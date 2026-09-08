@@ -1,0 +1,30 @@
+{
+  "name": "kanjikan",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Learn JLPT vocabulary word-first. N5 today, N4-N1 to come.",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "doctor": "node scripts/doctor.mjs",
+    "lint": "next lint",
+    "migrate": "node scripts/migrate.mjs",
+    "start": "next start",
+    "validate:content": "node scripts/validate-content.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.4",
+    "next": "^14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "pg": "^8.23.0",
+    "typescript": "^5.6.3"
+  }
+}

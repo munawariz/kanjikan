@@ -1,0 +1,256 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { levelStats } from "@/lib/content";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { getUser } from "@/lib/supabase/server";
+import { Button } from "@/components/atlas/core/Button.jsx";
+import { Card } from "@/components/atlas/layout/Card.jsx";
+import { Badge } from "@/components/atlas/core/Badge.jsx";
+import { Icon } from "@/components/atlas/core/Icon.jsx";
+import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
+import { Wordmark } from "@/components/app/Wordmark";
+import { ThemeToggle } from "@/components/app/ThemeToggle";
+
+export const dynamic = "force-dynamic";
+
+const LEVELS = [
+  { level: "N5", state: "Available now", words: "813 words" },
+  { level: "N4", state: "Next up", words: "Planned" },
+  { level: "N3", state: "Planned", words: "Planned" },
+  { level: "N2", state: "Planned", words: "Planned" },
+  { level: "N1", state: "Planned", words: "Planned" },
+];
+
+export default async function LandingPage() {
+  if (isSupabaseConfigured && (await getUser())) redirect("/dashboard");
+
+  const stats = levelStats("N5");
+
+  return (
+    <main>
+      <header style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+        <div className="page row" style={{ height: 84, justifyContent: "space-between", gap: 24 }}>
+          <Wordmark size={24} />
+          <div className="row" style={{ gap: 12 }}>
+            <ThemeToggle />
+            <Link href="/login" className="reset-link">
+              <Button variant="ghost" size="sm">
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/signup" className="reset-link">
+              <Button variant="primary" size="sm" shape="pill">
+                Open an Account
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* ---- Hero ---------------------------------------------------------- */}
+      <section className="page" style={{ paddingTop: 96, paddingBottom: 104, position: "relative" }}>
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: 40,
+            left: "45%",
+            width: 520,
+            height: 520,
+            background: "var(--glow-lime)",
+            pointerEvents: "none",
+          }}
+        />
+        <div style={{ position: "relative", maxWidth: 760 }}>
+          <div className="row" style={{ gap: 10, marginBottom: 24 }}>
+            <Sparkle size={18} color="var(--forest-800)" />
+            <span className="eyebrow" style={{ color: "var(--forest-800)" }}>
+              JLPT N5 · Vocabulary first
+            </span>
+          </div>
+
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "var(--text-display-1)",
+              letterSpacing: "var(--tracking-display)",
+              lineHeight: "var(--leading-display)",
+            }}
+          >
+            Learn Japanese Words, Not Loose Characters.
+          </h1>
+
+          <p style={{ marginTop: 28, maxWidth: 520, fontSize: "var(--text-body-lg)" }}>
+            Kanjikan teaches {stats.words} JLPT N5 words across {stats.lessons} lessons. The{" "}
+            {stats.kanji} N5 kanji come along inside real vocabulary, which is where you will
+            actually meet them.
+          </p>
+
+          <div className="row" style={{ gap: 12, marginTop: 36, flexWrap: "wrap" }}>
+            <Link href="/signup" className="reset-link">
+              <Button variant="accent" size="lg" icon="chevron-right">
+                Start Learning
+              </Button>
+            </Link>
+            <Link href="/login" className="reset-link">
+              <Button variant="outline" size="lg">
+                I Have an Account
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ---- Proof numbers ------------------------------------------------- */}
+      <section style={{ background: "var(--forest-800)" }}>
+        <div className="page row" style={{ padding: "56px 48px", gap: 64, flexWrap: "wrap" }}>
+          {[
+            [String(stats.words), "N5 words"],
+            [String(stats.lessons), "Themed lessons"],
+            [String(stats.kanji), "Kanji covered"],
+            ["8", "Review stages"],
+          ].map(([value, label]) => (
+            <div key={label}>
+              <div
+                style={{
+                  fontSize: "var(--text-stat-md)",
+                  fontWeight: "var(--weight-extrabold)",
+                  letterSpacing: "var(--tracking-stat)",
+                  color: "var(--lime-500)",
+                  lineHeight: 1,
+                }}
+              >
+                {value}
+              </div>
+              <div className="eyebrow" style={{ marginTop: 8, color: "var(--forest-200)" }}>
+                {label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ---- Features ------------------------------------------------------ */}
+      <section className="page" style={{ paddingTop: 104, paddingBottom: 104 }}>
+        <div style={{ maxWidth: 620, marginBottom: 48 }}>
+          <p className="eyebrow">How it works</p>
+          <h2
+            style={{
+              margin: "12px 0 0",
+              fontSize: "var(--text-display-3)",
+              letterSpacing: "var(--tracking-display)",
+              lineHeight: "var(--leading-display)",
+            }}
+          >
+            Three Ideas, No Ceremony.
+          </h2>
+        </div>
+
+        <div className="grid grid-3">
+          {[
+            {
+              icon: "file-text",
+              title: "Words carry the kanji.",
+              body: "You meet 日本語 as a word you can say, not as three characters to memorise separately. Every lesson is grouped by theme, so the vocabulary arrives in a context you can hang it on.",
+              tone: "cream" as const,
+            },
+            {
+              icon: "zap",
+              title: "Reviews find the gaps.",
+              body: "Eight scheduling stages, from ten minutes to three months. Get a word right and it moves out of the way. Get it wrong and it comes back before you leave the session.",
+              tone: "sage" as const,
+            },
+            {
+              icon: "chart-line",
+              title: "Your place is always saved.",
+              body: "Progress is stored per account, so you can stop mid-lesson on a laptop and pick the same queue up on a phone. Nothing lives in the browser.",
+              tone: "cream" as const,
+            },
+          ].map((f) => (
+            <Card key={f.title} tone={f.tone} pad="lg" radius="lg">
+              <div className="stack" style={{ gap: 20 }}>
+                <div
+                  className="row"
+                  style={{
+                    width: 54,
+                    height: 54,
+                    borderRadius: "var(--radius-full)",
+                    background: "var(--lime-500)",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name={f.icon} size={26} color="var(--forest-800)" />
+                </div>
+                <h3 style={{ margin: 0, fontSize: "var(--text-heading-3)" }}>{f.title}</h3>
+                <p className="body-sm" style={{ margin: 0, color: "var(--on-tint-body)" }}>
+                  {f.body}
+                </p>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ---- Levels -------------------------------------------------------- */}
+      <section className="page" style={{ paddingBottom: 104 }}>
+        <Card tone="cream" pad="lg" radius="lg">
+          <div className="stack" style={{ gap: 28 }}>
+            <div>
+              <p className="eyebrow" style={{ color: "var(--on-tint-body)" }}>
+                The roadmap
+              </p>
+              <h2 style={{ margin: "10px 0 0", fontSize: "var(--text-heading-1)" }}>
+                N5 today. The rest is built the same way.
+              </h2>
+            </div>
+
+            <div className="grid grid-4" style={{ gap: 12 }}>
+              {LEVELS.map((l) => (
+                <div
+                  key={l.level}
+                  style={{
+                    padding: 20,
+                    borderRadius: "var(--radius-md)",
+                    background: l.level === "N5" ? "var(--surface-inverse)" : "var(--surface-card)",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "var(--text-heading-2)",
+                      fontWeight: "var(--weight-extrabold)",
+                      letterSpacing: "var(--tracking-heading)",
+                      color: l.level === "N5" ? "var(--lime-500)" : "var(--text-heading)",
+                    }}
+                  >
+                    {l.level}
+                  </div>
+                  <div
+                    className="body-sm"
+                    style={{
+                      marginTop: 8,
+                      color: l.level === "N5" ? "var(--forest-200)" : "var(--text-muted)",
+                    }}
+                  >
+                    {l.words}
+                  </div>
+                  <div style={{ marginTop: 14 }}>
+                    <Badge tone={l.level === "N5" ? "accent" : "sage"}>{l.state}</Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      <footer style={{ background: "var(--forest-800)" }}>
+        <div
+          className="page row"
+          style={{ padding: "48px", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}
+        >
+          <Wordmark tone="inverse" size={20} />
+        </div>
+      </footer>
+    </main>
+  );
+}

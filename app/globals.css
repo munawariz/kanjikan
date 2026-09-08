@@ -1,0 +1,289 @@
+/* Kanjikan application styles, layered on top of the Atlas tokens.
+   Everything here either composes Atlas variables or fills a gap Atlas does not
+   cover, and each gap is called out. No token values are overridden. */
+
+/* GAP: Atlas ships Figtree, which has no CJK coverage — Japanese set in it
+   falls back to whatever the OS picks, so kanji would render in a different
+   face on every machine. Noto Sans JP is the neutral match and is loaded the
+   same way Atlas loads its own faces. Swap this for the real face if the brand
+   ever specifies one. */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap");
+
+:root {
+  --font-jp: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+
+  --page-max: 1240px;
+  --page-gutter: 48px;
+
+  /* ---> SPACE BETWEEN CARDS. These are the numbers to tune. <---
+     Every card grid in the app reads from one of these three.
+
+     --grid-gap        the compact grids: dashboard stat tiles and panels,
+                       landing page features, progress page tiles
+     --grid-gap-col    left-to-right between lesson cards on /lessons
+     --grid-gap-row    top-to-bottom between lesson cards on /lessons */
+  --grid-gap: 30px;
+  --grid-gap-col: 10px;
+  --grid-gap-row: 74px;
+
+  /* Mastery bands. Forest ramp for progress, lime for the finished state, so
+     the palette stays inside the two brand colours. */
+  --band-new: var(--sage-200);
+  --band-learning: var(--forest-300);
+  --band-known: var(--forest-600);
+  --band-mastered: var(--lime-500);
+
+  /* Ink for text sitting on a tinted (cream / sage) card. Atlas uses forest
+     rather than grey there, which is warmer than --text-body and is why these
+     exist instead of the plain text aliases. */
+  --on-tint-heading: var(--forest-800);
+  --on-tint-body: var(--forest-600);
+
+  --meter-track: var(--sage-200);
+  --meter-track-on-tint: rgba(0, 53, 17, 0.12);
+  --meter-fill: var(--forest-800);
+}
+
+/* ---------------------------------------------------------------------------
+   Dark theme
+   ---------------------------------------------------------------------------
+   EXTENSION TO ATLAS. The system ships light only — tokens/base.css declares
+   color-scheme: light and no dark values exist anywhere in it.
+
+   This overrides only the semantic aliases, which the Atlas readme designates
+   as the layer product code should consume. The brand ramps (forest, lime,
+   cream, sage, ink) are left exactly as sampled, so nothing here changes what
+   the brand colours *are* — only which of them each role resolves to.
+
+   Lime stays the accent at full strength in both themes: it is the one brand
+   colour and it already carries forest text, which reads correctly on a dark
+   page. Grounds are desaturated forest rather than neutral grey, so the dark
+   theme still looks like Atlas rather than like a generic dark mode.
+   --------------------------------------------------------------------------- */
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --text-heading: #f1f6f2;
+  --text-body: #b7c8bc;
+  --text-muted: #7f9187;
+  --text-inverse: #ffffff;
+  --text-inverse-muted: #a8bdb0;
+  --text-brand: var(--lime-500);
+  --text-link: var(--lime-400);
+  --text-link-hover: var(--lime-300);
+
+  --surface-page: #06120b;
+  --surface-card: #0e1c13;
+  --surface-card-cream: #13241a;
+  --surface-card-sage: #16291f;
+  --surface-sunken: #0a1710;
+  --surface-inverse: #12301d;
+  --surface-inverse-raised: #17381f;
+  --surface-chip: #1e3728;
+
+  /* Hairlines invert: on a dark ground a forest border is invisible, so they
+     become white at the same low alphas Atlas uses for its inverse dividers. */
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-default: rgba(255, 255, 255, 0.16);
+  --border-strong: var(--lime-500);
+
+  --on-tint-heading: #e9f3eb;
+  --on-tint-body: #a6bcad;
+
+  --band-new: rgba(255, 255, 255, 0.14);
+  --band-learning: var(--forest-500);
+  --band-known: var(--forest-300);
+  --band-mastered: var(--lime-500);
+
+  --meter-track: rgba(255, 255, 255, 0.12);
+  --meter-track-on-tint: rgba(255, 255, 255, 0.12);
+  --meter-fill: var(--lime-500);
+}
+
+/* Atlas shadows are green-tinted and tuned for light grounds; at these alphas
+   they are invisible on a dark page, so elevation is carried by the surface
+   step instead and the shadows are dropped rather than left doing nothing. */
+[data-theme="dark"] {
+  --shadow-xs: none;
+  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 32px 72px rgba(0, 0, 0, 0.55);
+  --shadow-float: 0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+/* Atlas paints body background from --surface-page in base.css; restate it so
+   the theme applies before any component mounts. */
+[data-theme="dark"] body {
+  background: var(--surface-page);
+  color: var(--text-body);
+}
+
+@media (max-width: 720px) {
+  :root {
+    --page-gutter: 20px;
+  }
+}
+
+/* --- Japanese text -------------------------------------------------------- */
+
+.jp {
+  font-family: var(--font-jp);
+  font-weight: 500;
+  /* Kanji need more room between lines than Latin at the same size. */
+  line-height: 1.45;
+}
+
+.jp-display {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  /* Atlas display tracking is -0.03em, but negative tracking crowds kanji
+     strokes badly. Held at 0 deliberately. */
+  letter-spacing: 0;
+  line-height: 1.15;
+  color: var(--text-heading);
+}
+
+/* --- Layout --------------------------------------------------------------- */
+
+.page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--page-gutter);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.grid {
+  display: grid;
+  gap: var(--grid-gap);
+  /* Every column track below is minmax(0, 1fr) rather than 1fr. The default
+     minimum is auto, which lets a long unbroken string force a track wider than
+     its share and shove the next card out of its column; a 0 minimum cannot. */
+  align-items: stretch;
+}
+
+/* A long run of similar tiles needs more air than the dashboard's handful of
+   panels. The row gap is deliberately larger than the column gap: with equal
+   gaps a tall grid reads as one continuous block, whereas extra vertical space
+   breaks it into rows the eye can scan. */
+.grid-roomy {
+  column-gap: var(--grid-gap-col);
+  row-gap: var(--grid-gap-row);
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 960px) {
+
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- Type helpers --------------------------------------------------------- */
+
+.eyebrow {
+  font-size: var(--text-eyebrow);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.body-sm {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-tight);
+}
+
+/* --- Interactive surfaces ------------------------------------------------- */
+
+/* Atlas rule: cards do not lift or scale on hover, they change colour only. */
+.card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.card-link:hover {
+  color: inherit;
+}
+
+.reset-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* --- Progress bar --------------------------------------------------------- */
+
+.meter {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--meter-track);
+  overflow: hidden;
+}
+
+/* Meters sitting on a cream or sage card need a track tinted against that card
+   rather than against the page. */
+.meter.on-tint {
+  background: var(--meter-track-on-tint);
+}
+
+.meter>span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--meter-fill);
+  transition: width var(--duration-slow) var(--ease-standard);
+}
+
+/* --- Motion --------------------------------------------------------------- */
+
+.rise {
+  animation: atlas-rise var(--duration-base) var(--ease-standard) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

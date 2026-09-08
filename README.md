@@ -1,0 +1,227 @@
+# Kanjikan
+
+Learn Japanese JLPT vocabulary word-first. N5 is built; N4–N1 are structured for but not yet
+written.
+
+The premise is that **words, not characters, are the unit of learning**. You meet 日本語 as
+something you can say, and the three kanji come along inside it. The kanji screen is a reference
+for looking a character up, not a drill.
+
+- **813 N5 words** across **40 themed lessons**
+- **All 80 N5 kanji**, each covered by at least one word in the vocabulary
+- Spaced repetition with 8 scheduling stages, from ten minutes to three months
+- Multi-user accounts with per-lesson resume checkpoints
+- UI built on the **Atlas Design System** in this repository
+
+---
+
+## Where the data lives
+
+Content and user state are stored differently on purpose.
+
+| | Vocabulary and kanji | Accounts and progress |
+|---|---|---|
+| **Where** | JSON files in `data/jlpt/` | Supabase Postgres |
+| **Why** | Static, identical for every learner, and reviewable as a diff when a reading is wrong. Ships with the app and needs no network. | Mutable, per-user and concurrent. Needs real writes and row-level isolation. |
+
+The tables therefore carry **no foreign key onto a words table**. Progress rows reference a word by
+a content-derived id, so content and progress version independently.
+
+### Word ids
+
+`lib/content.ts` derives every id from `(level, lesson slug, word, reading)` with an FNV-1a hash.
+This matters:
+
+- Inserting a word in the middle of a lesson leaves every other id untouched.
+- The id is reproducible from the JSON alone, so the files and the database cannot drift.
+- Moving a word to a different lesson deliberately makes it a new word.
+
+`npm run validate:content` enforces the invariant that actually matters — that
+`(lesson, word, reading)` is unique within a level.
+
+---
+
+## Setup
+
+### 1. Install
+
+```bash
+npm install
+```
+
+### 2. Create a Supabase project
+
+Any region; the free tier is enough. From **Project Settings → API**, copy the Project URL and the
+`anon` public key.
+
+```bash
+cp .env.example .env.local
+```
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
+Until both are set, every route redirects to `/setup`, which repeats these steps in the browser.
+
+### 3. Run the migration
+
+Add one more line to `.env.local` — the Postgres connection string, which is **not** the same as
+`NEXT_PUBLIC_SUPABASE_URL`. Get it from the **Connect** button at the top of the dashboard, under
+*ORMs* or *Connection string*, and copy the URI. Prefer the **Session pooler** one: the direct
+`db.<ref>.supabase.co` host is IPv6-only on newer projects and will not connect from most networks.
+
+```
+SUPABASE_DB_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
+```
+
+```bash
+npm run migrate
+```
+
+This applies everything in `supabase/migrations/` in filename order and records what it ran in a
+`schema_migrations` table, so it is safe to run repeatedly. Each file goes in its own transaction —
+a migration lands whole or not at all.
+
+| | |
+|---|---|
+| `npm run migrate` | Apply anything not yet applied |
+| `npm run migrate -- --dry` | List the files without connecting |
+| `npm run migrate -- --redo` | Re-run every file, ignoring the ledger |
+
+It connects straight to Postgres rather than through the REST API, because PostgREST cannot run DDL
+— it only exposes tables that already exist. That is why the publishable key is not enough here.
+
+### 4. Decide about email confirmation
+
+**Authentication → Providers → Email.** Switching *Confirm email* **off** makes signup log you
+straight in — the low-friction behaviour. Left on, new accounts must click a link first; the signup
+form handles both and says which happened.
+
+### 5. Run it
+
+```bash
+npm run dev
+```
+
+---
+
+## Commands
+
+| | |
+|---|---|
+| `npm run dev` | Dev server on :3000 |
+| `npm run build` | Production build |
+| `npm run migrate` | Apply `supabase/migrations/*.sql`. Idempotent; tracks applied files in `schema_migrations` |
+| `npm run validate:content` | Check the JSON: duplicate ids, kana-only readings, unknown parts of speech, kanji coverage |
+| `npm run doctor` | Check the Supabase side: credentials present, project reachable, all four tables created. Run this first whenever progress is not saving. Prints no secrets. |
+
+---
+
+## Authentication
+
+You asked for "simple basic auth". This is **email and password with no OAuth, no magic links and
+no email verification required** — the same low friction, but with real sessions.
+
+Literal HTTP Basic Auth was not used, deliberately: it has no logout, replays credentials on every
+request, and gives the server no session to hang per-user progress off. It cannot support the
+multi-user progress tracking you asked for in the same sentence.
+
+Isolation is enforced in Postgres, not in application code. Every table has an RLS policy of
+`auth.uid() = user_id`, so a bug in a query cannot leak one learner's progress to another.
+
+---
+
+## How the scheduling works
+
+`lib/srs.ts` — one integer of state per word.
+
+| Stage | Next review |
+|---|---|
+| 1 | 10 minutes |
+| 2 | 8 hours |
+| 3 | 1 day |
+| 4 | 3 days |
+| 5 | 1 week — counts as **known** |
+| 6 | 2 weeks |
+| 7 | 1 month |
+| 8 | 3 months — **mastered** |
+
+Correct promotes one stage; wrong demotes two, never below 1. A word counts as *known* once it has
+survived a week-long gap, which is the bar the progress screen measures against.
+
+Question type is chosen by stage: meaning first, readings once a word has kanji and a stage above
+1, and English-to-Japanese production only at higher stages.
+
+---
+
+## Checkpoints
+
+`lesson_progress.cursor` records how many of a lesson's words have been covered. It is written
+every five cards and again when a lesson finishes, so closing the tab halfway through a 20-word
+lesson resumes at the right group rather than the start. `profiles.current_lesson_slug` is the
+resume target the dashboard offers.
+
+---
+
+## Project layout
+
+```
+data/jlpt/n5/
+  kanji.json            80 kanji: readings, meanings, stroke counts
+  lessons/*.json        40 lessons, hand-editable, grouped by theme
+lib/
+  content.ts            Loads and indexes the JSON; derives word ids
+  srs.ts                Scheduling, mastery bands, streaks
+  study.ts              Queue building and distractor selection (pure, seeded)
+  progress.ts           Everything that touches the database
+components/
+  atlas/                Components copied from the Atlas Design System
+  app/                  Kanjikan screens
+supabase/migrations/    Schema, RLS policies, triggers
+scripts/
+  migrate.mjs           Applies migrations straight to Postgres
+  doctor.mjs            Checks credentials, reachability and that tables exist
+  validate-content.mjs  Checks the vocabulary JSON
+```
+
+---
+
+## Design system notes
+
+The UI is built on the Atlas Design System in `Atlas Design System/`. Tokens are used as-is and no
+values are overridden. Two additions were needed and are flagged in `app/globals.css`:
+
+1. **Noto Sans JP.** Figtree has no CJK coverage, so Japanese set in it falls back to whatever the
+   OS chooses and renders differently on every machine. Noto Sans JP is loaded the same way Atlas
+   loads its own faces, exposed as `--font-jp`.
+2. **Japanese typesetting.** Atlas display type is tracked at `-0.03em`, which crowds kanji strokes
+   badly. The `.jp-display` class holds tracking at 0 and opens line-height instead.
+
+The Atlas wordmark is not reproduced. `components/app/Wordmark.tsx` sets *kanjikan* in the display
+face at the same `-0.045em` the system specifies for its own.
+
+---
+
+## Content accuracy
+
+The vocabulary was compiled for this project rather than imported from a licensed source. The JLPT
+publishes no official vocabulary list, so any N5 list is an informed reconstruction — this one
+covers the words consistently taught at N5 and every one of the 80 kanji.
+
+Readings, meanings and parts of speech should be spot-checked against a dictionary before anyone
+relies on them for an exam. Corrections are one edit to one JSON file, and
+`npm run validate:content` will catch a structural mistake.
+
+Two duplicate surface forms are intentional and reported as warnings: が appears as a conjunction
+and as a particle, and 本 as both *book* and the counter for long thin objects.
+
+---
+
+## Adding N4–N1
+
+1. Create `data/jlpt/n4/` with `kanji.json` and `lessons/*.json` in the same shape.
+2. Add `"N4"` to `LEVELS` in `lib/content.ts` and to `LEVELS` in `scripts/validate-content.mjs`.
+
+No schema change is needed — `level` is already a column on every table.
