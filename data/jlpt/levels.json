@@ -1,0 +1,45 @@
+{
+  "note": "The JLPT publishes no official kanji or vocabulary lists. kanjiTarget figures are the widely used community estimates of how many NEW characters each level introduces, and are labelled as approximate wherever they are shown. Actual counts for a built level come from that level's kanji.json, never from this file.",
+  "levels": [
+    {
+      "level": "N5",
+      "title": "Foundations",
+      "blurb": "Numbers, days, people, the five elements, direction and position. The characters you meet on a train platform before you meet them in a textbook.",
+      "canDo": "Read hiragana, katakana and basic kanji. Follow short, slow conversations about everyday topics.",
+      "kanjiTarget": 80,
+      "cumulativeKanji": 80
+    },
+    {
+      "level": "N4",
+      "title": "Everyday ground",
+      "blurb": "Verbs of doing and feeling, the body, the weather, work and travel. Characters that stop sentences from needing furigana.",
+      "canDo": "Read passages on familiar daily topics. Follow everyday conversation spoken at close to natural speed.",
+      "kanjiTarget": 170,
+      "cumulativeKanji": 250
+    },
+    {
+      "level": "N3",
+      "title": "The bridge",
+      "blurb": "The step most learners find hardest: abstract nouns, compound verbs, and the characters that carry newspaper headlines.",
+      "canDo": "Read everyday material with some depth. Follow conversation at natural speed in most familiar situations.",
+      "kanjiTarget": 370,
+      "cumulativeKanji": 620
+    },
+    {
+      "level": "N2",
+      "title": "Reading widely",
+      "blurb": "News, business and formal writing. Characters that rarely appear alone and almost always inside two-kanji compounds.",
+      "canDo": "Read newspapers and general commentary. Follow news and discussion at natural speed.",
+      "kanjiTarget": 380,
+      "cumulativeKanji": 1000
+    },
+    {
+      "level": "N1",
+      "title": "Everything else",
+      "blurb": "The long tail: literary, technical and formal characters, including many you will meet only in print.",
+      "canDo": "Read logically complex and abstract writing on any topic. Follow it spoken at full speed.",
+      "kanjiTarget": 1100,
+      "cumulativeKanji": 2100
+    }
+  ]
+}

@@ -193,6 +193,62 @@ export function availableLevels(): Level[] {
   return LEVELS;
 }
 
+export function isLevelAvailable(l: string): l is Level {
+  return (LEVELS as string[]).includes(l);
+}
+
+export type LevelPathEntry = {
+  level: Level;
+  title: string;
+  blurb: string;
+  canDo: string;
+  /** Community estimate of new characters at this level. Not an official figure. */
+  kanjiTarget: number;
+  /** Estimated running total once this level is finished. */
+  cumulativeKanji: number;
+  available: boolean;
+  /** Real counts, from the level's own files. Zero for a level not yet built. */
+  lessons: number;
+  kanji: number;
+  words: number;
+};
+
+type LevelsFile = {
+  note: string;
+  levels: Omit<LevelPathEntry, "available" | "lessons" | "kanji" | "words">[];
+};
+
+let levelsFile: LevelsFile | null = null;
+
+/**
+ * The N5-to-N1 progression.
+ *
+ * Descriptions and the estimated character counts come from
+ * data/jlpt/levels.json; the counts that are actually shown as facts — lessons,
+ * kanji, words — are read from each level's own content, so an unbuilt level
+ * reports zero rather than borrowing a number from the roadmap file. A level
+ * becomes available purely by existing in LEVELS with a data directory, so
+ * nothing here needs editing to ship N4.
+ */
+export function getLevelPath(): LevelPathEntry[] {
+  levelsFile ??= readJson<LevelsFile>(path.join(DATA_ROOT, "levels.json"));
+
+  return levelsFile.levels.map((entry) => {
+    const available = isLevelAvailable(entry.level);
+    if (!available) {
+      return { ...entry, available, lessons: 0, kanji: 0, words: 0 };
+    }
+    const stats = levelStats(entry.level);
+    return {
+      ...entry,
+      available,
+      lessons: stats.lessons,
+      kanji: stats.kanji,
+      words: stats.words,
+    };
+  });
+}
+
 export function getLessons(l: Level = "N5"): Lesson[] {
   return level(l).lessons;
 }

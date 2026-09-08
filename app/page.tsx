@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { levelStats } from "@/lib/content";
+import { getLevelPath, levelStats } from "@/lib/content";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getUser } from "@/lib/supabase/server";
 import { Button } from "@/components/atlas/core/Button.jsx";
@@ -13,18 +13,11 @@ import { ThemeToggle } from "@/components/app/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
-const LEVELS = [
-  { level: "N5", state: "Available now", words: "80 kanji" },
-  { level: "N4", state: "Next up", words: "Planned" },
-  { level: "N3", state: "Planned", words: "Planned" },
-  { level: "N2", state: "Planned", words: "Planned" },
-  { level: "N1", state: "Planned", words: "Planned" },
-];
-
 export default async function LandingPage() {
   if (isSupabaseConfigured && (await getUser())) redirect("/dashboard");
 
   const stats = levelStats("N5");
+  const path = getLevelPath();
 
   return (
     <main>
@@ -200,18 +193,18 @@ export default async function LandingPage() {
                 The roadmap
               </p>
               <h2 style={{ margin: "10px 0 0", fontSize: "var(--text-heading-1)" }}>
-                N5 today. The rest is built the same way.
+                N5 today. Four levels mapped behind it.
               </h2>
             </div>
 
             <div className="grid grid-4" style={{ gap: 12 }}>
-              {LEVELS.map((l) => (
+              {path.map((l) => (
                 <div
                   key={l.level}
                   style={{
                     padding: 20,
                     borderRadius: "var(--radius-md)",
-                    background: l.level === "N5" ? "var(--surface-inverse)" : "var(--surface-card)",
+                    background: l.available ? "var(--surface-inverse)" : "var(--surface-card)",
                   }}
                 >
                   <div
@@ -219,7 +212,7 @@ export default async function LandingPage() {
                       fontSize: "var(--text-heading-2)",
                       fontWeight: "var(--weight-extrabold)",
                       letterSpacing: "var(--tracking-heading)",
-                      color: l.level === "N5" ? "var(--lime-500)" : "var(--text-heading)",
+                      color: l.available ? "var(--lime-500)" : "var(--text-heading)",
                     }}
                   >
                     {l.level}
@@ -228,13 +221,15 @@ export default async function LandingPage() {
                     className="body-sm"
                     style={{
                       marginTop: 8,
-                      color: l.level === "N5" ? "var(--forest-200)" : "var(--text-muted)",
+                      color: l.available ? "var(--forest-200)" : "var(--text-muted)",
                     }}
                   >
-                    {l.words}
+                    {l.available ? `${l.kanji} kanji` : `~${l.kanjiTarget} kanji`}
                   </div>
                   <div style={{ marginTop: 14 }}>
-                    <Badge tone={l.level === "N5" ? "accent" : "sage"}>{l.state}</Badge>
+                    <Badge tone={l.available ? "accent" : "sage"}>
+                      {l.available ? "Available now" : "Planned"}
+                    </Badge>
                   </div>
                 </div>
               ))}
