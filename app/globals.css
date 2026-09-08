@@ -9,6 +9,17 @@
    ever specifies one. */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap");
 
+/* GAP: neither Atlas's base.css nor Next.js sets a box model, so the CSS
+   default of content-box applies. That makes padding add to any explicit width
+   or height instead of fitting inside it — a card with height:100% and 20px of
+   padding renders 40px taller than the space it was given and overlaps whatever
+   is below. Border-box is what every layout here already assumes. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 :root {
   --font-jp: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
 
@@ -126,6 +137,33 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Fluid type
+   ---------------------------------------------------------------------------
+   EXTENSION TO ATLAS. The system's type scale is fixed pixels, tuned for a
+   1240px page — 76px display type is roughly a fifth of a phone's width per
+   character and overflows immediately.
+
+   Each size keeps its Atlas value as the clamp maximum, so at page width the
+   scale is unchanged and every specimen still matches the design system. Only
+   below that do sizes shrink, and they do it continuously rather than jumping
+   at a breakpoint. The minima are set so the tightest display tracking still
+   holds together.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --text-display-1: clamp(36px, 8vw, 76px);
+  --text-display-2: clamp(31px, 6.2vw, 56px);
+  --text-display-3: clamp(27px, 5vw, 44px);
+  --text-display-4: clamp(23px, 4vw, 34px);
+
+  --text-heading-1: clamp(22px, 3.2vw, 28px);
+  --text-heading-2: clamp(20px, 2.8vw, 24px);
+
+  --text-stat-lg: clamp(32px, 7vw, 44px);
+  --text-stat-md: clamp(25px, 5vw, 32px);
+}
+
 /* --- Japanese text -------------------------------------------------------- */
 
 .jp {
@@ -151,6 +189,23 @@
   max-width: var(--page-max);
   margin: 0 auto;
   padding: 0 var(--page-gutter);
+}
+
+/* A single stray wide child — a long unbroken reading, a fixed-width meter —
+   otherwise scrolls the whole document sideways, which on a phone reads as the
+   layout being broken rather than as one element overflowing. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Japanese has no spaces, so a long compound cannot wrap without help. */
+.jp,
+.jp-display {
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-break: strict;
 }
 
 .stack {
@@ -181,6 +236,25 @@
   row-gap: var(--grid-gap-row);
 }
 
+/* Below 960px .grid-3 drops to two columns, and a column gap tuned for a
+   three-up desktop becomes far too tight — the hover shadow alone is a 32px
+   blur, so a 10px gutter puts it well onto the neighbouring card and the two
+   read as overlapping. --grid-gap-col still governs the wide layout; this only
+   sets a floor for the narrow ones. */
+@media (max-width: 960px) {
+  .grid-roomy {
+    column-gap: max(var(--grid-gap-col), 20px);
+  }
+}
+
+/* Stacked in one column, the row gap is pure dead space: it exists to separate
+   rows the eye scans across, and there are no rows left to separate. */
+@media (max-width: 640px) {
+  .grid-roomy {
+    row-gap: min(var(--grid-gap-row), 24px);
+  }
+}
+
 .grid-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -191,6 +265,33 @@
 
 .grid-4 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* An asymmetric two-column split — a wide panel beside a narrow one. These
+   were inline grid-template-columns, which no media query can reach, so every
+   one of them stayed two columns wide on a phone. */
+.grid-split {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
+@media (max-width: 860px) {
+  .grid-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The kanji detail panel sticks only while it sits beside a scrolling grid of
+   tiles. Once stacked it is below them, where sticky would pin it over the
+   very tiles being chosen from. */
+.kanji-detail {
+  position: static;
+}
+
+@media (min-width: 861px) {
+  .kanji-detail {
+    position: sticky;
+    top: 24px;
+  }
 }
 
 @media (max-width: 960px) {
@@ -247,6 +348,33 @@
 .reset-link {
   text-decoration: none;
   color: inherit;
+}
+
+/* The meter beside a lesson row was a fixed 160px, which together with its
+   label pushed the row past a phone's width. It now takes the space left. */
+.lesson-row-meter {
+  flex: 1 1 160px;
+  min-width: 120px;
+  max-width: 260px;
+}
+
+/* The learning-path rail costs 68px before the card starts. Worth it on a
+   laptop, too expensive on a phone, so it narrows rather than disappears —
+   losing it entirely would lose the sense of one continuous progression. */
+@media (max-width: 640px) {
+  .path-row {
+    gap: 12px !important;
+  }
+
+  .path-rail {
+    width: 34px !important;
+  }
+
+  .path-rail > div:first-child {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 11px !important;
+  }
 }
 
 /* --- Progress bar --------------------------------------------------------- */

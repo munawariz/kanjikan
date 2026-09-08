@@ -48,8 +48,11 @@ export default async function LandingPage() {
             position: "absolute",
             top: 40,
             left: "45%",
-            width: 520,
-            height: 520,
+            // Capped to the viewport: at 520px fixed it reached 682px on a
+            // 360px screen, and only overflow-x:hidden was keeping that off
+            // the page. Decorative, but nothing should rely on being clipped.
+            width: "min(520px, 55vw)",
+            height: "min(520px, 55vw)",
             background: "var(--glow-lime)",
             pointerEvents: "none",
           }}
@@ -96,7 +99,7 @@ export default async function LandingPage() {
 
       {/* ---- Proof numbers ------------------------------------------------- */}
       <section style={{ background: "var(--forest-800)" }}>
-        <div className="page row" style={{ padding: "56px 48px", gap: 64, flexWrap: "wrap" }}>
+        <div className="page row" style={{ paddingTop: 56, paddingBottom: 56, gap: 40, flexWrap: "wrap" }}>
           {[
             [String(stats.kanji), "N5 kanji"],
             [String(stats.lessons), "Lessons of five"],
@@ -241,7 +244,7 @@ export default async function LandingPage() {
       <footer style={{ background: "var(--forest-800)" }}>
         <div
           className="page row"
-          style={{ padding: "48px", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}
+          style={{ paddingTop: 40, paddingBottom: 40, justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}
         >
           <Wordmark tone="inverse" size={20} />
           {/* KanjiVG is CC BY-SA 3.0 and requires attribution wherever the

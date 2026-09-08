@@ -120,7 +120,7 @@ export function AuthLayout({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "48px var(--page-gutter)",
+            padding: "40px var(--page-gutter)",
           }}
         >
           <div style={{ width: "100%", maxWidth: 400 }}>
@@ -146,13 +146,19 @@ export function AuthLayout({
         </section>
       </div>
 
-      <style>{`
+      <style
+        // Set as raw HTML rather than as a text child: React escapes and then
+        // re-checks text content during hydration, so a single apostrophe in a
+        // CSS comment renders as &#x27; on the server, mismatches on the client,
+        // and makes React discard the server HTML and re-render the whole root.
+        dangerouslySetInnerHTML={{ __html: `
         @media (min-width: 900px) {
           .auth-split { grid-template-columns: 1fr 1fr; }
           .auth-aside { display: flex; }
           .auth-mobile-mark { display: none; }
         }
-      `}</style>
+      ` }}
+      />
     </main>
   );
 }

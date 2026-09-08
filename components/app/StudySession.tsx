@@ -338,7 +338,7 @@ function WordTeachCard({ word, onNext }: { word: Word; onNext: () => void }) {
         </span>
 
         <div className="stack" style={{ gap: 8 }}>
-          <div className="jp-display" style={{ fontSize: 56 }}>
+          <div className="jp-display" style={{ fontSize: "clamp(40px, 13vw, 56px)" }}>
             {word.word}
           </div>
           {word.reading !== word.word && (
@@ -405,7 +405,11 @@ function QuizCard({
           <div
             className={promptIsJapanese ? "jp-display" : undefined}
             style={{
-              fontSize: isKanji ? 96 : promptIsJapanese ? 56 : "var(--text-display-4)",
+              fontSize: isKanji
+                ? "clamp(64px, 22vw, 96px)"
+                : promptIsJapanese
+                  ? "clamp(38px, 13vw, 56px)"
+                  : "var(--text-display-4)",
               letterSpacing: promptIsJapanese ? 0 : "var(--tracking-display)",
               lineHeight: 1.15,
               color: "var(--on-tint-heading)",

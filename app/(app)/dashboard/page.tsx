@@ -193,7 +193,7 @@ export default async function DashboardPage() {
       </section>
 
       {/* ---- Activity and mastery ---------------------------------------- */}
-      <section className="grid" style={{ gridTemplateColumns: "minmax(0, 3fr) minmax(0, 2fr)", gap: 20 }}>
+      <section className="grid grid-split" style={{ gap: 20 }}>
         <Card tone="cream" pad="lg" radius="lg">
           <div className="stack" style={{ gap: 24 }}>
             <div>

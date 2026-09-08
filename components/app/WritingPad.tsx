@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { StrokeDiagram } from "./StrokeDiagram";
 
@@ -30,11 +30,34 @@ export function WritingPad({
   onGrade: (correct: boolean) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const frameRef = useRef<HTMLDivElement | null>(null);
   const drawing = useRef(false);
   const [strokeCount, setStrokeCount] = useState(0);
   const [revealed, setRevealed] = useState(false);
 
-  const SIZE = 260;
+  /**
+   * The pad is square and as large as the column allows, up to 260.
+   *
+   * A canvas needs real pixel dimensions, so this cannot be done in CSS: the
+   * width is measured and fed back as state. 260 was previously hard-coded,
+   * which overflowed the page on any phone narrower than about 340px.
+   */
+  const [SIZE, setSize] = useState(260);
+
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const measure = () => {
+      const available = Math.floor(frame.parentElement?.clientWidth ?? 0);
+      // No lower bound: a floor larger than the space available is exactly the
+      // overflow this measurement exists to prevent. 260 is only the cap.
+      setSize(available > 0 ? Math.min(260, available) : 260);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (frame.parentElement) ro.observe(frame.parentElement);
+    return () => ro.disconnect();
+  }, []);
 
   const setup = useCallback(() => {
     const canvas = canvasRef.current;
@@ -47,13 +70,16 @@ export function WritingPad({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.scale(dpr, dpr);
-    ctx.lineWidth = 8;
+    ctx.lineWidth = Math.max(6, Math.round(SIZE / 32));
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.strokeStyle = getComputedStyle(canvas).getPropertyValue("color") || "#111";
-  }, []);
+  }, [SIZE]);
 
-  useEffect(setup, [setup]);
+  useEffect(() => {
+    setup();
+    setStrokeCount(0);
+  }, [setup, SIZE]);
 
   function pos(e: React.PointerEvent<HTMLCanvasElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -109,6 +135,7 @@ export function WritingPad({
         style={{ gap: 20, justifyContent: "center", flexWrap: "wrap", alignItems: "flex-start" }}
       >
         <div
+          ref={frameRef}
           style={{
             position: "relative",
             width: SIZE,

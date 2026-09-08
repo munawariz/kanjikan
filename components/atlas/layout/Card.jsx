@@ -40,7 +40,16 @@ export function Card({
   onMouseLeave,
   ...rest
 }) {
-  const pads = { none: 0, sm: 20, md: 32, lg: 40 };
+  /* Atlas specifies 20 / 32 / 40. Those are kept as the clamp maxima, so at
+     page width the padding is exactly the system's, and only narrower screens
+     tighten it — 40px of padding either side of a 320px phone leaves almost no
+     room for content. */
+  const pads = {
+    none: "0px",
+    sm: "clamp(16px, 4vw, 20px)",
+    md: "clamp(20px, 5vw, 32px)",
+    lg: "clamp(24px, 6vw, 40px)",
+  };
   const radii = { card: "var(--radius-card)", lg: "var(--radius-card-lg)", md: "var(--radius-md)", sm: "var(--radius-sm)" };
   const shadows = { none: "none", sm: "var(--shadow-sm)", md: "var(--shadow-md)", lg: "var(--shadow-lg)" };
   const t = TONES[tone] || TONES.white;

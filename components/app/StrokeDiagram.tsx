@@ -146,12 +146,18 @@ export function StrokeDiagram({
         </button>
       )}
 
-      <style>{`
+      <style
+        // Set as raw HTML rather than as a text child: React escapes and then
+        // re-checks text content during hydration, so a single apostrophe in a
+        // CSS comment renders as &#x27; on the server, mismatches on the client,
+        // and makes React discard the server HTML and re-render the whole root.
+        dangerouslySetInnerHTML={{ __html: `
         @keyframes kanji-draw {
           from { stroke-dashoffset: 200; }
           to   { stroke-dashoffset: 0; }
         }
-      `}</style>
+      ` }}
+      />
     </div>
   );
 }

@@ -51,7 +51,7 @@ export default async function PathPage() {
             : 0;
 
           return (
-            <li key={entry.level} className="row" style={{ gap: 24, alignItems: "stretch" }}>
+            <li key={entry.level} className="row path-row" style={{ gap: 24, alignItems: "stretch" }}>
               {/* Rail: a flat marker and a connecting line, the only decorative
                   shapes Atlas permits. */}
               <div

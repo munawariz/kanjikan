@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
@@ -33,9 +33,25 @@ export type KanjiEntry = {
 export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; viewBox: string }) {
   const [selected, setSelected] = useState(entries[0]?.char ?? "");
   const active = entries.find((e) => e.char === selected) ?? entries[0];
+  const detailRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * Below 860px the detail panel stacks underneath eighty tiles, so choosing a
+   * character would otherwise update something entirely off screen. Scrolling
+   * to it is the difference between the page working and appearing not to
+   * respond at all.
+   */
+  function select(char: string) {
+    setSelected(char);
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 860px)").matches) {
+      requestAnimationFrame(() =>
+        detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+    }
+  }
 
   return (
-    <div className="grid" style={{ gridTemplateColumns: "minmax(0, 3fr) minmax(0, 2fr)", gap: 24 }}>
+    <div className="grid grid-split" style={{ gap: 24 }}>
       <div
         style={{
           display: "grid",
@@ -50,7 +66,7 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
             <button
               key={entry.char}
               type="button"
-              onClick={() => setSelected(entry.char)}
+              onClick={() => select(entry.char)}
               aria-pressed={isActive}
               title={entry.meanings.join(", ")}
               style={{
@@ -92,7 +108,7 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
       </div>
 
       {active && (
-        <div style={{ position: "sticky", top: 24, alignSelf: "start" }}>
+        <div ref={detailRef} className="kanji-detail" style={{ alignSelf: "start", scrollMarginTop: 16 }}>
           <Card tone="cream" pad="lg" radius="lg">
             <div className="stack" style={{ gap: 22 }}>
               <div className="row" style={{ gap: 20, alignItems: "flex-start", flexWrap: "wrap" }}>

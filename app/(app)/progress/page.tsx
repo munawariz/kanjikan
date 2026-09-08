@@ -92,7 +92,7 @@ export default async function ProgressPage() {
         ))}
       </section>
 
-      <section className="grid" style={{ gridTemplateColumns: "minmax(0, 3fr) minmax(0, 2fr)", gap: 20 }}>
+      <section className="grid grid-split" style={{ gap: 20 }}>
         <Card tone="cream" pad="lg" radius="lg">
           <div className="stack" style={{ gap: 24 }}>
             <div>
@@ -217,15 +217,15 @@ export default async function ProgressPage() {
                   style={{
                     fontWeight: "var(--weight-semibold)",
                     color: "var(--text-heading)",
-                    minWidth: 200,
+                    minWidth: 0,
                   }}
                 >
                   {lesson.title}
                 </span>
               </div>
 
-              <div className="row" style={{ gap: 20, flex: "0 0 auto" }}>
-                <div className="meter" style={{ width: 160 }}>
+              <div className="row lesson-row-meter" style={{ gap: 16 }}>
+                <div className="meter" style={{ width: "100%", minWidth: 80 }}>
                   <span style={{ width: `${lesson.percent}%` }} />
                 </div>
                 <span
