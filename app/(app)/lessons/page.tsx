@@ -26,21 +26,21 @@ export default async function LessonsPage() {
             maxWidth: 720,
           }}
         >
-          {stats.words} words, grouped the way you would actually meet them.
+          {stats.kanji} kanji, five at a time.
         </h1>
         <p style={{ margin: 0, maxWidth: 560 }}>
-          Lessons run in order, but nothing is locked. Each one takes a few minutes and ends with
-          every word scheduled for review.
+          Lessons run in order, but nothing is locked. Each introduces five characters, teaches the
+          words that fix their readings, and ends with you writing each one from memory.
         </p>
       </header>
 
       <Card tone="cream" pad="md" radius="lg">
         <div className="row" style={{ gap: 48, flexWrap: "wrap" }}>
           {[
+            [String(stats.kanji), "Kanji"],
             [String(stats.lessons), "Lessons"],
             [String(completed), "Completed"],
             [String(inProgress), "In progress"],
-            [String(stats.kanji), "Kanji covered"],
           ].map(([value, label]) => (
             <div key={label}>
               <div

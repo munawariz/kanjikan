@@ -57,17 +57,17 @@ export default async function ProgressPage() {
             maxWidth: 720,
           }}
         >
-          {data.knownWords} of {data.totalWords} N5 words are sticking.
+          {data.kanjiKnown} of {data.totalKanji} N5 kanji are sticking.
         </h1>
         <p style={{ margin: 0, maxWidth: 560 }}>
-          A word counts as known once it has survived a week-long gap. Everything below is measured
-          against that bar, not against how many cards you have seen.
+          A character counts as known once its meaning has survived a week-long gap. Everything
+          below is measured against that bar, not against how many cards you have seen.
         </p>
       </header>
 
       <section className="grid grid-4">
         {[
-          { label: "Known", value: data.knownWords, sub: `of ${data.totalWords} words` },
+          { label: "Kanji known", value: data.kanjiKnown, sub: `of ${data.totalKanji}` },
           { label: "Accuracy", value: `${accuracy}%`, sub: `${attempts} answers` },
           { label: "Day streak", value: data.streak, sub: "consecutive days" },
           { label: "Due now", value: data.dueNow, sub: "waiting for review" },
@@ -116,13 +116,13 @@ export default async function ProgressPage() {
                   color: "var(--white)",
                 }}
               >
-                Every N5 word
+                Every N5 kanji
               </h2>
             </div>
 
             <div className="stack" style={{ gap: 16 }}>
               {(Object.keys(BAND_LABEL) as MasteryBand[]).map((band) => {
-                const pct = Math.round((data.bands[band] / Math.max(data.totalWords, 1)) * 100);
+                const pct = Math.round((data.bands[band] / Math.max(data.totalKanji, 1)) * 100);
                 return (
                   <div key={band} className="stack" style={{ gap: 8 }}>
                     <div className="row" style={{ justifyContent: "space-between" }}>
@@ -237,7 +237,7 @@ export default async function ProgressPage() {
                     textAlign: "right",
                   }}
                 >
-                  {lesson.known}/{lesson.total}
+                  {lesson.kanjiKnown}/{lesson.kanji.length}
                 </span>
               </div>
             </Link>

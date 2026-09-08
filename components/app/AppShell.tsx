@@ -12,6 +12,7 @@ const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: "house" },
   { href: "/lessons", label: "Lessons", icon: "file-text" },
   { href: "/review", label: "Review", icon: "zap" },
+  { href: "/writing", label: "Writing", icon: "file-text" },
   { href: "/kanji", label: "Kanji", icon: "grid-2x2" },
   { href: "/progress", label: "Progress", icon: "chart-line" },
 ];

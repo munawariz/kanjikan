@@ -14,7 +14,7 @@ import { ThemeToggle } from "@/components/app/ThemeToggle";
 export const dynamic = "force-dynamic";
 
 const LEVELS = [
-  { level: "N5", state: "Available now", words: "813 words" },
+  { level: "N5", state: "Available now", words: "80 kanji" },
   { level: "N4", state: "Next up", words: "Planned" },
   { level: "N3", state: "Planned", words: "Planned" },
   { level: "N2", state: "Planned", words: "Planned" },
@@ -65,7 +65,7 @@ export default async function LandingPage() {
           <div className="row" style={{ gap: 10, marginBottom: 24 }}>
             <Sparkle size={18} color="var(--forest-800)" />
             <span className="eyebrow" style={{ color: "var(--forest-800)" }}>
-              JLPT N5 · Vocabulary first
+              JLPT N5 · {stats.kanji} kanji
             </span>
           </div>
 
@@ -77,13 +77,13 @@ export default async function LandingPage() {
               lineHeight: "var(--leading-display)",
             }}
           >
-            Learn Japanese Words, Not Loose Characters.
+            Remember Every N5 Kanji.
           </h1>
 
           <p style={{ marginTop: 28, maxWidth: 520, fontSize: "var(--text-body-lg)" }}>
-            Kanjikan teaches {stats.words} JLPT N5 words across {stats.lessons} lessons. The{" "}
-            {stats.kanji} N5 kanji come along inside real vocabulary, which is where you will
-            actually meet them.
+            All {stats.kanji} JLPT N5 characters, across {stats.lessons} lessons of five. Each comes with
+            its stroke order, its readings, and the {stats.words} words that fix those readings in
+            place — because a kanji learned alone is a kanji forgotten.
           </p>
 
           <div className="row" style={{ gap: 12, marginTop: 36, flexWrap: "wrap" }}>
@@ -105,9 +105,9 @@ export default async function LandingPage() {
       <section style={{ background: "var(--forest-800)" }}>
         <div className="page row" style={{ padding: "56px 48px", gap: 64, flexWrap: "wrap" }}>
           {[
-            [String(stats.words), "N5 words"],
-            [String(stats.lessons), "Themed lessons"],
-            [String(stats.kanji), "Kanji covered"],
+            [String(stats.kanji), "N5 kanji"],
+            [String(stats.lessons), "Lessons of five"],
+            [String(stats.words), "Words that teach them"],
             ["8", "Review stages"],
           ].map(([value, label]) => (
             <div key={label}>
@@ -149,21 +149,21 @@ export default async function LandingPage() {
         <div className="grid grid-3">
           {[
             {
-              icon: "file-text",
-              title: "Words carry the kanji.",
-              body: "You meet 日本語 as a word you can say, not as three characters to memorise separately. Every lesson is grouped by theme, so the vocabulary arrives in a context you can hang it on.",
+              icon: "grid-2x2",
+              title: "Five kanji at a time.",
+              body: "A lesson introduces five characters and nothing else. You meet each one, read the words built from it, then write it from memory before the next one starts.",
               tone: "cream" as const,
+            },
+            {
+              icon: "file-text",
+              title: "Stroke order, then your hand.",
+              body: "Every character animates stroke by stroke, then you draw it on a ruled grid from memory. Recognising a kanji and being able to write it are different skills, and they are tracked separately.",
+              tone: "sage" as const,
             },
             {
               icon: "zap",
               title: "Reviews find the gaps.",
-              body: "Eight scheduling stages, from ten minutes to three months. Get a word right and it moves out of the way. Get it wrong and it comes back before you leave the session.",
-              tone: "sage" as const,
-            },
-            {
-              icon: "chart-line",
-              title: "Your place is always saved.",
-              body: "Progress is stored per account, so you can stop mid-lesson on a laptop and pick the same queue up on a phone. Nothing lives in the browser.",
+              body: "Eight scheduling stages, from ten minutes to three months. Get a character right and it moves out of the way. Get it wrong and it comes back before you leave the session.",
               tone: "cream" as const,
             },
           ].map((f) => (
@@ -249,6 +249,20 @@ export default async function LandingPage() {
           style={{ padding: "48px", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}
         >
           <Wordmark tone="inverse" size={20} />
+          {/* KanjiVG is CC BY-SA 3.0 and requires attribution wherever the
+              stroke data is used. See data/jlpt/STROKES-LICENSE.md. */}
+          <span className="body-sm" style={{ color: "var(--forest-200)" }}>
+            Kanji and vocabulary ship with the app. Stroke order from{" "}
+            <a
+              href="https://kanjivg.tagaini.net"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "var(--lime-500)" }}
+            >
+              KanjiVG
+            </a>
+            , CC BY-SA 3.0.
+          </span>
         </div>
       </footer>
     </main>

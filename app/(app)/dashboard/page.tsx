@@ -33,7 +33,7 @@ export default async function DashboardPage() {
   const name = data.profile.display_name || user.email?.split("@")[0] || "there";
   const resume = data.resumeLesson ?? data.nextLesson;
   const upNext = lessons.filter((l) => l.status !== "completed").slice(0, 3);
-  const percent = Math.round((data.knownWords / Math.max(data.totalWords, 1)) * 100);
+  const percent = Math.round((data.kanjiKnown / Math.max(data.totalKanji, 1)) * 100);
 
   return (
     <div className="stack" style={{ gap: 48 }}>
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
                   ? `${data.dueNow} ${data.dueNow === 1 ? "word is" : "words are"} ready for review.`
                   : resume
                     ? resume.title
-                    : "Every N5 word is scheduled."}
+                    : "Every N5 kanji is scheduled."}
               </h2>
 
               <p style={{ margin: 0, color: "var(--forest-200)" }}>
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
                       size="lg"
                       icon="chevron-right"
                     >
-                      {resume.started > 0 ? "Continue Lesson" : "Start Lesson"}
+                      {resume.status === "learning" ? "Continue Lesson" : "Start Lesson"}
                     </Button>
                   </Link>
                 )}
@@ -132,7 +132,7 @@ export default async function DashboardPage() {
                 {percent}%
               </div>
               <div className="eyebrow" style={{ color: "var(--forest-200)" }}>
-                N5 vocabulary known
+                N5 kanji known
               </div>
               <div
                 className="meter"
@@ -141,7 +141,7 @@ export default async function DashboardPage() {
                 <span style={{ width: `${percent}%`, background: "var(--lime-500)" }} />
               </div>
               <div className="body-sm" style={{ color: "var(--forest-200)", marginTop: 6 }}>
-                {data.knownWords} of {data.totalWords} words
+                {data.kanjiKnown} of {data.totalKanji} kanji
               </div>
             </div>
           </div>
@@ -151,8 +151,8 @@ export default async function DashboardPage() {
       {/* ---- Numbers ----------------------------------------------------- */}
       <section className="grid grid-4">
         {[
-          { label: "Words started", value: data.startedWords, sub: `of ${stats.words}`, icon: "file-text" },
-          { label: "Due now", value: data.dueNow, sub: "ready to review", icon: "zap" },
+          { label: "Kanji started", value: data.kanjiStarted, sub: `of ${stats.kanji}`, icon: "grid-2x2" },
+          { label: "Can write", value: data.kanjiWritten, sub: "from memory", icon: "file-text" },
           { label: "Answered today", value: data.reviewedToday, sub: `goal ${data.profile.daily_goal}`, icon: "check" },
           { label: "Day streak", value: data.streak, sub: "consecutive days", icon: "star" },
         ].map((stat) => (
@@ -209,8 +209,8 @@ export default async function DashboardPage() {
         <Card tone="white" pad="lg" radius="lg" bordered>
           <div className="stack" style={{ gap: 24 }}>
             <div>
-              <p className="eyebrow">Where your words sit</p>
-              <h3 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-3)" }}>Mastery</h3>
+              <p className="eyebrow">Where your kanji sit</p>
+              <h3 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-3)" }}>Kanji mastery</h3>
             </div>
 
             <div style={{ display: "flex", height: 12, borderRadius: "var(--radius-full)", overflow: "hidden" }}>
@@ -218,7 +218,7 @@ export default async function DashboardPage() {
                 <span
                   key={band}
                   style={{
-                    width: `${(data.bands[band] / Math.max(data.totalWords, 1)) * 100}%`,
+                    width: `${(data.bands[band] / Math.max(data.totalKanji, 1)) * 100}%`,
                     background: BAND_COLOUR[band],
                   }}
                 />

@@ -1,0 +1,150 @@
+[
+  {
+    "slug": "one-to-five",
+    "title": "One to five",
+    "summary": "The first five numerals. Each one carries two readings — 一 is いち when counting and ひと when counting things — and the only way to fix that is to meet both.",
+    "kanji": ["一", "二", "三", "四", "五"],
+    "words": [
+      { "word": "一つ", "reading": "ひとつ", "meanings": ["one thing"], "pos": "counter", "teaches": "一" },
+      { "word": "一人", "reading": "ひとり", "meanings": ["one person", "alone"], "pos": "counter", "teaches": "一" },
+      { "word": "一日", "reading": "ついたち", "meanings": ["first of the month"], "pos": "noun", "teaches": "一" },
+      { "word": "一月", "reading": "いちがつ", "meanings": ["January"], "pos": "noun", "teaches": "一" },
+      { "word": "一番", "reading": "いちばん", "meanings": ["the most", "number one"], "pos": "adverb", "teaches": "一" },
+
+      { "word": "二つ", "reading": "ふたつ", "meanings": ["two things"], "pos": "counter", "teaches": "二" },
+      { "word": "二人", "reading": "ふたり", "meanings": ["two people"], "pos": "counter", "teaches": "二" },
+      { "word": "二日", "reading": "ふつか", "meanings": ["second of the month", "two days"], "pos": "noun", "teaches": "二" },
+      { "word": "二月", "reading": "にがつ", "meanings": ["February"], "pos": "noun", "teaches": "二" },
+      { "word": "十二", "reading": "じゅうに", "meanings": ["twelve"], "pos": "number", "teaches": "二" },
+
+      { "word": "三つ", "reading": "みっつ", "meanings": ["three things"], "pos": "counter", "teaches": "三" },
+      { "word": "三人", "reading": "さんにん", "meanings": ["three people"], "pos": "counter", "teaches": "三" },
+      { "word": "三日", "reading": "みっか", "meanings": ["third of the month", "three days"], "pos": "noun", "teaches": "三" },
+      { "word": "三月", "reading": "さんがつ", "meanings": ["March"], "pos": "noun", "teaches": "三" },
+      { "word": "三時", "reading": "さんじ", "meanings": ["three o clock"], "pos": "noun", "teaches": "三" },
+
+      { "word": "四つ", "reading": "よっつ", "meanings": ["four things"], "pos": "counter", "teaches": "四" },
+      { "word": "四人", "reading": "よにん", "meanings": ["four people"], "pos": "counter", "teaches": "四" },
+      { "word": "四日", "reading": "よっか", "meanings": ["fourth of the month", "four days"], "pos": "noun", "teaches": "四" },
+      { "word": "四月", "reading": "しがつ", "meanings": ["April"], "pos": "noun", "teaches": "四" },
+      { "word": "四時", "reading": "よじ", "meanings": ["four o clock"], "pos": "noun", "teaches": "四" },
+
+      { "word": "五つ", "reading": "いつつ", "meanings": ["five things"], "pos": "counter", "teaches": "五" },
+      { "word": "五人", "reading": "ごにん", "meanings": ["five people"], "pos": "counter", "teaches": "五" },
+      { "word": "五日", "reading": "いつか", "meanings": ["fifth of the month", "five days"], "pos": "noun", "teaches": "五" },
+      { "word": "五月", "reading": "ごがつ", "meanings": ["May"], "pos": "noun", "teaches": "五" },
+      { "word": "五時", "reading": "ごじ", "meanings": ["five o clock"], "pos": "noun", "teaches": "五" }
+    ]
+  },
+  {
+    "slug": "six-to-ten",
+    "title": "Six to ten",
+    "summary": "The second half of the count. Watch the dates: 六日 is むいか, 七日 is なのか, 八日 is ようか — none of them follow the numeral reading.",
+    "kanji": ["六", "七", "八", "九", "十"],
+    "words": [
+      { "word": "六つ", "reading": "むっつ", "meanings": ["six things"], "pos": "counter", "teaches": "六" },
+      { "word": "六人", "reading": "ろくにん", "meanings": ["six people"], "pos": "counter", "teaches": "六" },
+      { "word": "六日", "reading": "むいか", "meanings": ["sixth of the month", "six days"], "pos": "noun", "teaches": "六" },
+      { "word": "六月", "reading": "ろくがつ", "meanings": ["June"], "pos": "noun", "teaches": "六" },
+      { "word": "六時", "reading": "ろくじ", "meanings": ["six o clock"], "pos": "noun", "teaches": "六" },
+
+      { "word": "七つ", "reading": "ななつ", "meanings": ["seven things"], "pos": "counter", "teaches": "七" },
+      { "word": "七人", "reading": "しちにん", "meanings": ["seven people"], "pos": "counter", "teaches": "七" },
+      { "word": "七日", "reading": "なのか", "meanings": ["seventh of the month", "seven days"], "pos": "noun", "teaches": "七" },
+      { "word": "七月", "reading": "しちがつ", "meanings": ["July"], "pos": "noun", "teaches": "七" },
+      { "word": "七時", "reading": "しちじ", "meanings": ["seven o clock"], "pos": "noun", "teaches": "七" },
+
+      { "word": "八つ", "reading": "やっつ", "meanings": ["eight things"], "pos": "counter", "teaches": "八" },
+      { "word": "八人", "reading": "はちにん", "meanings": ["eight people"], "pos": "counter", "teaches": "八" },
+      { "word": "八日", "reading": "ようか", "meanings": ["eighth of the month", "eight days"], "pos": "noun", "teaches": "八" },
+      { "word": "八月", "reading": "はちがつ", "meanings": ["August"], "pos": "noun", "teaches": "八" },
+      { "word": "八時", "reading": "はちじ", "meanings": ["eight o clock"], "pos": "noun", "teaches": "八" },
+
+      { "word": "九つ", "reading": "ここのつ", "meanings": ["nine things"], "pos": "counter", "teaches": "九" },
+      { "word": "九人", "reading": "きゅうにん", "meanings": ["nine people"], "pos": "counter", "teaches": "九" },
+      { "word": "九日", "reading": "ここのか", "meanings": ["ninth of the month", "nine days"], "pos": "noun", "teaches": "九" },
+      { "word": "九月", "reading": "くがつ", "meanings": ["September"], "pos": "noun", "teaches": "九" },
+      { "word": "九時", "reading": "くじ", "meanings": ["nine o clock"], "pos": "noun", "teaches": "九" },
+
+      { "word": "十", "reading": "じゅう", "meanings": ["ten"], "pos": "number", "teaches": "十" },
+      { "word": "十日", "reading": "とおか", "meanings": ["tenth of the month", "ten days"], "pos": "noun", "teaches": "十" },
+      { "word": "十月", "reading": "じゅうがつ", "meanings": ["October"], "pos": "noun", "teaches": "十" },
+      { "word": "十時", "reading": "じゅうじ", "meanings": ["ten o clock"], "pos": "noun", "teaches": "十" },
+      { "word": "十分", "reading": "じゅっぷん", "meanings": ["ten minutes"], "pos": "noun", "teaches": "十" }
+    ]
+  },
+  {
+    "slug": "hundreds-and-money",
+    "title": "Hundreds, thousands and money",
+    "summary": "Counting past ten, plus the yen. The big numbers change sound in compounds — 三百 is さんびゃく but 六百 is ろっぴゃく.",
+    "kanji": ["百", "千", "万", "円", "半"],
+    "words": [
+      { "word": "百", "reading": "ひゃく", "meanings": ["hundred"], "pos": "number", "teaches": "百" },
+      { "word": "三百", "reading": "さんびゃく", "meanings": ["three hundred"], "pos": "number", "teaches": "百" },
+      { "word": "六百", "reading": "ろっぴゃく", "meanings": ["six hundred"], "pos": "number", "teaches": "百" },
+      { "word": "八百屋", "reading": "やおや", "meanings": ["greengrocer"], "pos": "noun", "teaches": "百" },
+      { "word": "百人", "reading": "ひゃくにん", "meanings": ["one hundred people"], "pos": "counter", "teaches": "百" },
+
+      { "word": "千", "reading": "せん", "meanings": ["thousand"], "pos": "number", "teaches": "千" },
+      { "word": "三千", "reading": "さんぜん", "meanings": ["three thousand"], "pos": "number", "teaches": "千" },
+      { "word": "八千", "reading": "はっせん", "meanings": ["eight thousand"], "pos": "number", "teaches": "千" },
+      { "word": "千人", "reading": "せんにん", "meanings": ["one thousand people"], "pos": "counter", "teaches": "千" },
+      { "word": "千年", "reading": "せんねん", "meanings": ["a thousand years"], "pos": "noun", "teaches": "千" },
+
+      { "word": "万", "reading": "まん", "meanings": ["ten thousand"], "pos": "number", "teaches": "万" },
+      { "word": "一万", "reading": "いちまん", "meanings": ["ten thousand"], "pos": "number", "teaches": "万" },
+      { "word": "十万", "reading": "じゅうまん", "meanings": ["one hundred thousand"], "pos": "number", "teaches": "万" },
+      { "word": "百万", "reading": "ひゃくまん", "meanings": ["one million"], "pos": "number", "teaches": "万" },
+      { "word": "万年筆", "reading": "まんねんひつ", "meanings": ["fountain pen"], "pos": "noun", "teaches": "万" },
+
+      { "word": "円", "reading": "えん", "meanings": ["yen"], "pos": "noun", "teaches": "円" },
+      { "word": "百円", "reading": "ひゃくえん", "meanings": ["one hundred yen"], "pos": "noun", "teaches": "円" },
+      { "word": "千円", "reading": "せんえん", "meanings": ["one thousand yen"], "pos": "noun", "teaches": "円" },
+      { "word": "一万円", "reading": "いちまんえん", "meanings": ["ten thousand yen"], "pos": "noun", "teaches": "円" },
+      { "word": "円い", "reading": "まるい", "meanings": ["round", "circular"], "pos": "i-adjective", "teaches": "円" },
+
+      { "word": "半分", "reading": "はんぶん", "meanings": ["half"], "pos": "noun", "teaches": "半" },
+      { "word": "半日", "reading": "はんにち", "meanings": ["half a day"], "pos": "noun", "teaches": "半" },
+      { "word": "半年", "reading": "はんとし", "meanings": ["half a year"], "pos": "noun", "teaches": "半" },
+      { "word": "半月", "reading": "はんつき", "meanings": ["half a month"], "pos": "noun", "teaches": "半" },
+      { "word": "三時半", "reading": "さんじはん", "meanings": ["half past three"], "pos": "noun", "teaches": "半" }
+    ]
+  },
+  {
+    "slug": "days-months-time",
+    "title": "Day, month, year, time",
+    "summary": "The calendar kanji. 日 alone is ひ, but it turns into にち, か and even じつ inside compounds — this is where multiple readings really start.",
+    "kanji": ["日", "月", "年", "時", "分"],
+    "words": [
+      { "word": "日", "reading": "ひ", "meanings": ["day", "sun"], "pos": "noun", "teaches": "日" },
+      { "word": "日本", "reading": "にほん", "meanings": ["Japan"], "pos": "noun", "teaches": "日" },
+      { "word": "今日", "reading": "きょう", "meanings": ["today"], "pos": "noun", "teaches": "日" },
+      { "word": "日曜日", "reading": "にちようび", "meanings": ["Sunday"], "pos": "noun", "teaches": "日" },
+      { "word": "明日", "reading": "あした", "meanings": ["tomorrow"], "pos": "noun", "teaches": "日" },
+
+      { "word": "月", "reading": "つき", "meanings": ["moon", "month"], "pos": "noun", "teaches": "月" },
+      { "word": "月曜日", "reading": "げつようび", "meanings": ["Monday"], "pos": "noun", "teaches": "月" },
+      { "word": "今月", "reading": "こんげつ", "meanings": ["this month"], "pos": "noun", "teaches": "月" },
+      { "word": "来月", "reading": "らいげつ", "meanings": ["next month"], "pos": "noun", "teaches": "月" },
+      { "word": "先月", "reading": "せんげつ", "meanings": ["last month"], "pos": "noun", "teaches": "月" },
+
+      { "word": "年", "reading": "とし", "meanings": ["year", "age"], "pos": "noun", "teaches": "年" },
+      { "word": "今年", "reading": "ことし", "meanings": ["this year"], "pos": "noun", "teaches": "年" },
+      { "word": "来年", "reading": "らいねん", "meanings": ["next year"], "pos": "noun", "teaches": "年" },
+      { "word": "去年", "reading": "きょねん", "meanings": ["last year"], "pos": "noun", "teaches": "年" },
+      { "word": "一年生", "reading": "いちねんせい", "meanings": ["first-year student"], "pos": "noun", "teaches": "年" },
+
+      { "word": "時", "reading": "とき", "meanings": ["time", "when"], "pos": "noun", "teaches": "時" },
+      { "word": "時間", "reading": "じかん", "meanings": ["time", "hour"], "pos": "noun", "teaches": "時" },
+      { "word": "何時", "reading": "なんじ", "meanings": ["what time"], "pos": "noun", "teaches": "時" },
+      { "word": "時計", "reading": "とけい", "meanings": ["clock", "watch"], "pos": "noun", "teaches": "時" },
+      { "word": "時々", "reading": "ときどき", "meanings": ["sometimes"], "pos": "adverb", "teaches": "時" },
+
+      { "word": "分", "reading": "ふん", "meanings": ["minute"], "pos": "counter", "teaches": "分" },
+      { "word": "分かる", "reading": "わかる", "meanings": ["to understand"], "pos": "verb (godan)", "teaches": "分" },
+      { "word": "分ける", "reading": "わける", "meanings": ["to divide", "to share out"], "pos": "verb (ichidan)", "teaches": "分" },
+      { "word": "自分", "reading": "じぶん", "meanings": ["oneself"], "pos": "noun", "teaches": "分" },
+      { "word": "気分", "reading": "きぶん", "meanings": ["mood", "feeling"], "pos": "noun", "teaches": "分" }
+    ]
+  }
+]

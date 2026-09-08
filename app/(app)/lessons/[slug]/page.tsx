@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getLesson, getKanji } from "@/lib/content";
-import { getWordProgress, getLessonProgress } from "@/lib/progress";
-import { bandFor, BAND_LABEL, type MasteryBand } from "@/lib/srs";
+import { getLesson, strokeViewBox } from "@/lib/content";
+import { getKanjiProgress, getLessonProgress, getWordProgress } from "@/lib/progress";
+import { bandFor, BAND_LABEL, KNOWN_STAGE, type MasteryBand } from "@/lib/srs";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
+import { StrokeDiagram } from "@/components/app/StrokeDiagram";
 
 export const dynamic = "force-dynamic";
 
@@ -25,22 +26,18 @@ export default async function LessonPage({ params }: { params: { slug: string } 
   const lesson = getLesson(params.slug);
   if (!lesson) notFound();
 
-  const [progress, lessonRows] = await Promise.all([getWordProgress(), getLessonProgress()]);
+  const [wordRows, kanjiRows, lessonRows] = await Promise.all([
+    getWordProgress(),
+    getKanjiProgress(),
+    getLessonProgress(),
+  ]);
   const row = lessonRows.get(lesson.slug);
 
-  const known = lesson.words.filter((w) => (progress.get(w.id)?.srs_stage ?? 0) >= 5).length;
-  const started = lesson.words.filter((w) => progress.has(w.id)).length;
-  const percent = Math.round((known / lesson.words.length) * 100);
-
-  // Every kanji in the lesson, split by whether kanji.json has data for it.
-  // N5 vocabulary routinely uses characters from higher levels — 大丈夫 is an
-  // N5 word, but 丈 and 夫 are not N5 kanji — so showing only the studied set
-  // would silently hide most of what the learner is actually looking at.
-  const kanjiData = new Map(getKanji().map((k) => [k.char, k]));
-  const studiedKanji = [...new Set(lesson.words.flatMap((w) => w.levelKanji))];
-  const otherKanji = [...new Set(lesson.words.flatMap((w) => w.kanji))].filter(
-    (c) => !kanjiData.has(c),
-  );
+  const known = lesson.kanji.filter(
+    (k) => (kanjiRows.get(k.char)?.recognition_stage ?? 0) >= KNOWN_STAGE,
+  ).length;
+  const percent = Math.round((known / lesson.kanji.length) * 100);
+  const started = row ? row.cursor > 0 : false;
 
   return (
     <div className="stack" style={{ gap: 40 }}>
@@ -75,7 +72,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
         <div className="row" style={{ gap: 12, flexWrap: "wrap", marginTop: 8 }}>
           <Link href={`/lessons/${lesson.slug}/study`} className="reset-link">
             <Button variant="primary" size="lg" icon="chevron-right">
-              {started === 0 ? "Start Lesson" : started < lesson.words.length ? "Continue Lesson" : "Practise Again"}
+              {!started ? "Start Lesson" : row?.status === "completed" ? "Practise Again" : "Continue Lesson"}
             </Button>
           </Link>
         </div>
@@ -85,7 +82,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
         <div className="stack" style={{ gap: 14 }}>
           <div className="row" style={{ justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
             <span className="eyebrow" style={{ color: "var(--on-tint-body)" }}>
-              {known} of {lesson.words.length} known
+              {known} of {lesson.kanji.length} kanji known · {lesson.words.length} words
             </span>
             <span
               style={{
@@ -103,83 +100,78 @@ export default async function LessonPage({ params }: { params: { slug: string } 
         </div>
       </Card>
 
-      {(studiedKanji.length > 0 || otherKanji.length > 0) && (
-        <section className="stack" style={{ gap: 20 }}>
-          <div>
-            <p className="eyebrow">Kanji in this lesson</p>
-            <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-2)" }}>
-              {studiedKanji.length + otherKanji.length} characters you will meet
-            </h2>
-          </div>
+      {/* ---- The characters ------------------------------------------------ */}
+      <section className="stack" style={{ gap: 24 }}>
+        <div>
+          <p className="eyebrow">The characters</p>
+          <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-1)" }}>
+            {lesson.kanji.length} kanji, {lesson.words.length} words to fix them
+          </h2>
+        </div>
 
-          {studiedKanji.length > 0 && (
-            <div className="stack" style={{ gap: 12 }}>
-              <p className="eyebrow" style={{ color: "var(--on-tint-body)" }}>
-                On the N5 list · {studiedKanji.length}
-              </p>
-              <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
-                {studiedKanji.map((char) => {
-                  const k = kanjiData.get(char);
-                  return (
-                    <Card key={char} tone="sage" pad="none" radius="md" style={{ padding: "14px 16px" }}>
-                      <div className="row" style={{ gap: 12 }}>
-                        <span className="jp" style={{ fontSize: 28, color: "var(--on-tint-heading)" }}>
-                          {char}
+        <div className="stack" style={{ gap: 16 }}>
+          {lesson.kanji.map((k) => {
+            const p = kanjiRows.get(k.char);
+            const words = lesson.words.filter((w) => w.teaches === k.char);
+            return (
+              <Card key={k.char} tone="white" pad="md" radius="lg" bordered>
+                <div className="row" style={{ gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
+                  <StrokeDiagram
+                    char={k.char}
+                    paths={k.strokePaths}
+                    viewBox={strokeViewBox()}
+                    size={120}
+                  />
+
+                  <div className="stack" style={{ gap: 12, flex: 1, minWidth: 220 }}>
+                    <div className="row" style={{ gap: 12, flexWrap: "wrap", alignItems: "baseline" }}>
+                      <span style={{ fontSize: "var(--text-heading-3)", color: "var(--text-heading)" }}>
+                        {k.meanings.join(", ")}
+                      </span>
+                      <Badge tone={BAND_TONE[bandFor(p?.recognition_stage)]}>
+                        {BAND_LABEL[bandFor(p?.recognition_stage)]}
+                      </Badge>
+                      {(p?.writing_stage ?? 0) >= KNOWN_STAGE && <Badge tone="accent">Can write</Badge>}
+                    </div>
+
+                    <div className="row body-sm" style={{ gap: 18, flexWrap: "wrap" }}>
+                      <span className="muted">{k.strokes} strokes</span>
+                      {k.radical && <span className="muted">radical {k.radical}</span>}
+                      <span className="jp" style={{ color: "var(--text-body)" }}>
+                        {[...k.onyomi, ...k.kunyomi].join("・")}
+                      </span>
+                    </div>
+
+                    <div className="row" style={{ gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+                      {words.map((w) => (
+                        <span
+                          key={w.id}
+                          className="jp"
+                          title={w.meanings.join(", ")}
+                          style={{
+                            padding: "6px 12px",
+                            borderRadius: "var(--radius-full)",
+                            background: "var(--surface-sunken)",
+                            color: "var(--text-heading)",
+                            fontSize: 15,
+                          }}
+                        >
+                          {w.word}
+                          <span style={{ color: "var(--text-muted)", marginLeft: 6, fontSize: 13 }}>
+                            {w.reading}
+                          </span>
                         </span>
-                        <div>
-                          <div
-                            className="body-sm"
-                            style={{ fontWeight: "var(--weight-semibold)", color: "var(--on-tint-heading)" }}
-                          >
-                            {k?.meanings.slice(0, 2).join(", ")}
-                          </div>
-                          <div className="jp body-sm" style={{ color: "var(--on-tint-body)" }}>
-                            {[...(k?.onyomi ?? []), ...(k?.kunyomi ?? [])].slice(0, 3).join("・")}
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
 
-          {otherKanji.length > 0 && (
-            <div className="stack" style={{ gap: 12 }}>
-              <p className="eyebrow" style={{ color: "var(--text-muted)" }}>
-                Beyond the N5 list · {otherKanji.length}
-              </p>
-              <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-                {otherKanji.map((char) => (
-                  <span
-                    key={char}
-                    className="jp"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: 46,
-                      height: 46,
-                      borderRadius: "var(--radius-sm)",
-                      border: "1px solid var(--border-subtle)",
-                      color: "var(--text-body)",
-                      fontSize: 24,
-                    }}
-                  >
-                    {char}
-                  </span>
-                ))}
-              </div>
-              <p className="body-sm muted" style={{ margin: 0, maxWidth: 560 }}>
-                These appear in this lesson but are not N5 kanji, so no readings ship for them.
-                Learn the word as a whole — that is the point of studying vocabulary first.
-              </p>
-            </div>
-          )}
-        </section>
-      )}
-
+      {/* ---- Full word list ------------------------------------------------ */}
       <section className="stack" style={{ gap: 20 }}>
         <div>
           <p className="eyebrow">Word list</p>
@@ -190,7 +182,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
 
         <Card tone="white" pad="none" radius="lg" bordered>
           {lesson.words.map((word, i) => {
-            const band = bandFor(progress.get(word.id)?.srs_stage);
+            const band = bandFor(wordRows.get(word.id)?.srs_stage);
             return (
               <div
                 key={word.id}
@@ -205,15 +197,15 @@ export default async function LessonPage({ params }: { params: { slug: string } 
               >
                 <div className="row" style={{ gap: 20, minWidth: 0, flex: 1 }}>
                   <span
+                    className="jp"
                     style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "var(--text-body-xs)",
-                      color: "var(--text-muted)",
-                      width: 24,
+                      width: 28,
                       flex: "0 0 auto",
+                      fontSize: 20,
+                      color: "var(--text-muted)",
                     }}
                   >
-                    {String(i + 1).padStart(2, "0")}
+                    {word.teaches}
                   </span>
 
                   <div style={{ minWidth: 130 }}>

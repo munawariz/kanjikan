@@ -1,0 +1,143 @@
+[
+  {
+    "slug": "seeing-and-saying",
+    "title": "Seeing, hearing, saying",
+    "summary": "The five kanji of taking things in and putting them out. 読 gives you 音読み and 訓読み — the names for the two kinds of reading you have been learning all along.",
+    "kanji": ["見", "聞", "話", "読", "書"],
+    "words": [
+      { "word": "見る", "reading": "みる", "meanings": ["to see", "to watch"], "pos": "verb (ichidan)", "teaches": "見" },
+      { "word": "見せる", "reading": "みせる", "meanings": ["to show"], "pos": "verb (ichidan)", "teaches": "見" },
+      { "word": "見える", "reading": "みえる", "meanings": ["to be visible", "can see"], "pos": "verb (ichidan)", "teaches": "見" },
+      { "word": "花見", "reading": "はなみ", "meanings": ["flower viewing"], "pos": "noun", "teaches": "見" },
+      { "word": "見学", "reading": "けんがく", "meanings": ["a study visit", "field trip"], "pos": "noun", "teaches": "見" },
+
+      { "word": "聞く", "reading": "きく", "meanings": ["to listen", "to hear", "to ask"], "pos": "verb (godan)", "teaches": "聞" },
+      { "word": "聞こえる", "reading": "きこえる", "meanings": ["to be audible", "can hear"], "pos": "verb (ichidan)", "teaches": "聞" },
+      { "word": "新聞", "reading": "しんぶん", "meanings": ["newspaper"], "pos": "noun", "teaches": "聞" },
+      { "word": "新聞紙", "reading": "しんぶんし", "meanings": ["newsprint", "newspaper paper"], "pos": "noun", "teaches": "聞" },
+
+      { "word": "話す", "reading": "はなす", "meanings": ["to speak", "to talk"], "pos": "verb (godan)", "teaches": "話" },
+      { "word": "話", "reading": "はなし", "meanings": ["a talk", "a story"], "pos": "noun", "teaches": "話" },
+      { "word": "会話", "reading": "かいわ", "meanings": ["conversation"], "pos": "noun", "teaches": "話" },
+      { "word": "話し合う", "reading": "はなしあう", "meanings": ["to discuss"], "pos": "verb (godan)", "teaches": "話" },
+
+      { "word": "読む", "reading": "よむ", "meanings": ["to read"], "pos": "verb (godan)", "teaches": "読" },
+      { "word": "読書", "reading": "どくしょ", "meanings": ["reading books"], "pos": "noun", "teaches": "読" },
+      { "word": "読み方", "reading": "よみかた", "meanings": ["how to read", "reading"], "pos": "noun", "teaches": "読" },
+      { "word": "音読み", "reading": "おんよみ", "meanings": ["on reading", "Chinese-derived reading"], "pos": "noun", "teaches": "読" },
+      { "word": "訓読み", "reading": "くんよみ", "meanings": ["kun reading", "native Japanese reading"], "pos": "noun", "teaches": "読" },
+
+      { "word": "書く", "reading": "かく", "meanings": ["to write"], "pos": "verb (godan)", "teaches": "書" },
+      { "word": "辞書", "reading": "じしょ", "meanings": ["dictionary"], "pos": "noun", "teaches": "書" },
+      { "word": "図書館", "reading": "としょかん", "meanings": ["library"], "pos": "noun", "teaches": "書" },
+      { "word": "教科書", "reading": "きょうかしょ", "meanings": ["textbook"], "pos": "noun", "teaches": "書" },
+      { "word": "書き方", "reading": "かきかた", "meanings": ["how to write"], "pos": "noun", "teaches": "書" }
+    ]
+  },
+  {
+    "slug": "school-and-language",
+    "title": "School, books and languages",
+    "summary": "本 starts as book, but its older meaning is origin — which is why 日本 is sun-origin, and why it counts long thin things.",
+    "kanji": ["学", "校", "語", "本", "国"],
+    "words": [
+      { "word": "学校", "reading": "がっこう", "meanings": ["school"], "pos": "noun", "teaches": "学" },
+      { "word": "学ぶ", "reading": "まなぶ", "meanings": ["to learn", "to study"], "pos": "verb (godan)", "teaches": "学" },
+      { "word": "学年", "reading": "がくねん", "meanings": ["school year", "grade"], "pos": "noun", "teaches": "学" },
+      { "word": "科学", "reading": "かがく", "meanings": ["science"], "pos": "noun", "teaches": "学" },
+      { "word": "留学生", "reading": "りゅうがくせい", "meanings": ["international student"], "pos": "noun", "teaches": "学" },
+
+      { "word": "高校", "reading": "こうこう", "meanings": ["high school"], "pos": "noun", "teaches": "校" },
+      { "word": "校長", "reading": "こうちょう", "meanings": ["principal", "head teacher"], "pos": "noun", "teaches": "校" },
+      { "word": "校庭", "reading": "こうてい", "meanings": ["schoolyard"], "pos": "noun", "teaches": "校" },
+      { "word": "母校", "reading": "ぼこう", "meanings": ["alma mater"], "pos": "noun", "teaches": "校" },
+
+      { "word": "日本語", "reading": "にほんご", "meanings": ["Japanese language"], "pos": "noun", "teaches": "語" },
+      { "word": "英語", "reading": "えいご", "meanings": ["English language"], "pos": "noun", "teaches": "語" },
+      { "word": "中国語", "reading": "ちゅうごくご", "meanings": ["Chinese language"], "pos": "noun", "teaches": "語" },
+      { "word": "語る", "reading": "かたる", "meanings": ["to tell", "to narrate"], "pos": "verb (godan)", "teaches": "語" },
+      { "word": "単語", "reading": "たんご", "meanings": ["word", "vocabulary item"], "pos": "noun", "teaches": "語" },
+
+      { "word": "本", "reading": "ほん", "meanings": ["book"], "pos": "noun", "teaches": "本" },
+      { "word": "本屋", "reading": "ほんや", "meanings": ["bookshop"], "pos": "noun", "teaches": "本" },
+      { "word": "本当", "reading": "ほんとう", "meanings": ["truth", "really"], "pos": "noun", "teaches": "本" },
+      { "word": "一本", "reading": "いっぽん", "meanings": ["one long thin object"], "pos": "counter", "teaches": "本" },
+      { "word": "本人", "reading": "ほんにん", "meanings": ["the person themselves"], "pos": "noun", "teaches": "本" },
+
+      { "word": "国", "reading": "くに", "meanings": ["country"], "pos": "noun", "teaches": "国" },
+      { "word": "国語", "reading": "こくご", "meanings": ["national language", "Japanese as a school subject"], "pos": "noun", "teaches": "国" },
+      { "word": "国内", "reading": "こくない", "meanings": ["domestic", "within the country"], "pos": "noun", "teaches": "国" },
+      { "word": "帰国", "reading": "きこく", "meanings": ["returning to your country"], "pos": "noun", "teaches": "国" },
+      { "word": "全国", "reading": "ぜんこく", "meanings": ["the whole country", "nationwide"], "pos": "noun", "teaches": "国" }
+    ]
+  },
+  {
+    "slug": "eating-and-resting",
+    "title": "Eating, resting, every day",
+    "summary": "The rhythm of a day. 毎 never stands alone — it only ever attaches to a unit of time, which makes it one of the easiest kanji here.",
+    "kanji": ["食", "休", "毎", "今", "何"],
+    "words": [
+      { "word": "食べる", "reading": "たべる", "meanings": ["to eat"], "pos": "verb (ichidan)", "teaches": "食" },
+      { "word": "食事", "reading": "しょくじ", "meanings": ["a meal"], "pos": "noun", "teaches": "食" },
+      { "word": "食堂", "reading": "しょくどう", "meanings": ["cafeteria", "dining hall"], "pos": "noun", "teaches": "食" },
+      { "word": "朝食", "reading": "ちょうしょく", "meanings": ["breakfast"], "pos": "noun", "teaches": "食" },
+      { "word": "夕食", "reading": "ゆうしょく", "meanings": ["dinner", "evening meal"], "pos": "noun", "teaches": "食" },
+
+      { "word": "休む", "reading": "やすむ", "meanings": ["to rest", "to take time off"], "pos": "verb (godan)", "teaches": "休" },
+      { "word": "休み", "reading": "やすみ", "meanings": ["a rest", "a holiday"], "pos": "noun", "teaches": "休" },
+      { "word": "昼休み", "reading": "ひるやすみ", "meanings": ["lunch break"], "pos": "noun", "teaches": "休" },
+      { "word": "夏休み", "reading": "なつやすみ", "meanings": ["summer holiday"], "pos": "noun", "teaches": "休" },
+      { "word": "休日", "reading": "きゅうじつ", "meanings": ["a day off", "public holiday"], "pos": "noun", "teaches": "休" },
+
+      { "word": "毎日", "reading": "まいにち", "meanings": ["every day"], "pos": "noun", "teaches": "毎" },
+      { "word": "毎朝", "reading": "まいあさ", "meanings": ["every morning"], "pos": "noun", "teaches": "毎" },
+      { "word": "毎週", "reading": "まいしゅう", "meanings": ["every week"], "pos": "noun", "teaches": "毎" },
+      { "word": "毎月", "reading": "まいつき", "meanings": ["every month"], "pos": "noun", "teaches": "毎" },
+      { "word": "毎年", "reading": "まいとし", "meanings": ["every year"], "pos": "noun", "teaches": "毎" },
+
+      { "word": "今", "reading": "いま", "meanings": ["now"], "pos": "noun", "teaches": "今" },
+      { "word": "今週", "reading": "こんしゅう", "meanings": ["this week"], "pos": "noun", "teaches": "今" },
+      { "word": "今夜", "reading": "こんや", "meanings": ["tonight"], "pos": "noun", "teaches": "今" },
+      { "word": "今度", "reading": "こんど", "meanings": ["next time", "this time"], "pos": "noun", "teaches": "今" },
+      { "word": "今朝", "reading": "けさ", "meanings": ["this morning"], "pos": "noun", "teaches": "今" },
+
+      { "word": "何", "reading": "なに", "meanings": ["what"], "pos": "pronoun", "teaches": "何" },
+      { "word": "何曜日", "reading": "なんようび", "meanings": ["what day of the week"], "pos": "noun", "teaches": "何" },
+      { "word": "何回", "reading": "なんかい", "meanings": ["how many times"], "pos": "noun", "teaches": "何" },
+      { "word": "何度", "reading": "なんど", "meanings": ["how many times", "how many degrees"], "pos": "noun", "teaches": "何" },
+      { "word": "何か", "reading": "なにか", "meanings": ["something", "anything"], "pos": "pronoun", "teaches": "何" }
+    ]
+  },
+  {
+    "slug": "describing-things",
+    "title": "Tall, long, white, noon, electric",
+    "summary": "The last five. 白 hides inside 面白い interesting, which has nothing to do with white — a good reminder that compounds are their own words.",
+    "kanji": ["高", "長", "白", "午", "電"],
+    "words": [
+      { "word": "高い", "reading": "たかい", "meanings": ["high", "tall", "expensive"], "pos": "i-adjective", "teaches": "高" },
+      { "word": "高校生", "reading": "こうこうせい", "meanings": ["high school student"], "pos": "noun", "teaches": "高" },
+      { "word": "最高", "reading": "さいこう", "meanings": ["the best", "the highest"], "pos": "noun", "teaches": "高" },
+      { "word": "高さ", "reading": "たかさ", "meanings": ["height"], "pos": "noun", "teaches": "高" },
+
+      { "word": "長い", "reading": "ながい", "meanings": ["long"], "pos": "i-adjective", "teaches": "長" },
+      { "word": "社長", "reading": "しゃちょう", "meanings": ["company president"], "pos": "noun", "teaches": "長" },
+      { "word": "部長", "reading": "ぶちょう", "meanings": ["department manager"], "pos": "noun", "teaches": "長" },
+      { "word": "長さ", "reading": "ながさ", "meanings": ["length"], "pos": "noun", "teaches": "長" },
+      { "word": "長時間", "reading": "ちょうじかん", "meanings": ["a long time"], "pos": "noun", "teaches": "長" },
+
+      { "word": "白い", "reading": "しろい", "meanings": ["white"], "pos": "i-adjective", "teaches": "白" },
+      { "word": "白", "reading": "しろ", "meanings": ["white"], "pos": "noun", "teaches": "白" },
+      { "word": "面白い", "reading": "おもしろい", "meanings": ["interesting", "funny"], "pos": "i-adjective", "teaches": "白" },
+      { "word": "白黒", "reading": "しろくろ", "meanings": ["black and white"], "pos": "noun", "teaches": "白" },
+
+      { "word": "午前", "reading": "ごぜん", "meanings": ["morning", "a.m."], "pos": "noun", "teaches": "午" },
+      { "word": "午後", "reading": "ごご", "meanings": ["afternoon", "p.m."], "pos": "noun", "teaches": "午" },
+      { "word": "正午", "reading": "しょうご", "meanings": ["noon", "midday"], "pos": "noun", "teaches": "午" },
+      { "word": "午前中", "reading": "ごぜんちゅう", "meanings": ["during the morning"], "pos": "noun", "teaches": "午" },
+
+      { "word": "電話", "reading": "でんわ", "meanings": ["telephone", "phone call"], "pos": "noun", "teaches": "電" },
+      { "word": "電気", "reading": "でんき", "meanings": ["electricity", "the light"], "pos": "noun", "teaches": "電" },
+      { "word": "電池", "reading": "でんち", "meanings": ["battery"], "pos": "noun", "teaches": "電" },
+      { "word": "電子", "reading": "でんし", "meanings": ["electronic"], "pos": "noun", "teaches": "電" }
+    ]
+  }
+]

@@ -10,8 +10,11 @@ const STATUS: Record<LessonSummary["status"], { label: string; tone: "sage" | "s
 };
 
 /**
- * A lesson tile. Atlas alternates cream and sage across a grid, so the tone is
- * driven by position rather than by status — status is carried by the badge.
+ * A lesson tile, leading with the characters it teaches.
+ *
+ * The five glyphs are the whole point of the lesson, so they get the largest
+ * type on the card. Atlas alternates cream and sage across a grid, so tone is
+ * driven by position; status is carried by the badge.
  */
 export function LessonCard({ lesson, index }: { lesson: LessonSummary; index: number }) {
   const status = STATUS[lesson.status];
@@ -34,7 +37,18 @@ export function LessonCard({ lesson, index }: { lesson: LessonSummary; index: nu
             <Badge tone={status.tone}>{status.label}</Badge>
           </div>
 
-          <div className="stack" style={{ gap: 8, flex: 1 }}>
+          <div className="row jp" style={{ gap: 10, flexWrap: "wrap" }}>
+            {lesson.kanji.map((char) => (
+              <span
+                key={char}
+                style={{ fontSize: 34, lineHeight: 1, color: "var(--on-tint-heading)" }}
+              >
+                {char}
+              </span>
+            ))}
+          </div>
+
+          <div className="stack" style={{ gap: 6, flex: 1 }}>
             <h3 style={{ margin: 0, fontSize: "var(--text-heading-4)" }}>{lesson.title}</h3>
             <p className="body-sm" style={{ margin: 0, color: "var(--on-tint-body)" }}>
               {lesson.summary}
@@ -50,7 +64,7 @@ export function LessonCard({ lesson, index }: { lesson: LessonSummary; index: nu
               style={{ justifyContent: "space-between", color: "var(--on-tint-body)" }}
             >
               <span>
-                {lesson.known} of {lesson.total} known
+                {lesson.kanjiKnown} of {lesson.kanji.length} kanji known
               </span>
               {lesson.due > 0 && <span>{lesson.due} due</span>}
             </div>

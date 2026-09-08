@@ -8,21 +8,30 @@ import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Icon } from "@/components/atlas/core/Icon.jsx";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
-import type { Word } from "@/lib/content";
-import { buildLessonQueue, buildReviewQueue, PROMPT, type StudyCard } from "@/lib/study";
+import type { Kanji, Word } from "@/lib/content";
+import {
+  buildLessonQueue,
+  buildReviewQueue,
+  buildWritingQueue,
+  PROMPT,
+  type StudyCard,
+} from "@/lib/study";
+import { StrokeDiagram } from "./StrokeDiagram";
+import { WritingPad } from "./WritingPad";
 
 type Props = {
-  mode: "lesson" | "review";
+  mode: "lesson" | "review" | "writing";
   lessonSlug: string | null;
   lessonTitle: string;
+  kanji: Kanji[];
   words: Word[];
   /** Wider candidate set for review distractors. */
   pool?: Word[];
-  stages: Record<string, number>;
+  kanjiStages: Record<string, number>;
+  wordStages: Record<string, number>;
   seed: number;
-  /** How many of the lesson's words were already covered before this run. */
+  /** Characters of this lesson already completed before this run. */
   cursorOffset?: number;
-  /** Full lesson length, which may be longer than `words` when resuming. */
   lessonLength?: number;
 };
 
@@ -54,30 +63,28 @@ export function StudySession({
   mode,
   lessonSlug,
   lessonTitle,
+  kanji,
   words,
   pool,
-  stages,
+  kanjiStages,
+  wordStages,
   seed,
   cursorOffset = 0,
   lessonLength,
 }: Props) {
   const router = useRouter();
 
-  const queue = useMemo<StudyCard[]>(
-    () =>
-      mode === "lesson"
-        ? buildLessonQueue(words, stages, seed)
-        : buildReviewQueue(words, stages, pool ?? words, seed),
-    [mode, words, pool, stages, seed],
-  );
+  const queue = useMemo<StudyCard[]>(() => {
+    if (mode === "lesson") return buildLessonQueue(kanji, words, kanjiStages, wordStages, seed);
+    if (mode === "writing") return buildWritingQueue(kanji);
+    return buildReviewQueue(words, wordStages, pool ?? words, seed);
+  }, [mode, kanji, words, pool, kanjiStages, wordStages, seed]);
 
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [answered, setAnswered] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [done, setDone] = useState(false);
-  // Set when any write fails, so the learner is told their answers are not
-  // being stored rather than discovering it on the dashboard later.
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const card = queue[index];
@@ -87,19 +94,17 @@ export function StudySession({
   const finish = useCallback(
     (right: number, asked: number) => {
       setDone(true);
-      if (asked > 0) {
-        post("/api/session", { mode, lessonSlug, total: asked, correct: right }, setSaveError);
-      }
+      if (asked > 0) post("/api/session", { mode, lessonSlug, total: asked, correct: right }, setSaveError);
       if (lessonSlug) {
         post(
           "/api/checkpoint",
-          { lessonSlug, cursor: lessonLength ?? cursorOffset + words.length, completed: true },
+          { lessonSlug, cursor: lessonLength ?? cursorOffset + kanji.length, completed: true },
           setSaveError,
         );
       }
       router.refresh();
     },
-    [mode, lessonSlug, words.length, cursorOffset, lessonLength, router],
+    [mode, lessonSlug, kanji.length, cursorOffset, lessonLength, router],
   );
 
   const advance = useCallback(() => {
@@ -110,15 +115,13 @@ export function StudySession({
     setPicked(null);
     setIndex((i) => {
       const next = i + 1;
-      // Checkpoint on the way past every fifth card, matching the teach/quiz
-      // chunk size, so a resumed lesson restarts at a group boundary.
-      if (lessonSlug && next % 5 === 0) {
-        // Count words fully dealt with, not cards shown, and add back the
-        // words this run started from so a second resume does not rewind.
-        const seen = new Set(queue.slice(0, next).map((c) => c.word.id)).size;
+      // A character's cycle ends on its writing card, which is the only safe
+      // place to resume from — mid-cycle would re-teach words already seen.
+      if (lessonSlug && queue[i]?.kind === "kanji-write") {
+        const doneChars = queue.slice(0, next).filter((c) => c.kind === "kanji-write").length;
         post(
           "/api/checkpoint",
-          { lessonSlug, cursor: cursorOffset + seen, completed: false },
+          { lessonSlug, cursor: cursorOffset + doneChars, completed: false },
           setSaveError,
         );
       }
@@ -126,33 +129,50 @@ export function StudySession({
     });
   }, [isLast, finish, correctCount, answered, lessonSlug, queue, cursorOffset]);
 
-  const choose = useCallback(
-    (choiceId: string) => {
-      if (picked || card?.kind === "teach") return;
-      setPicked(choiceId);
-
-      const right = choiceId === (card as Exclude<StudyCard, { kind: "teach" }>).answerId;
+  /** Records one graded answer against a word or a character. */
+  const grade = useCallback(
+    (right: boolean) => {
+      if (!card) return;
       setAnswered((n) => n + 1);
       if (right) setCorrectCount((n) => n + 1);
-      post("/api/answer", { wordId: card.word.id, correct: right }, setSaveError);
+
+      if (card.kind === "kanji-write") {
+        post("/api/kanji", { char: card.kanji.char, correct: right, skill: "writing" }, setSaveError);
+      } else if (card.kind === "kanji-meaning") {
+        post("/api/kanji", { char: card.kanji.char, correct: right, skill: "recognition" }, setSaveError);
+      } else if ("word" in card) {
+        post("/api/answer", { wordId: card.word.id, correct: right }, setSaveError);
+      }
     },
-    [picked, card],
+    [card],
+  );
+
+  const choose = useCallback(
+    (choiceId: string) => {
+      if (picked || !card || !("choices" in card)) return;
+      setPicked(choiceId);
+      grade(choiceId === card.answerId);
+    },
+    [picked, card, grade],
+  );
+
+  const gradeWriting = useCallback(
+    (right: boolean) => {
+      grade(right);
+      advance();
+    },
+    [grade, advance],
   );
 
   // Number keys pick an option, Enter or Space moves on. Study screens live or
-  // die on not needing the mouse.
+  // die on not needing the mouse. The writing pad is exempt: it wants the
+  // pointer, and Space there would skip past the character being drawn.
   useEffect(() => {
-    if (done) return;
+    if (done || !card || card.kind === "kanji-write") return;
     function onKey(e: KeyboardEvent) {
       if (!card) return;
-      if (card.kind === "teach") {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          advance();
-        }
-        return;
-      }
-      if (picked) {
+      const isQuiz = "choices" in card;
+      if (!isQuiz || picked) {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           advance();
@@ -196,7 +216,7 @@ export function StudySession({
         <div className="row" style={{ justifyContent: "space-between", gap: 16 }}>
           <span className="eyebrow">
             {lessonTitle}
-            {cursorOffset > 0 && ` · resumed at word ${cursorOffset + 1}`}
+            {cursorOffset > 0 && ` · resumed at kanji ${cursorOffset + 1}`}
           </span>
           <span className="eyebrow" style={{ color: "var(--text-body)" }}>
             {index + 1} / {total}
@@ -207,9 +227,21 @@ export function StudySession({
         </div>
       </div>
 
-      {card.kind === "teach" ? (
-        <TeachCard card={card} onNext={advance} />
-      ) : (
+      {card.kind === "kanji-teach" && <KanjiTeachCard kanji={card.kanji} onNext={advance} />}
+      {card.kind === "word-teach" && <WordTeachCard word={card.word} onNext={advance} />}
+      {card.kind === "kanji-write" && (
+        <Card tone="white" pad="lg" elevation="md" radius="lg">
+          <WritingPad
+            key={card.kanji.char}
+            char={card.kanji.char}
+            paths={card.kanji.strokePaths}
+            meaning={card.kanji.meanings.join(", ")}
+            expectedStrokes={card.kanji.strokes}
+            onGrade={gradeWriting}
+          />
+        </Card>
+      )}
+      {"choices" in card && (
         <QuizCard card={card} picked={picked} onChoose={choose} onNext={advance} isLast={isLast} />
       )}
     </div>
@@ -218,11 +250,6 @@ export function StudySession({
 
 /* -------------------------------------------------------------------------- */
 
-/**
- * Shown as soon as any write fails. Study continues — the queue still works
- * offline — but the learner is told plainly that nothing is being recorded,
- * rather than finding an empty dashboard afterwards.
- */
 function SaveWarning({ detail }: { detail: string }) {
   return (
     <div
@@ -247,68 +274,75 @@ function SaveWarning({ detail }: { detail: string }) {
   );
 }
 
-/**
- * Every kanji in the word. Only the ones on the level's studied list link to
- * the kanji screen — the rest have no entry there, so a link would dead-end.
- */
-function KanjiChips({ word }: { word: Word }) {
-  if (word.kanji.length === 0) return null;
-
-  const box = {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: 44,
-    height: 44,
-    borderRadius: "var(--radius-sm)",
-    fontSize: 22,
-  } as const;
-
-  return (
-    <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-      {word.kanji.map((k) =>
-        word.levelKanji.includes(k) ? (
-          <Link
-            key={k}
-            href={`/kanji#${encodeURIComponent(k)}`}
-            className="reset-link jp"
-            style={{ ...box, background: "var(--surface-chip)", color: "var(--on-tint-heading)" }}
-          >
-            {k}
-          </Link>
-        ) : (
-          <span
-            key={k}
-            className="jp"
-            title="Not an N5 kanji"
-            style={{ ...box, border: "1px solid var(--border-subtle)", color: "var(--text-muted)" }}
-          >
-            {k}
-          </span>
-        ),
-      )}
-    </div>
-  );
-}
-
-function TeachCard({ card, onNext }: { card: Extract<StudyCard, { kind: "teach" }>; onNext: () => void }) {
-  const { word } = card;
+function KanjiTeachCard({ kanji, onNext }: { kanji: Kanji; onNext: () => void }) {
   return (
     <Card tone="white" pad="lg" elevation="md" radius="lg">
       <div className="stack" style={{ gap: 24 }}>
         <div className="row" style={{ gap: 10 }}>
-          <Sparkle size={16} color="var(--lime-500)" />
-          <span className="eyebrow" style={{ color: "var(--forest-800)" }}>
-            New word
+          <Sparkle size={16} color="var(--accent)" />
+          <span className="eyebrow" style={{ color: "var(--text-brand)" }}>
+            New kanji
           </span>
         </div>
 
-        <div className="stack" style={{ gap: 10 }}>
-          <div className="jp-display" style={{ fontSize: 64 }}>
+        <div className="row" style={{ gap: 28, flexWrap: "wrap", alignItems: "flex-start" }}>
+          <StrokeDiagram
+            char={kanji.char}
+            paths={kanji.strokePaths}
+            size={200}
+            mode="animate"
+          />
+
+          <div className="stack" style={{ gap: 16, flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: "var(--text-heading-1)", color: "var(--text-heading)", lineHeight: 1.2 }}>
+              {kanji.meanings.join(", ")}
+            </div>
+
+            <div className="stack" style={{ gap: 10 }}>
+              {[
+                ["On", kanji.onyomi],
+                ["Kun", kanji.kunyomi],
+              ].map(([label, readings]) => (
+                <div key={label as string} className="row" style={{ gap: 14, alignItems: "baseline" }}>
+                  <span className="eyebrow" style={{ width: 34 }}>
+                    {label as string}
+                  </span>
+                  <span className="jp" style={{ color: "var(--text-heading)" }}>
+                    {(readings as string[]).length ? (readings as string[]).join("・") : "—"}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+              <Badge tone="sage">{kanji.strokes} strokes</Badge>
+              {kanji.radical && <Badge tone="cream">radical {kanji.radical}</Badge>}
+            </div>
+          </div>
+        </div>
+
+        <Button variant="primary" size="lg" fullWidth onClick={onNext} icon="chevron-right">
+          Got It
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+function WordTeachCard({ word, onNext }: { word: Word; onNext: () => void }) {
+  return (
+    <Card tone="white" pad="lg" elevation="md" radius="lg">
+      <div className="stack" style={{ gap: 22 }}>
+        <span className="eyebrow">
+          {word.teaches} in a word
+        </span>
+
+        <div className="stack" style={{ gap: 8 }}>
+          <div className="jp-display" style={{ fontSize: 56 }}>
             {word.word}
           </div>
           {word.reading !== word.word && (
-            <div className="jp" style={{ fontSize: 22, color: "var(--text-muted)" }}>
+            <div className="jp" style={{ fontSize: 20, color: "var(--text-muted)" }}>
               {word.reading}
             </div>
           )}
@@ -316,7 +350,7 @@ function TeachCard({ card, onNext }: { card: Extract<StudyCard, { kind: "teach" 
 
         <div style={{ height: 1, background: "var(--border-subtle)" }} />
 
-        <div className="stack" style={{ gap: 14 }}>
+        <div className="stack" style={{ gap: 12 }}>
           <div style={{ fontSize: "var(--text-heading-3)", color: "var(--text-heading)" }}>
             {word.meanings.join(", ")}
           </div>
@@ -324,8 +358,6 @@ function TeachCard({ card, onNext }: { card: Extract<StudyCard, { kind: "teach" 
             <Badge tone="sage">{word.pos}</Badge>
           </div>
         </div>
-
-        <KanjiChips word={word} />
 
         <Button variant="primary" size="lg" fullWidth onClick={onNext} icon="chevron-right">
           Got It
@@ -342,21 +374,28 @@ function QuizCard({
   onNext,
   isLast,
 }: {
-  card: Exclude<StudyCard, { kind: "teach" }>;
+  card: Extract<StudyCard, { choices: unknown }>;
   picked: string | null;
   onChoose: (id: string) => void;
   onNext: () => void;
   isLast: boolean;
 }) {
-  const { word } = card;
   const wasRight = picked === card.answerId;
+  const isKanji = card.kind === "kanji-meaning";
 
-  // The prompt shows the side the question is not asking about: English for a
-  // production card, the written form otherwise. A meaning card also shows the
-  // reading, since that is not what is being tested.
-  const prompt = card.kind === "recall" ? word.meanings.join(", ") : word.word;
-  const promptIsJapanese = card.kind !== "recall";
-  const sub = card.kind === "meaning" && word.reading !== word.word ? word.reading : null;
+  const prompt = isKanji
+    ? card.kanji.char
+    : card.kind === "word-recall"
+      ? card.word.meanings.join(", ")
+      : card.word.word;
+  const promptIsJapanese = isKanji || card.kind !== "word-recall";
+  const sub =
+    !isKanji && card.kind === "word-meaning" && card.word.reading !== card.word.word
+      ? card.word.reading
+      : null;
+
+  // Options are Japanese except when the answer is an English gloss.
+  const optionsAreJapanese = card.kind === "word-reading" || card.kind === "word-recall";
 
   return (
     <div className="stack" style={{ gap: 20 }}>
@@ -366,16 +405,16 @@ function QuizCard({
           <div
             className={promptIsJapanese ? "jp-display" : undefined}
             style={{
-              fontSize: promptIsJapanese ? 56 : "var(--text-display-4)",
+              fontSize: isKanji ? 96 : promptIsJapanese ? 56 : "var(--text-display-4)",
               letterSpacing: promptIsJapanese ? 0 : "var(--tracking-display)",
               lineHeight: 1.15,
-              color: "var(--text-heading)",
+              color: "var(--on-tint-heading)",
             }}
           >
             {prompt}
           </div>
           {sub && (
-            <div className="jp" style={{ fontSize: 18, color: "var(--text-muted)" }}>
+            <div className="jp" style={{ fontSize: 18, color: "var(--on-tint-body)" }}>
               {sub}
             </div>
           )}
@@ -393,9 +432,9 @@ function QuizCard({
 
           if (picked) {
             if (isAnswer) {
-              background = "var(--lime-500)";
-              borderColor = "var(--lime-500)";
-              color = "var(--forest-800)";
+              background = "var(--surface-accent)";
+              borderColor = "var(--surface-accent)";
+              color = "var(--text-on-accent)";
             } else if (isPicked) {
               background = "var(--negative-100)";
               borderColor = "var(--negative-500)";
@@ -405,15 +444,13 @@ function QuizCard({
             }
           }
 
-          const japanese = card.kind !== "meaning";
-
           return (
             <button
               key={choice.id}
               type="button"
               onClick={() => onChoose(choice.id)}
               disabled={Boolean(picked)}
-              className={japanese ? "jp" : undefined}
+              className={optionsAreJapanese ? "jp" : undefined}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -426,8 +463,8 @@ function QuizCard({
                 border: `1px solid ${borderColor}`,
                 borderRadius: "var(--radius-input)",
                 color,
-                fontFamily: japanese ? "var(--font-jp)" : "var(--font-text)",
-                fontSize: japanese ? 20 : "var(--text-body-md)",
+                fontFamily: optionsAreJapanese ? "var(--font-jp)" : "var(--font-text)",
+                fontSize: optionsAreJapanese ? 20 : "var(--text-body-md)",
                 fontWeight: "var(--weight-semibold)",
                 cursor: picked ? "default" : "pointer",
                 transition: "var(--transition-control)",
@@ -464,22 +501,34 @@ function QuizCard({
               <Icon
                 name={wasRight ? "check" : "arrow-up-right"}
                 size={20}
-                color={wasRight ? "var(--forest-800)" : "var(--negative-600)"}
+                color={wasRight ? "var(--text-on-accent)" : "var(--negative-600)"}
               />
               <div>
                 <div
                   style={{
                     fontWeight: "var(--weight-semibold)",
-                    color: wasRight ? "var(--forest-800)" : "var(--text-heading)",
+                    color: wasRight ? "var(--text-on-accent)" : "var(--text-heading)",
                   }}
                 >
                   {wasRight ? "Correct" : "Not quite"}
                 </div>
                 <div className="body-sm" style={{ color: wasRight ? "var(--forest-700)" : "var(--text-body)" }}>
-                  <span className="jp">{word.word}</span>
-                  {word.reading !== word.word && <span className="jp"> ({word.reading})</span>}
-                  {" — "}
-                  {word.meanings.join(", ")}
+                  {isKanji ? (
+                    <>
+                      <span className="jp">{card.kanji.char}</span>
+                      {" — "}
+                      {card.kanji.meanings.join(", ")}
+                    </>
+                  ) : (
+                    <>
+                      <span className="jp">{card.word.word}</span>
+                      {card.word.reading !== card.word.word && (
+                        <span className="jp"> ({card.word.reading})</span>
+                      )}
+                      {" — "}
+                      {card.word.meanings.join(", ")}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -501,7 +550,7 @@ function Summary({
 }: {
   correct: number;
   total: number;
-  mode: "lesson" | "review";
+  mode: "lesson" | "review" | "writing";
   lessonTitle: string;
 }) {
   const percent = total ? Math.round((correct / total) * 100) : 0;
@@ -529,43 +578,32 @@ function Summary({
         </h2>
 
         <div className="row" style={{ gap: 48, flexWrap: "wrap" }}>
-          <div>
-            <div
-              style={{
-                fontSize: "var(--text-stat-lg)",
-                fontWeight: "var(--weight-extrabold)",
-                letterSpacing: "var(--tracking-stat)",
-                color: "var(--lime-500)",
-                lineHeight: 1,
-              }}
-            >
-              {percent}%
+          {[
+            [`${percent}%`, "Accuracy", "var(--lime-500)"],
+            [`${correct}/${total}`, "Answered", "var(--white)"],
+          ].map(([value, label, colour]) => (
+            <div key={label}>
+              <div
+                style={{
+                  fontSize: "var(--text-stat-lg)",
+                  fontWeight: "var(--weight-extrabold)",
+                  letterSpacing: "var(--tracking-stat)",
+                  color: colour,
+                  lineHeight: 1,
+                }}
+              >
+                {value}
+              </div>
+              <div className="eyebrow" style={{ color: "var(--forest-200)", marginTop: 8 }}>
+                {label}
+              </div>
             </div>
-            <div className="eyebrow" style={{ color: "var(--forest-200)", marginTop: 8 }}>
-              Accuracy
-            </div>
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: "var(--text-stat-lg)",
-                fontWeight: "var(--weight-extrabold)",
-                letterSpacing: "var(--tracking-stat)",
-                color: "var(--white)",
-                lineHeight: 1,
-              }}
-            >
-              {correct}/{total}
-            </div>
-            <div className="eyebrow" style={{ color: "var(--forest-200)", marginTop: 8 }}>
-              Answered
-            </div>
-          </div>
+          ))}
         </div>
 
         <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
-          Everything you answered is scheduled. The words you missed come back within minutes; the
-          ones you knew move further out.
+          Everything you answered is scheduled. What you missed comes back within minutes; what you
+          knew moves further out.
         </p>
 
         <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>

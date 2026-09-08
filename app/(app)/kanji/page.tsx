@@ -1,5 +1,5 @@
-import { getAllWords, getKanji } from "@/lib/content";
-import { getWordProgress } from "@/lib/progress";
+import { getKanji, getLessons, getWordsUsingKanji, strokeViewBox } from "@/lib/content";
+import { getKanjiProgress } from "@/lib/progress";
 import { KNOWN_STAGE } from "@/lib/srs";
 import { KanjiExplorer, type KanjiEntry } from "@/components/app/KanjiExplorer";
 
@@ -8,28 +8,39 @@ export const dynamic = "force-dynamic";
 
 export default async function KanjiPage() {
   const kanji = getKanji();
-  const words = getAllWords();
-  const progress = await getWordProgress();
+  const progress = await getKanjiProgress();
+  const lessonTitles = new Map(getLessons().map((l) => [l.slug, l.title]));
 
   const entries: KanjiEntry[] = kanji.map((k) => {
-    const using = words.filter((w) => w.kanji.includes(k.char));
+    const p = progress.get(k.char);
     return {
-      ...k,
-      words: using.map((w) => ({
+      char: k.char,
+      strokes: k.strokes,
+      meanings: k.meanings,
+      onyomi: k.onyomi,
+      kunyomi: k.kunyomi,
+      radical: k.radical,
+      strokePaths: k.strokePaths,
+      order: k.order,
+      lessonSlug: k.lessonSlug,
+      lessonTitle: lessonTitles.get(k.lessonSlug) ?? k.lessonSlug,
+      known: (p?.recognition_stage ?? 0) >= KNOWN_STAGE,
+      canWrite: (p?.writing_stage ?? 0) >= KNOWN_STAGE,
+      words: getWordsUsingKanji(k.char).map((w) => ({
         id: w.id,
         word: w.word,
         reading: w.reading,
         meanings: w.meanings,
-        lessonSlug: w.lessonSlug,
       })),
-      known: using.filter((w) => (progress.get(w.id)?.srs_stage ?? 0) >= KNOWN_STAGE).length,
     };
   });
+
+  const known = entries.filter((e) => e.known).length;
 
   return (
     <div className="stack" style={{ gap: 32 }}>
       <header className="stack" style={{ gap: 16 }}>
-        <p className="eyebrow">Reference</p>
+        <p className="eyebrow">All {kanji.length} N5 kanji</p>
         <h1
           style={{
             margin: 0,
@@ -39,15 +50,15 @@ export default async function KanjiPage() {
             maxWidth: 720,
           }}
         >
-          All 80 N5 kanji, and the words that use them.
+          {known} of {kanji.length} characters known.
         </h1>
         <p style={{ margin: 0, maxWidth: 560 }}>
-          Nothing here is drilled on its own. Characters are learned through the words in your
-          lessons; this page is for looking one up and seeing where else it appears.
+          In curriculum order. A tinted tile is a character you know; the dot marks one you can also
+          write from memory. Select any character for its stroke order, readings and vocabulary.
         </p>
       </header>
 
-      <KanjiExplorer entries={entries} />
+      <KanjiExplorer entries={entries} viewBox={strokeViewBox()} />
     </div>
   );
 }

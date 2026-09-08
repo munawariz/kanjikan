@@ -53,7 +53,7 @@ export function AuthLayout({
                 color: "var(--white)",
               }}
             >
-              Learn the word, and the kanji comes with it.
+              Five kanji a lesson, until all eighty stick.
             </h1>
             <p
               style={{
@@ -63,16 +63,16 @@ export function AuthLayout({
                 color: "var(--forest-200)",
               }}
             >
-              813 JLPT N5 words across 40 lessons. Your place is saved on every card, so you can
-              stop after ninety seconds and pick the same queue up tomorrow.
+              Stroke order, readings, and the words that fix them. Your place is saved on every
+              card, so you can stop after ninety seconds and pick it up tomorrow.
             </p>
           </div>
 
           <div style={{ position: "relative", zIndex: 1, display: "flex", gap: 40 }}>
             {[
-              ["813", "Words"],
               ["80", "Kanji"],
-              ["40", "Lessons"],
+              ["16", "Lessons"],
+              ["380", "Words"],
             ].map(([value, label]) => (
               <div key={label}>
                 <div
