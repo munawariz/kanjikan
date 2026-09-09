@@ -1,30 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kanjikan">
   <!--
-    Kanjikan mark: 字 (character / letter).
+    Kanjikan mark: 時 (time / hour) — the kanji the whole app is about
+    remembering, and one of the N5 characters it teaches.
 
-    Atlas colours, used the way the system specifies. Forest #003511 is the
-    brand's dark surface and carries the primary button and flagship card; lime
-    #d3fa53 is the single accent sitting on it. The reverse — a full lime ground
-    — is ruled out by Atlas: "Never as a large ground except the one lime
-    marquee variant."
+    Atlas colours, used the way the system specifies. Forest #003511 carries
+    every dark surface, including the primary button and the flagship card;
+    lime #d3fa53 is the single accent sitting on it. The reverse is ruled out
+    by Atlas: "Never as a large ground except the one lime marquee variant."
 
-    Radius 14/64 matches the ratio of Atlas's --radius-card (24px) to a 110px
-    card, so the mark reads as the same family as the UI it sits above.
+    Radius 14/64 matches --radius-card's ratio to a card of this size, so the
+    mark reads as the same family as the UI.
 
-    The glyph is set as text rather than outlined paths, so it needs a CJK font
-    on the viewer's machine. Windows, macOS and any Linux with CJK support all
-    ship one. Anyone without a CJK font cannot read the app's content either,
-    so this adds no failure mode the app does not already have.
+    NOT set in the Atlas brand face. Figtree has no CJK coverage and therefore
+    no 時 to draw, so this uses the project's --font-jp stack. The PNG icons in
+    public/icons/ are rasterised from Noto Sans JP by `npm run icons` and do
+    not depend on the viewer having any font at all; this SVG is the browser
+    tab icon, where a system CJK font is a safe assumption on any machine that
+    can read the app's content.
   -->
   <rect width="64" height="64" rx="14" fill="#003511"/>
   <text
     x="32"
     y="34"
     fill="#d3fa53"
-    font-size="42"
+    font-size="40"
     font-weight="700"
     text-anchor="middle"
     dominant-baseline="central"
-    font-family="'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic','Yu Gothic UI',Meiryo,'Noto Sans JP','Noto Sans CJK JP','MS Gothic',sans-serif"
-  >字</text>
+    font-family="'Noto Sans JP','Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic','Yu Gothic UI',Meiryo,'Noto Sans CJK JP','MS Gothic',sans-serif"
+  >時</text>
 </svg>

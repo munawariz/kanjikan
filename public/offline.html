@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline — Kanjikan</title>
+    <link rel="icon" href="/icon.svg" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#06120b" />
+    <!--
+      Deliberately a plain HTML file, not a Next.js route.
+
+      The service worker serves this in place of whatever page was requested, so
+      the URL in the address bar will not match the document. A Next page
+      carries an RSC payload for its own route, and React then fails to
+      reconcile it against the requested one — which renders as "Application
+      error: a client-side exception has occurred" rather than as a useful
+      offline message. No framework here means nothing to hydrate and nothing
+      to mismatch.
+
+      Styles are inlined for the same reason: the stylesheet may not be in the
+      cache, and this page has to render regardless. Values are copied from the
+      Atlas tokens rather than referenced.
+    -->
+    <style>
+      :root {
+        color-scheme: light dark;
+        --page: #ffffff;
+        --card: #f7f4ed;
+        --heading: #111111;
+        --body: #4e4e4e;
+        --forest: #003511;
+        --lime: #d3fa53;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --page: #06120b;
+          --card: #13241a;
+          --heading: #f1f6f2;
+          --body: #b7c8bc;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: var(--page);
+        color: var(--body);
+        font-family: "Figtree", "Helvetica Neue", Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.7;
+        -webkit-font-smoothing: antialiased;
+      }
+      .card {
+        width: 100%;
+        max-width: 460px;
+        background: var(--card);
+        border-radius: 24px;
+        padding: clamp(24px, 6vw, 40px);
+      }
+      .mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        background: var(--forest);
+        color: var(--lime);
+        font-size: 30px;
+        font-weight: 700;
+        font-family: "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
+        line-height: 1;
+      }
+      .eyebrow {
+        margin: 24px 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--body);
+      }
+      h1 {
+        margin: 0 0 14px;
+        font-size: clamp(23px, 4vw, 34px);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        color: var(--heading);
+      }
+      p { margin: 0 0 20px; }
+      button {
+        height: 48px;
+        padding: 0 26px;
+        border: 1px solid var(--forest);
+        border-radius: 10px;
+        background: var(--forest);
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover { background: #0a3d1c; }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <span class="mark" aria-hidden="true">時</span>
+      <p class="eyebrow">No connection</p>
+      <h1>You are offline.</h1>
+      <p>
+        Kanjikan needs the network to load a lesson and to record what you answer. Reconnect and try
+        again — everything you had already answered is saved.
+      </p>
+      <button type="button" onclick="location.reload()">Try Again</button>
+    </main>
+  </body>
+</html>

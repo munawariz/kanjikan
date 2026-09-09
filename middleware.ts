@@ -63,10 +63,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // The icon and the web manifest must stay public: a browser fetches them
-  // without credentials, so sending them through the auth gate answers with a
-  // redirect to /login and the installed app ends up with no icon and no name.
+  // The icon, manifest, service worker and offline page must stay public. A
+  // browser fetches all of them without credentials, so sending them through
+  // the auth gate answers with a redirect to /login — which would leave the
+  // installed app with no icon, no name, and a service worker that never
+  // registers because /sw.js returned an HTML redirect instead of JavaScript.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon|manifest.webmanifest|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon|manifest.webmanifest|sw.js|offline.html|icons/|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

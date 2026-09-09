@@ -1,12 +1,30 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeScript } from "@/components/app/ThemeScript";
+import { ServiceWorker } from "@/components/app/ServiceWorker";
 import "@/styles/atlas/styles.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kanjikan — Learn Japanese words, not just characters",
+  title: "Kanjikan — Remember every JLPT kanji",
   description:
-    "Work through JLPT vocabulary word by word, with spaced repetition and a progress checkpoint that follows you across devices.",
+    "Learn the JLPT N5 kanji five at a time, with stroke order, the words that fix their readings, and writing practice from memory.",
+  applicationName: "Kanjikan",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/icon.svg",
+    // iOS ignores the manifest's icons for a home-screen shortcut and reads
+    // this link instead, so without it an installed app gets a screenshot of
+    // the page as its icon.
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Kanjikan",
+    // Lets the forest header run under the status bar rather than leaving a
+    // white strip above it.
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: { telephone: false },
 };
 
 /**
@@ -28,7 +46,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <ThemeScript />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ServiceWorker />
+      </body>
     </html>
   );
 }

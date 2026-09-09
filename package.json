@@ -8,6 +8,7 @@
     "dev": "next dev",
     "doctor": "node scripts/doctor.mjs",
     "fetch:strokes": "node scripts/fetch-strokes.mjs",
+    "icons": "node scripts/generate-icons.mjs",
     "lint": "next lint",
     "migrate": "node scripts/migrate.mjs",
     "start": "next start",
