@@ -5,7 +5,10 @@ import "@/styles/atlas/styles.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kanjikan — Remember every JLPT kanji",
+  // Fixed, and deliberately not per-page: a tab that always reads Kanjikan is
+  // how the app is found among a row of open tabs. Pages do not override it —
+  // a title here is the one the whole app wears.
+  title: "Kanjikan",
   description:
     "Learn the JLPT N5 kanji five at a time, with stroke order, the words that fix their readings, and writing practice from memory.",
   applicationName: "Kanjikan",

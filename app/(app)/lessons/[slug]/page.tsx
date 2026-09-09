@@ -10,11 +10,6 @@ import { StrokeDiagram } from "@/components/app/StrokeDiagram";
 
 export const dynamic = "force-dynamic";
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const lesson = getLesson(params.slug);
-  return { title: lesson ? `${lesson.title} — Kanjikan` : "Lesson — Kanjikan" };
-}
-
 const BAND_TONE: Record<MasteryBand, "sage" | "soft" | "accent" | "forest"> = {
   new: "sage",
   learning: "soft",

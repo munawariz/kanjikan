@@ -6,7 +6,6 @@ import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 
-export const metadata = { title: "Review — Kanjikan" };
 export const dynamic = "force-dynamic";
 
 const BATCH = 30;

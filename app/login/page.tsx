@@ -1,8 +1,6 @@
 import { AuthLayout } from "@/components/app/AuthLayout";
 import { AuthForm } from "@/components/app/AuthForm";
 
-export const metadata = { title: "Sign in — Kanjikan" };
-
 export default function LoginPage({
   searchParams,
 }: {

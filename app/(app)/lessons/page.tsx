@@ -3,7 +3,6 @@ import { levelStats } from "@/lib/content";
 import { LessonCard } from "@/components/app/LessonCard";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 
-export const metadata = { title: "Lessons — Kanjikan" };
 export const dynamic = "force-dynamic";
 
 export default async function LessonsPage() {

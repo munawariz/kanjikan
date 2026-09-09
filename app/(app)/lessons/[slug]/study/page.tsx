@@ -5,11 +5,6 @@ import { StudySession } from "@/components/app/StudySession";
 
 export const dynamic = "force-dynamic";
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const lesson = getLesson(params.slug);
-  return { title: lesson ? `Studying ${lesson.title} — Kanjikan` : "Study — Kanjikan" };
-}
-
 export default async function StudyPage({ params }: { params: { slug: string } }) {
   const lesson = getLesson(params.slug);
   if (!lesson) notFound();

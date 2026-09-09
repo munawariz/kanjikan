@@ -5,7 +5,6 @@ import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Wordmark } from "@/components/app/Wordmark";
 
-export const metadata = { title: "Setup — Kanjikan" };
 export const dynamic = "force-dynamic";
 
 const STEPS = [

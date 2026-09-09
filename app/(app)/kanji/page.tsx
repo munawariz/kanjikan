@@ -3,7 +3,6 @@ import { getKanjiProgress } from "@/lib/progress";
 import { KNOWN_STAGE } from "@/lib/srs";
 import { KanjiExplorer, type KanjiEntry } from "@/components/app/KanjiExplorer";
 
-export const metadata = { title: "Kanji — Kanjikan" };
 export const dynamic = "force-dynamic";
 
 export default async function KanjiPage() {

@@ -12,7 +12,6 @@ import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import { BarChart } from "@/components/atlas/data/BarChart.jsx";
 import { LessonCard } from "@/components/app/LessonCard";
 
-export const metadata = { title: "Dashboard — Kanjikan" };
 export const dynamic = "force-dynamic";
 
 const BAND_COLOUR: Record<MasteryBand, string> = {

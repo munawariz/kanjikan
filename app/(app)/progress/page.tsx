@@ -8,7 +8,6 @@ import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { BarChart } from "@/components/atlas/data/BarChart.jsx";
 
-export const metadata = { title: "Progress — Kanjikan" };
 export const dynamic = "force-dynamic";
 
 const BAND_COLOUR: Record<MasteryBand, string> = {
