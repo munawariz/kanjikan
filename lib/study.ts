@@ -57,13 +57,68 @@ const wordLabel = {
   "word-reading": (w: Word) => w.reading,
 } as const;
 
+/** Carry no meaning on their own, so sharing one says nothing about two words. */
+const GLOSS_STOPWORDS = new Set([
+  "a", "an", "the", "of", "to", "in", "on", "at", "for", "and", "or", "with",
+  "it", "is", "be", "this", "that", "from", "by", "as", "up",
+]);
+
+function glossTokens(word: Word): Set<string> {
+  const out = new Set<string>();
+  for (const m of word.meanings) {
+    for (const t of m.toLowerCase().split(/[^a-z0-9]+/)) {
+      if (t && !GLOSS_STOPWORDS.has(t)) out.add(t);
+    }
+  }
+  return out;
+}
+
 /**
- * Three wrong answers for one card.
+ * How hard a candidate would be to rule out without knowing the answer.
  *
- * Same part of speech is preferred: a question whose only plausible option is
- * the right one can be answered without knowing the word. Falls back to the
- * wider pool, and de-duplicates by rendered label so two identical options can
- * never both appear.
+ * The point of a distractor is to be eliminable only by knowledge. Ask what
+ * 三つ means beside "four things" and "five people" and the question answers
+ * itself: three is the one word of the prompt the learner can already read, so
+ * every option that does not say "three" is free. Ask it beside "three people"
+ * and "three o'clock" and the shortcut is gone — what is being tested is which
+ * counter 三 is paired with, which is the thing worth knowing.
+ *
+ * Sharing a character is what generalises that beyond numbers, and it is the
+ * dominant term for every question type. It works in both directions: the
+ * English options all inherit the character's meaning, and when the options are
+ * Japanese the answer can no longer be spotted as the only one containing the
+ * character from the prompt.
+ */
+function confusability(word: Word, kanji: Set<string>, gloss: Set<string>) {
+  return (candidate: Word) => {
+    let score = 0;
+    // The character the card is built around is held constant, so what varies
+    // between the options is what it is paired with. Sharing some other
+    // character still helps, and a candidate that shares both is better still.
+    //
+    // Ten, deliberately: more than every other term added together, so a word
+    // containing the character always outranks one that does not, and the rest
+    // of the score only orders words within those two groups.
+    if (candidate.kanji.includes(word.teaches)) score += 10;
+    if (candidate.kanji.some((c) => c !== word.teaches && kanji.has(c))) score += 4;
+    for (const t of glossTokens(candidate)) {
+      if (gloss.has(t)) {
+        score += 2;
+        break;
+      }
+    }
+    if (candidate.pos === word.pos) score += 2;
+    return score;
+  };
+}
+
+/**
+ * Three wrong answers for one card, most confusable first.
+ *
+ * De-duplicates by rendered label, so two identical options can never both
+ * appear, and drops any word that shares a meaning with the answer — 万 and
+ * 一万 are both "ten thousand", and offered together on a recall card they
+ * would be two correct answers.
  */
 function wordDistractors(
   word: Word,
@@ -73,28 +128,26 @@ function wordDistractors(
 ): Choice[] {
   const render = wordLabel[kind];
   const taken = new Set([render(word)]);
+  const synonym = new Set(word.meanings.map((m) => m.trim().toLowerCase()));
+  const score = confusability(word, new Set(word.kanji), glossTokens(word));
 
-  const pick = (candidates: Word[]) => {
-    const out: Choice[] = [];
-    for (const c of shuffle(candidates, rand)) {
-      if (out.length === 3) break;
-      const text = render(c);
-      if (!text || taken.has(text)) continue;
-      taken.add(text);
-      out.push({ id: c.id, label: text });
-    }
-    return out;
-  };
+  const candidates = pool.filter(
+    (w) => w.id !== word.id && !w.meanings.some((m) => synonym.has(m.trim().toLowerCase())),
+  );
 
-  const others = pool.filter((w) => w.id !== word.id);
-  const chosen = pick(others.filter((w) => w.pos === word.pos));
-  if (chosen.length < 3) {
-    for (const extra of pick(others)) {
-      if (chosen.length === 3) break;
-      chosen.push(extra);
-    }
+  // Shuffle first, then sort: Array.sort is stable, so equally confusable
+  // candidates stay in random — but seeded, and so reproducible — order.
+  const ranked = shuffle(candidates, rand).sort((a, b) => score(b) - score(a));
+
+  const out: Choice[] = [];
+  for (const c of ranked) {
+    if (out.length === 3) break;
+    const text = render(c);
+    if (!text || taken.has(text)) continue;
+    taken.add(text);
+    out.push({ id: c.id, label: text });
   }
-  return chosen;
+  return out;
 }
 
 function wordQuiz(
