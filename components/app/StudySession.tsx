@@ -59,6 +59,8 @@ function post(url: string, body: unknown, onFail?: (detail: string) => void) {
     });
 }
 
+const FURIGANA_KEY = "kanjikan-furigana";
+
 export function StudySession({
   mode,
   lessonSlug,
@@ -86,6 +88,40 @@ export function StudySession({
   const [correctCount, setCorrectCount] = useState(0);
   const [done, setDone] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  /**
+   * Whether the reading is shown beneath the word on a meaning card.
+   *
+   * That reading is a hint: with it visible a word can be answered without
+   * reading its kanji at all, which is the one thing this app exists to make
+   * you do. Hiding it is the harder, more useful mode, so it is worth being
+   * able to switch without leaving the session.
+   *
+   * Starts true to match the server render, then reads the stored preference
+   * after mount — deciding during render would disagree with the HTML and trip
+   * a hydration mismatch.
+   */
+  const [showFurigana, setShowFurigana] = useState(true);
+
+  useEffect(() => {
+    try {
+      setShowFurigana(localStorage.getItem(FURIGANA_KEY) !== "off");
+    } catch {
+      // Private browsing can refuse storage; the default stands.
+    }
+  }, []);
+
+  const toggleFurigana = useCallback(() => {
+    setShowFurigana((on) => {
+      const next = !on;
+      try {
+        localStorage.setItem(FURIGANA_KEY, next ? "on" : "off");
+      } catch {
+        // Applies for this session; it just will not be remembered.
+      }
+      return next;
+    });
+  }, []);
 
   const card = queue[index];
   const total = queue.length;
@@ -168,9 +204,24 @@ export function StudySession({
   // die on not needing the mouse. The writing pad is exempt: it wants the
   // pointer, and Space there would skip past the character being drawn.
   useEffect(() => {
-    if (done || !card || card.kind === "kanji-write") return;
+    if (done || !card) return;
     function onKey(e: KeyboardEvent) {
       if (!card) return;
+
+      // Handled first, and outside every other branch: hiding the reading is a
+      // session setting rather than a card action, so it has to work on any
+      // card — including the writing pad and a card already answered, which
+      // both return early below.
+      if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        toggleFurigana();
+        return;
+      }
+
+      // The writing pad wants the pointer, and Space there would skip past the
+      // character being drawn.
+      if (card.kind === "kanji-write") return;
+
       const isQuiz = "choices" in card;
       if (!isQuiz || picked) {
         if (e.key === "Enter" || e.key === " ") {
@@ -187,7 +238,7 @@ export function StudySession({
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [card, picked, done, advance, choose]);
+  }, [card, picked, done, advance, choose, toggleFurigana]);
 
   if (done) {
     return (
@@ -208,6 +259,17 @@ export function StudySession({
 
   const progress = Math.round((index / total) * 100);
 
+  /**
+   * Whether the current card has a reading for the toggle to act on.
+   *
+   * Only the meaning card shows one as a hint. On every other card the button
+   * still records the preference for the next word, but changes nothing on
+   * screen — and a control that looks live while doing nothing reads as broken,
+   * so it says so instead.
+   */
+  const cardHasReading =
+    "choices" in card && card.kind === "word-meaning" && card.word.reading !== card.word.word;
+
   return (
     <div className="stack" style={{ gap: 28 }}>
       {saveError && <SaveWarning detail={saveError} />}
@@ -218,9 +280,49 @@ export function StudySession({
             {lessonTitle}
             {cursorOffset > 0 && ` · resumed at kanji ${cursorOffset + 1}`}
           </span>
-          <span className="eyebrow" style={{ color: "var(--text-body)" }}>
-            {index + 1} / {total}
-          </span>
+          <div className="row" style={{ gap: 10 }}>
+            <button
+              type="button"
+              onClick={toggleFurigana}
+              aria-pressed={!showFurigana}
+              title={
+                cardHasReading
+                  ? showFurigana
+                    ? "Hide the reading (F)"
+                    : "Show the reading (F)"
+                  : showFurigana
+                    ? "No reading on this card. Readings stay on for the next word."
+                    : "No reading on this card. Readings stay hidden for the next word."
+              }
+              aria-label={showFurigana ? "Hide the reading" : "Show the reading"}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 30,
+                height: 30,
+                flex: "0 0 auto",
+                borderRadius: "var(--radius-full)",
+                // Stays clickable when the card has no reading, so the setting
+                // can be made ahead of the next word, but drops to a hairline
+                // outline so it does not promise a change it cannot make here.
+                border: `1px solid ${cardHasReading ? "var(--border-default)" : "var(--border-subtle)"}`,
+                background: !showFurigana && cardHasReading ? "var(--surface-sunken)" : "transparent",
+                color: cardHasReading
+                  ? showFurigana
+                    ? "var(--text-muted)"
+                    : "var(--text-heading)"
+                  : "var(--border-default)",
+                cursor: "pointer",
+                transition: "var(--transition-control)",
+              }}
+            >
+              <Icon name={showFurigana ? "eye" : "eye-off"} size={15} />
+            </button>
+            <span className="eyebrow" style={{ color: "var(--text-body)" }}>
+              {index + 1} / {total}
+            </span>
+          </div>
         </div>
         <div className="meter">
           <span style={{ width: `${progress}%` }} />
@@ -242,7 +344,14 @@ export function StudySession({
         </Card>
       )}
       {"choices" in card && (
-        <QuizCard card={card} picked={picked} onChoose={choose} onNext={advance} isLast={isLast} />
+        <QuizCard
+          card={card}
+          picked={picked}
+          onChoose={choose}
+          onNext={advance}
+          isLast={isLast}
+          showFurigana={showFurigana}
+        />
       )}
     </div>
   );
@@ -373,12 +482,14 @@ function QuizCard({
   onChoose,
   onNext,
   isLast,
+  showFurigana,
 }: {
   card: Extract<StudyCard, { choices: unknown }>;
   picked: string | null;
   onChoose: (id: string) => void;
   onNext: () => void;
   isLast: boolean;
+  showFurigana: boolean;
 }) {
   const wasRight = picked === card.answerId;
   const isKanji = card.kind === "kanji-meaning";
@@ -389,6 +500,22 @@ function QuizCard({
       ? card.word.meanings.join(", ")
       : card.word.word;
   const promptIsJapanese = isKanji || card.kind !== "word-recall";
+  /**
+   * Only the meaning card's reading is hidden.
+   *
+   * A reading card's options ARE readings, and the answer reveal is where the
+   * reading gets taught after a wrong guess — suppressing either would remove
+   * information rather than remove a hint.
+   */
+  /**
+   * The reading, and separately whether it is currently shown.
+   *
+   * These are two questions, not one. Whether the card HAS a reading decides
+   * if the row is rendered at all; whether the learner wants to see it decides
+   * only its visibility. Collapsing them into one value is what made the card
+   * change height when the eye was toggled, which moves the answer buttons
+   * under the cursor mid-read.
+   */
   const sub =
     !isKanji && card.kind === "word-meaning" && card.word.reading !== card.word.word
       ? card.word.reading
@@ -418,7 +545,17 @@ function QuizCard({
             {prompt}
           </div>
           {sub && (
-            <div className="jp" style={{ fontSize: 18, color: "var(--on-tint-body)" }}>
+            <div
+              className="jp"
+              style={{
+                fontSize: 18,
+                color: "var(--on-tint-body)",
+                // Hidden, not removed: the row keeps its height so the card and
+                // everything below it stay put. visibility also takes it out of
+                // the accessibility tree, so it is not read aloud either.
+                visibility: showFurigana ? "visible" : "hidden",
+              }}
+            >
               {sub}
             </div>
           )}
