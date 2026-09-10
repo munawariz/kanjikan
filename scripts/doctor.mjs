@@ -72,6 +72,31 @@ try {
   console.log("    -> Check the project URL, and that the project is not paused.");
 }
 
+// Accounts are usernames at an address that cannot receive mail, so with
+// Confirm email on, every new account would wait forever for a link.
+try {
+  const res = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } });
+  const settings = res.ok ? await res.json() : null;
+  if (!settings) {
+    problems++;
+    console.log(`  Auth settings                  HTTP ${res.status}`);
+  } else if (settings.disable_signup) {
+    problems++;
+    console.log("  New accounts                   DISABLED");
+    console.log("    -> Allow new users to sign up under Authentication > Sign In / Providers.");
+  } else if (!settings.mailer_autoconfirm) {
+    problems++;
+    console.log("  Confirm email                  ON");
+    console.log("    -> Switch it off under Authentication > Providers > Email, or no new");
+    console.log("       account can be opened.");
+  } else {
+    console.log("  Confirm email                  off OK");
+  }
+} catch (e) {
+  problems++;
+  console.log(`  Auth settings                  ERROR ${e.message}`);
+}
+
 console.log("\nTables");
 for (const table of TABLES) {
   let line = `  ${table.padEnd(30)} `;
@@ -98,15 +123,38 @@ for (const table of TABLES) {
   console.log(line);
 }
 
+console.log("\nFunctions");
+{
+  let line = `  ${"username_exists".padEnd(30)} `;
+  try {
+    const res = await fetch(`${url}/rest/v1/rpc/username_exists`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_username: "doctor" }),
+    });
+    const body = await res.text();
+    if (res.ok) {
+      line += "OK";
+    } else {
+      problems++;
+      line += res.status === 404 || body.includes("PGRST202") ? "MISSING" : `HTTP ${res.status} ${body.slice(0, 90)}`;
+    }
+  } catch (e) {
+    problems++;
+    line += `ERROR ${e.message}`;
+  }
+  console.log(line);
+}
+
 console.log("");
 if (problems === 0) {
   console.log("Database looks correct. If progress still is not saving, the problem is in the");
   console.log("browser: open DevTools > Network and look at the POST to /api/answer.");
 } else {
   console.log(`${problems} problem(s) found.`);
-  console.log("If tables are MISSING, run:  npm run migrate");
-  console.log("That applies supabase/migrations/, creating all four tables, the RLS");
-  console.log("policies and the signup trigger. It needs SUPABASE_DB_URL in .env - see");
+  console.log("If tables or functions are MISSING, run:  npm run migrate");
+  console.log("That applies supabase/migrations/, creating the tables, the RLS policies,");
+  console.log("the profile trigger and the username lookup. It needs SUPABASE_DB_URL in .env - see");
   console.log(".env.example for where to find it.");
 }
 process.exit(problems ? 1 : 0);

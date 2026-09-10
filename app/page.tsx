@@ -27,13 +27,8 @@ export default async function LandingPage() {
           <div className="row" style={{ gap: 12 }}>
             <ThemeToggle />
             <Link href="/login" className="reset-link">
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/signup" className="reset-link">
               <Button variant="primary" size="sm" shape="pill">
-                Open an Account
+                Sign In
               </Button>
             </Link>
           </div>
@@ -83,14 +78,9 @@ export default async function LandingPage() {
           </p>
 
           <div className="row" style={{ gap: 12, marginTop: 36, flexWrap: "wrap" }}>
-            <Link href="/signup" className="reset-link">
+            <Link href="/login" className="reset-link">
               <Button variant="accent" size="lg" icon="chevron-right">
                 Start Learning
-              </Button>
-            </Link>
-            <Link href="/login" className="reset-link">
-              <Button variant="outline" size="lg">
-                I Have an Account
               </Button>
             </Link>
           </div>

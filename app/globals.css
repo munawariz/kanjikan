@@ -400,6 +400,30 @@ body {
   transition: width var(--duration-slow) var(--ease-standard);
 }
 
+/* --- Dialog --------------------------------------------------------------- */
+
+/* EXTENSION TO ATLAS: the system has no modal. This is a native <dialog>,
+   which brings focus trapping, Escape to close and the top layer for free;
+   only its user-agent chrome is replaced. ::backdrop cannot be set inline. */
+.dialog {
+  width: min(440px, calc(100vw - 2 * var(--page-gutter)));
+  max-width: none;
+  padding: 32px;
+  border: none;
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+  color: var(--text-body);
+  box-shadow: var(--shadow-xl);
+}
+
+.dialog[open] {
+  animation: atlas-rise var(--duration-base) var(--ease-standard) both;
+}
+
+.dialog::backdrop {
+  background: rgba(0, 43, 15, 0.45);
+}
+
 /* --- Motion --------------------------------------------------------------- */
 
 .rise {

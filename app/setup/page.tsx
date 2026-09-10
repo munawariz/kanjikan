@@ -18,11 +18,11 @@ const STEPS = [
   },
   {
     title: "Run the migration.",
-    body: "Add SUPABASE_DB_URL to .env (the Postgres connection string, from the Connect button), then run npm run migrate. It creates four tables, the row level security policies and the signup trigger.",
+    body: "Add SUPABASE_DB_URL to .env (the Postgres connection string, from the Connect button), then run npm run migrate. It creates the tables, the row level security policies and the username lookup.",
   },
   {
     title: "Turn off email confirmation.",
-    body: "Authentication, Providers, Email: switch off Confirm email if you want signup to sign you straight in. Leave it on and new accounts have to click a link first.",
+    body: "Authentication, Providers, Email: switch off Confirm email. Accounts are usernames with no real address behind them, so a confirmation link would have nowhere to go and no new account could ever be opened.",
   },
 ];
 

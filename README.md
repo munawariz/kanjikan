@@ -93,11 +93,12 @@ a migration lands whole or not at all.
 It connects straight to Postgres rather than through the REST API, because PostgREST cannot run DDL
 — it only exposes tables that already exist. That is why the publishable key is not enough here.
 
-### 4. Decide about email confirmation
+### 4. Turn off email confirmation
 
-**Authentication → Providers → Email.** Switching *Confirm email* **off** makes signup log you
-straight in — the low-friction behaviour. Left on, new accounts must click a link first; the signup
-form handles both and says which happened.
+**Authentication → Providers → Email.** Switch *Confirm email* **off**. This is required: accounts
+are usernames with no real address behind them (see [Authentication](#authentication)), so a
+confirmation link would have nowhere to go and no new account could be opened. `npm run doctor`
+checks this.
 
 ### 5. Run it
 
@@ -121,8 +122,26 @@ npm run dev
 
 ## Authentication
 
-You asked for "simple basic auth". This is **email and password with no OAuth, no magic links and
-no email verification required** — the same low friction, but with real sessions.
+**Username and password, nothing else.** There is no registration page. `/login` takes a username
+and password:
+
+- The username exists and the password matches: you are signed in.
+- The username exists and the password does not: *Wrong password for that username.*
+- The username does not exist: a dialog says an account will be created with that username and
+  password, and creates it only once you confirm.
+
+Usernames are 3–24 letters, numbers, underscores or hyphens, and case-insensitive. New accounts need
+a password of at least 8 characters. There is no password reset, because there is no address to
+send one to.
+
+Supabase Auth only does password sign-in against an email, so `lib/username.ts` stores each username
+as `<username>@kanjikan.internal`. `.internal` is reserved for private networks and never resolves, so
+no mail can leave for these addresses. Sign-in cannot tell a wrong password from an unknown user on
+its own, so migration `0003_usernames.sql` adds `username_exists()`, a function the anon key may call
+that answers that one question and cannot be used to probe other addresses.
+
+Telling the two cases apart means anyone can check whether a username is taken. That is the cost of
+the create-on-first-sign-in flow.
 
 Literal HTTP Basic Auth was not used, deliberately: it has no logout, replays credentials on every
 request, and gives the server no session to hang per-user progress off. It cannot support the

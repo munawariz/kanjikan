@@ -7,8 +7,8 @@ export default function LoginPage({
   searchParams: { next?: string };
 }) {
   return (
-    <AuthLayout eyebrow="Welcome back" title="Sign in to keep going">
-      <AuthForm mode="signin" next={searchParams.next} />
+    <AuthLayout eyebrow="Welcome" title="Sign in or start learning">
+      <AuthForm next={searchParams.next} />
     </AuthLayout>
   );
 }
