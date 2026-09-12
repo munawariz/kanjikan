@@ -1,33 +1,42 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getLevelPath, levelStats } from "@/lib/content";
+import { getKanjiChar, getLessons, levelStats } from "@/lib/content";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getUser } from "@/lib/supabase/server";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
-import { Badge } from "@/components/atlas/core/Badge.jsx";
-import { Icon } from "@/components/atlas/core/Icon.jsx";
-import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import { Wordmark } from "@/components/app/Wordmark";
 import { ThemeToggle } from "@/components/app/ThemeToggle";
+import { KanjiAnatomy } from "@/components/app/KanjiAnatomy";
 
 export const dynamic = "force-dynamic";
 
+const REPO_URL = "https://github.com/munawariz/kanjikan";
+const ISSUES_URL = `${REPO_URL}/issues`;
+
+/**
+ * The front door, written for someone who is finding kanji hard — not sold to
+ * them. It says plainly what the app does and does not do, shows one real
+ * kanji the way a lesson teaches it, and is upfront that the content was made
+ * with AI and can only be checked so far.
+ */
 export default async function LandingPage() {
   if (isSupabaseConfigured && (await getUser())) redirect("/dashboard");
 
   const stats = levelStats("N5");
-  const path = getLevelPath();
+  const first = getLessons("N5")[0];
+  // A real entry from the content, so the example is exactly what a lesson shows.
+  const example = getKanjiChar("休");
 
   return (
     <main>
       <header style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-        <div className="page row" style={{ height: 84, justifyContent: "space-between", gap: 24 }}>
-          <Wordmark size={24} />
+        <div className="page row" style={{ height: 72, justifyContent: "space-between", gap: 16 }}>
+          <Wordmark size={22} />
           <div className="row" style={{ gap: 12 }}>
             <ThemeToggle />
             <Link href="/login" className="reset-link">
-              <Button variant="primary" size="sm" shape="pill">
+              <Button variant="outline" size="sm" shape="pill">
                 Sign In
               </Button>
             </Link>
@@ -35,229 +44,177 @@ export default async function LandingPage() {
         </div>
       </header>
 
-      {/* ---- Hero ---------------------------------------------------------- */}
-      <section className="page" style={{ paddingTop: 96, paddingBottom: 104, position: "relative" }}>
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            top: 40,
-            left: "45%",
-            // Capped to the viewport: at 520px fixed it reached 682px on a
-            // 360px screen, and only overflow-x:hidden was keeping that off
-            // the page. Decorative, but nothing should rely on being clipped.
-            width: "min(520px, 55vw)",
-            height: "min(520px, 55vw)",
-            background: "var(--glow-lime)",
-            pointerEvents: "none",
-          }}
-        />
-        <div style={{ position: "relative", maxWidth: 760 }}>
-          <div className="row" style={{ gap: 10, marginBottom: 24 }}>
-            <Sparkle size={18} color="var(--forest-800)" />
-            <span className="eyebrow" style={{ color: "var(--forest-800)" }}>
-              JLPT N5 · {stats.kanji} kanji
-            </span>
-          </div>
-
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "var(--text-display-1)",
-              letterSpacing: "var(--tracking-display)",
-              lineHeight: "var(--leading-display)",
-            }}
-          >
-            Remember Every N5 Kanji.
-          </h1>
-
-          <p style={{ marginTop: 28, maxWidth: 520, fontSize: "var(--text-body-lg)" }}>
-            All {stats.kanji} JLPT N5 characters, across {stats.lessons} lessons of five. Each comes with
-            its stroke order, its readings, and the {stats.words} words that fix those readings in
-            place — because a kanji learned alone is a kanji forgotten.
-          </p>
-
-          <div className="row" style={{ gap: 12, marginTop: 36, flexWrap: "wrap" }}>
-            <Link href="/login" className="reset-link">
-              <Button variant="accent" size="lg" icon="chevron-right">
-                Start Learning
-              </Button>
-            </Link>
-            <Link href="/lessons" className="reset-link">
-              <Button variant="outline" size="lg">
-                Try a Lesson First
-              </Button>
-            </Link>
-          </div>
-          <p className="body-sm muted" style={{ marginTop: 16 }}>
-            No account needed to try one. Your progress is only saved once you sign in.
-          </p>
-        </div>
-      </section>
-
-      {/* ---- Proof numbers ------------------------------------------------- */}
-      <section style={{ background: "var(--forest-800)" }}>
-        <div className="page row" style={{ paddingTop: 56, paddingBottom: 56, gap: 40, flexWrap: "wrap" }}>
-          {[
-            [String(stats.kanji), "N5 kanji"],
-            [String(stats.lessons), "Lessons of five"],
-            [String(stats.words), "Words that teach them"],
-            ["8", "Review stages"],
-          ].map(([value, label]) => (
-            <div key={label}>
-              <div
-                style={{
-                  fontSize: "var(--text-stat-md)",
-                  fontWeight: "var(--weight-extrabold)",
-                  letterSpacing: "var(--tracking-stat)",
-                  color: "var(--lime-500)",
-                  lineHeight: 1,
-                }}
-              >
-                {value}
-              </div>
-              <div className="eyebrow" style={{ marginTop: 8, color: "var(--forest-200)" }}>
-                {label}
-              </div>
+      <div className="page">
+        <div className="stack" style={{ gap: 72, maxWidth: 720, paddingTop: 64, paddingBottom: 88 }}>
+          {/* ---- What this is ------------------------------------------------ */}
+          <section className="stack" style={{ gap: 20 }}>
+            <p className="eyebrow" style={{ margin: 0 }}>
+              A free study aid for the JLPT N5 kanji
+            </p>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: "var(--text-display-3)",
+                letterSpacing: "var(--tracking-display)",
+                lineHeight: "var(--leading-display)",
+              }}
+            >
+              For anyone who finds kanji hard to remember.
+            </h1>
+            <p style={{ margin: 0, fontSize: "var(--text-body-lg)" }}>
+              If you have ever learned a kanji on Monday and lost it by Wednesday, you are not alone.
+              Kanjikan goes slowly: five kanji a lesson. It shows how each one is built, gives you a
+              short story to hang it on, teaches the everyday words that use it, and brings it back
+              for review before you forget.
+            </p>
+            <p style={{ margin: 0 }}>
+              You do not need an account to take the lessons. Sign in only if you want your progress
+              remembered.
+            </p>
+            <div className="row" style={{ gap: 12, flexWrap: "wrap", marginTop: 4 }}>
+              <Link href={`/lessons/${first.slug}`} className="reset-link">
+                <Button variant="primary" size="lg" icon="chevron-right">
+                  Start with Lesson 1
+                </Button>
+              </Link>
+              <Link href="/lessons" className="reset-link">
+                <Button variant="outline" size="lg">
+                  See All Lessons
+                </Button>
+              </Link>
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
 
-      {/* ---- Features ------------------------------------------------------ */}
-      <section className="page" style={{ paddingTop: 104, paddingBottom: 104 }}>
-        <div style={{ maxWidth: 620, marginBottom: 48 }}>
-          <p className="eyebrow">How it works</p>
-          <h2
-            style={{
-              margin: "12px 0 0",
-              fontSize: "var(--text-display-3)",
-              letterSpacing: "var(--tracking-display)",
-              lineHeight: "var(--leading-display)",
-            }}
-          >
-            Three Ideas, No Ceremony.
-          </h2>
-        </div>
+          {/* ---- How it tries to help ---------------------------------------- */}
+          <section className="stack" style={{ gap: 24 }}>
+            <h2 style={{ margin: 0, fontSize: "var(--text-heading-1)" }}>How it tries to help</h2>
+            <ol className="stack" style={{ gap: 18, margin: 0, paddingLeft: 22 }}>
+              {[
+                [
+                  "A few at a time.",
+                  "Each lesson has five kanji, and each one is finished — seen, used in words, quizzed, then written — before the next one starts.",
+                ],
+                [
+                  "Built from parts.",
+                  "Most kanji are made of smaller pieces. Every new kanji shows its parts, what they mean, and a short story that ties them together, so it becomes something you can picture instead of a jumble of strokes.",
+                ],
+                [
+                  "Words, not just characters.",
+                  "Each kanji comes with a handful of real words that use it. Readings are much easier to keep when they belong to words you know.",
+                ],
+                [
+                  "Writing by hand.",
+                  "You watch the stroke order, then draw the kanji yourself from memory.",
+                ],
+                [
+                  "Reviews before you forget.",
+                  "If you sign in, what you get wrong comes back within minutes and what you know moves further out. A five-question daily quiz checks what has stuck.",
+                ],
+              ].map(([title, body]) => (
+                <li key={title} style={{ paddingLeft: 6 }}>
+                  <strong style={{ color: "var(--text-heading)" }}>{title}</strong> {body}
+                </li>
+              ))}
+            </ol>
+          </section>
 
-        <div className="grid grid-3">
-          {[
-            {
-              icon: "grid-2x2",
-              title: "Five kanji at a time.",
-              body: "A lesson introduces five characters and nothing else. You meet each one, read the words built from it, then write it from memory before the next one starts.",
-              tone: "cream" as const,
-            },
-            {
-              icon: "file-text",
-              title: "Stroke order, then your hand.",
-              body: "Every character animates stroke by stroke, then you draw it on a ruled grid from memory. Recognising a kanji and being able to write it are different skills, and they are tracked separately.",
-              tone: "sage" as const,
-            },
-            {
-              icon: "zap",
-              title: "Reviews find the gaps.",
-              body: "Eight scheduling stages, from ten minutes to three months. Get a character right and it moves out of the way. Get it wrong and it comes back before you leave the session.",
-              tone: "cream" as const,
-            },
-          ].map((f) => (
-            <Card key={f.title} tone={f.tone} pad="lg" radius="lg">
-              <div className="stack" style={{ gap: 20 }}>
-                <div
-                  className="row"
-                  style={{
-                    width: 54,
-                    height: 54,
-                    borderRadius: "var(--radius-full)",
-                    background: "var(--lime-500)",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon name={f.icon} size={26} color="var(--forest-800)" />
+          {/* ---- One real example -------------------------------------------- */}
+          {example && (
+            <section className="stack" style={{ gap: 20 }}>
+              <div className="stack" style={{ gap: 8 }}>
+                <h2 style={{ margin: 0, fontSize: "var(--text-heading-2)" }}>What a new kanji looks like</h2>
+                <p style={{ margin: 0 }}>This is how a lesson introduces 休, from lesson {example.lessonOrder}.</p>
+              </div>
+              <Card tone="white" pad="md" radius="lg" bordered>
+                <div className="row" style={{ gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
+                  <div className="stack" style={{ gap: 6, alignItems: "center", minWidth: 96 }}>
+                    <span className="jp" style={{ fontSize: 72, lineHeight: 1, color: "var(--text-heading)" }}>
+                      {example.char}
+                    </span>
+                    <span className="body-sm" style={{ color: "var(--text-heading)" }}>
+                      {example.meanings[0]}
+                    </span>
+                    <span className="jp body-sm muted">
+                      {[...example.kunyomi, ...example.onyomi].join("・")}
+                    </span>
+                  </div>
+                  <div style={{ flex: "1 1 280px", minWidth: 0 }}>
+                    <KanjiAnatomy kanji={example} variant="teach" />
+                  </div>
                 </div>
-                <h3 style={{ margin: 0, fontSize: "var(--text-heading-3)" }}>{f.title}</h3>
-                <p className="body-sm" style={{ margin: 0, color: "var(--on-tint-body)" }}>
-                  {f.body}
+              </Card>
+            </section>
+          )}
+
+          {/* ---- What is here, and what is not ------------------------------- */}
+          <section className="stack" style={{ gap: 20 }}>
+            <h2 style={{ margin: 0, fontSize: "var(--text-heading-2)" }}>What is here, and what is not</h2>
+            <ul className="stack" style={{ gap: 12, margin: 0, paddingLeft: 22 }}>
+              <li>
+                All {stats.kanji} N5 kanji, in {stats.lessons} lessons, with {stats.words} words that
+                use them.
+              </li>
+              <li>N4 to N1 are not written yet.</li>
+              <li>It is free. There are no ads, nothing to buy, and no premium version.</li>
+              <li>
+                An account is only a username and a password — no email address. That also means
+                there is no password reset, so keep yours somewhere safe.
+              </li>
+            </ul>
+          </section>
+
+          {/* ---- A note on accuracy ------------------------------------------ */}
+          <section>
+            <Card tone="sage" pad="lg" radius="lg">
+              <div className="stack" style={{ gap: 16 }}>
+                <h2 style={{ margin: 0, fontSize: "var(--text-heading-2)", color: "var(--on-tint-heading)" }}>
+                  A note on accuracy
+                </h2>
+                <p style={{ margin: 0, color: "var(--on-tint-heading)" }}>
+                  Kanjikan was built with the help of AI — the app itself, and much of the learning
+                  content too: the word lists, readings, meanings and memory stories.
                 </p>
+                <p style={{ margin: 0, color: "var(--on-tint-heading)" }}>
+                  I made it, and I check what I can, but I am still learning Japanese myself. There is
+                  only so much I can catch, and some of it is bound to be wrong. Please treat it as a
+                  study aid rather than an authority, and check anything important against a
+                  dictionary — especially before an exam.
+                </p>
+                <p style={{ margin: 0, color: "var(--on-tint-heading)" }}>
+                  If you find a mistake, or would like to help correct or add lessons, please open an
+                  issue on GitHub. Every correction makes it better for the next person who is
+                  struggling with the same kanji.
+                </p>
+                <div className="row" style={{ gap: 12, flexWrap: "wrap", marginTop: 4 }}>
+                  <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer" className="reset-link">
+                    <Button variant="primary" size="md" icon="arrow-up-right">
+                      Open an Issue on GitHub
+                    </Button>
+                  </a>
+                </div>
               </div>
             </Card>
-          ))}
+          </section>
         </div>
-      </section>
+      </div>
 
-      {/* ---- Levels -------------------------------------------------------- */}
-      <section className="page" style={{ paddingBottom: 104 }}>
-        <Card tone="cream" pad="lg" radius="lg">
-          <div className="stack" style={{ gap: 28 }}>
-            <div>
-              <p className="eyebrow" style={{ color: "var(--on-tint-body)" }}>
-                The roadmap
-              </p>
-              <h2 style={{ margin: "10px 0 0", fontSize: "var(--text-heading-1)" }}>
-                N5 today. Four levels mapped behind it.
-              </h2>
-            </div>
-
-            <div className="grid grid-4" style={{ gap: 12 }}>
-              {path.map((l) => (
-                <div
-                  key={l.level}
-                  style={{
-                    padding: 20,
-                    borderRadius: "var(--radius-md)",
-                    background: l.available ? "var(--surface-inverse)" : "var(--surface-card)",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "var(--text-heading-2)",
-                      fontWeight: "var(--weight-extrabold)",
-                      letterSpacing: "var(--tracking-heading)",
-                      color: l.available ? "var(--lime-500)" : "var(--text-heading)",
-                    }}
-                  >
-                    {l.level}
-                  </div>
-                  <div
-                    className="body-sm"
-                    style={{
-                      marginTop: 8,
-                      color: l.available ? "var(--forest-200)" : "var(--text-muted)",
-                    }}
-                  >
-                    {l.available ? `${l.kanji} kanji` : `~${l.kanjiTarget} kanji`}
-                  </div>
-                  <div style={{ marginTop: 14 }}>
-                    <Badge tone={l.available ? "accent" : "sage"}>
-                      {l.available ? "Available now" : "Planned"}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-      </section>
-
-      <footer style={{ background: "var(--forest-800)" }}>
+      <footer style={{ borderTop: "1px solid var(--border-subtle)" }}>
         <div
-          className="page row"
-          style={{ paddingTop: 40, paddingBottom: 40, justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}
+          className="page row body-sm"
+          style={{ paddingTop: 28, paddingBottom: 28, justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}
         >
-          <Wordmark tone="inverse" size={20} />
+          <Wordmark size={18} />
           {/* KanjiVG is CC BY-SA 3.0 and requires attribution wherever the
               stroke data is used. See data/jlpt/STROKES-LICENSE.md. */}
-          <span className="body-sm" style={{ color: "var(--forest-200)" }}>
-            Kanji and vocabulary ship with the app. Stroke order from{" "}
-            <a
-              href="https://kanjivg.tagaini.net"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "var(--lime-500)" }}
-            >
+          <span className="muted">
+            Stroke order from{" "}
+            <a href="https://kanjivg.tagaini.net" target="_blank" rel="noopener noreferrer">
               KanjiVG
             </a>
-            , CC BY-SA 3.0.
+            , CC BY-SA 3.0 ·{" "}
+            <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
+              Source on GitHub
+            </a>
           </span>
         </div>
       </footer>
