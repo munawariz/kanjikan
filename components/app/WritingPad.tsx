@@ -30,7 +30,7 @@ export function WritingPad({
   onGrade: (correct: boolean) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const frameRef = useRef<HTMLDivElement | null>(null);
+  const rowRef = useRef<HTMLDivElement | null>(null);
   const drawing = useRef(false);
   const [strokeCount, setStrokeCount] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -45,17 +45,19 @@ export function WritingPad({
   const [SIZE, setSize] = useState(260);
 
   useLayoutEffect(() => {
-    const frame = frameRef.current;
-    if (!frame) return;
+    const row = rowRef.current;
+    if (!row) return;
+    // The row, not the pad's own column: the column is only as wide as the
+    // pad, so measuring it would let the pad shrink but never grow back.
     const measure = () => {
-      const available = Math.floor(frame.parentElement?.clientWidth ?? 0);
+      const available = Math.floor(row.clientWidth);
       // No lower bound: a floor larger than the space available is exactly the
       // overflow this measurement exists to prevent. 260 is only the cap.
       setSize(available > 0 ? Math.min(260, available) : 260);
     };
     measure();
     const ro = new ResizeObserver(measure);
-    if (frame.parentElement) ro.observe(frame.parentElement);
+    ro.observe(row);
     return () => ro.disconnect();
   }, []);
 
@@ -131,52 +133,59 @@ export function WritingPad({
       </div>
 
       <div
+        ref={rowRef}
         className="row"
         style={{ gap: 20, justifyContent: "center", flexWrap: "wrap", alignItems: "flex-start" }}
       >
-        <div
-          ref={frameRef}
-          style={{
-            position: "relative",
-            width: SIZE,
-            height: SIZE,
-            borderRadius: "var(--radius-md)",
-            background: "var(--surface-sunken)",
-            border: "1px solid var(--border-default)",
-            overflow: "hidden",
-            color: "var(--text-heading)",
-          }}
-        >
-          {/* Ruled guides matching the model diagram. */}
-          <svg
-            viewBox="0 0 109 109"
-            width={SIZE}
-            height={SIZE}
-            style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-            aria-hidden
-          >
-            <g stroke="var(--border-default)" strokeWidth="0.5" strokeDasharray="4 4">
-              <line x1="54.5" y1="0" x2="54.5" y2="109" />
-              <line x1="0" y1="54.5" x2="109" y2="54.5" />
-            </g>
-          </svg>
-
-          <canvas
-            ref={canvasRef}
-            width={SIZE}
-            height={SIZE}
-            onPointerDown={start}
-            onPointerMove={move}
-            onPointerUp={end}
-            onPointerLeave={end}
+        {/* Labelled like the model beside it. Both columns need the same
+            label above the box, or the model sits a label's height lower
+            than the pad once it is revealed. Always shown, so revealing the
+            model does not push the pad down either. */}
+        <div className="stack" style={{ gap: 8, alignItems: "center" }}>
+          <span className="eyebrow">Your writing</span>
+          <div
             style={{
+              position: "relative",
               width: SIZE,
               height: SIZE,
-              display: "block",
-              touchAction: "none",
-              cursor: revealed ? "default" : "crosshair",
+              borderRadius: "var(--radius-md)",
+              background: "var(--surface-sunken)",
+              border: "1px solid var(--border-default)",
+              overflow: "hidden",
+              color: "var(--text-heading)",
             }}
-          />
+          >
+            {/* Ruled guides matching the model diagram. */}
+            <svg
+              viewBox="0 0 109 109"
+              width={SIZE}
+              height={SIZE}
+              style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+              aria-hidden
+            >
+              <g stroke="var(--border-default)" strokeWidth="0.5" strokeDasharray="4 4">
+                <line x1="54.5" y1="0" x2="54.5" y2="109" />
+                <line x1="0" y1="54.5" x2="109" y2="54.5" />
+              </g>
+            </svg>
+
+            <canvas
+              ref={canvasRef}
+              width={SIZE}
+              height={SIZE}
+              onPointerDown={start}
+              onPointerMove={move}
+              onPointerUp={end}
+              onPointerLeave={end}
+              style={{
+                width: SIZE,
+                height: SIZE,
+                display: "block",
+                touchAction: "none",
+                cursor: revealed ? "default" : "crosshair",
+              }}
+            />
+          </div>
         </div>
 
         {revealed && (
