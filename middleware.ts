@@ -5,6 +5,19 @@ import { isSupabaseConfigured, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/sup
 const PUBLIC_PATHS = ["/", "/login", "/setup"];
 
 /**
+ * Whole sections a guest may use: lessons can be taken without an account,
+ * just without anything being saved. These are the pages under app/(open).
+ */
+const GUEST_SECTIONS = ["/lessons"];
+
+function isPublicPath(pathname: string) {
+  return (
+    PUBLIC_PATHS.includes(pathname) ||
+    GUEST_SECTIONS.some((s) => pathname === s || pathname.startsWith(`${s}/`))
+  );
+}
+
+/**
  * Refreshes the Supabase session cookie on every request and gates the app
  * routes. Server Components cannot write cookies, so without this the access
  * token would silently expire and every page would bounce to login.
@@ -43,7 +56,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isPublic = PUBLIC_PATHS.includes(pathname);
+  const isPublic = isPublicPath(pathname);
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();

@@ -83,7 +83,15 @@ export default async function LandingPage() {
                 Start Learning
               </Button>
             </Link>
+            <Link href="/lessons" className="reset-link">
+              <Button variant="outline" size="lg">
+                Try a Lesson First
+              </Button>
+            </Link>
           </div>
+          <p className="body-sm muted" style={{ marginTop: 16 }}>
+            No account needed to try one. Your progress is only saved once you sign in.
+          </p>
         </div>
       </section>
 

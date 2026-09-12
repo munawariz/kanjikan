@@ -10,7 +10,7 @@ for looking a character up, not a drill.
 - **813 N5 words** across **40 themed lessons**
 - **All 80 N5 kanji**, each covered by at least one word in the vocabulary
 - Spaced repetition with 8 scheduling stages, from ten minutes to three months
-- Multi-user accounts with per-lesson resume checkpoints
+- Multi-user accounts with per-lesson resume checkpoints, and lessons open to guests without one
 - UI built on the **Atlas Design System** in this repository
 
 ---
@@ -142,6 +142,24 @@ that answers that one question and cannot be used to probe other addresses.
 
 Telling the two cases apart means anyone can check whether a username is taken. That is the cost of
 the create-on-first-sign-in flow.
+
+### Guest mode
+
+Lessons can be taken without an account. `/lessons`, a lesson page, and its study session are open
+to anyone; the landing page offers *Try a Lesson First* and the login page links there too. A guest
+gets exactly the same session, but **nothing is saved**: `StudySession` makes no calls to `/api/`,
+every lesson starts at the first character, and a strip under the header says so. The end-of-lesson
+summary sends them to sign in and back to the same lesson.
+
+Every other page still requires a session. The split is by route group:
+
+| | |
+|---|---|
+| `app/(app)/` | Signed in only. The layout redirects to `/login`. |
+| `app/(open)/` | With or without a session. Currently just `lessons/`. |
+
+Opening a page to guests means moving it into `(open)` **and** adding its path to `GUEST_SECTIONS`
+in `middleware.ts`.
 
 Literal HTTP Basic Auth was not used, deliberately: it has no logout, replays credentials on every
 request, and gives the server no session to hang per-user progress off. It cannot support the

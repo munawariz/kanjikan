@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { requireSupabaseEnv } from "./env";
 
 /**
@@ -31,9 +32,14 @@ export function createClient() {
   });
 }
 
-/** The signed-in user, or null. Never throws for an anonymous visitor. */
-export async function getUser() {
+/**
+ * The signed-in user, or null. Never throws for an anonymous visitor.
+ *
+ * Memoised per request: a layout and its page both ask, and each uncached
+ * call is a round trip to the auth server.
+ */
+export const getUser = cache(async () => {
   const supabase = createClient();
   const { data } = await supabase.auth.getUser();
   return data.user ?? null;
-}
+});
