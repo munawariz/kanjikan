@@ -110,6 +110,28 @@ export async function getLessonProgress(level: Level = "N5"): Promise<Map<string
   return new Map((data ?? []).map((r) => [r.lesson_slug as string, r as LessonProgressRow]));
 }
 
+export type ProgressMaps = {
+  words: Map<string, WordProgressRow>;
+  kanji: Map<string, KanjiProgressRow>;
+  lessons: Map<string, LessonProgressRow>;
+};
+
+/**
+ * All of a learner's stored progress, or none for a guest.
+ *
+ * A guest has no rows by definition, so their queries are skipped rather than
+ * sent for Row Level Security to answer with nothing.
+ */
+export async function getProgress(user: { id: string } | null, level: Level = "N5"): Promise<ProgressMaps> {
+  if (!user) return { words: new Map(), kanji: new Map(), lessons: new Map() };
+  const [words, kanji, lessons] = await Promise.all([
+    getWordProgress(level),
+    getKanjiProgress(level),
+    getLessonProgress(level),
+  ]);
+  return { words, kanji, lessons };
+}
+
 export type LessonSummary = {
   slug: string;
   title: string;
@@ -137,11 +159,7 @@ export type LessonSummary = {
  */
 export async function getLessonSummaries(
   level: Level = "N5",
-  preloaded?: {
-    words?: Map<string, WordProgressRow>;
-    kanji?: Map<string, KanjiProgressRow>;
-    lessons?: Map<string, LessonProgressRow>;
-  },
+  preloaded?: Partial<ProgressMaps>,
 ): Promise<LessonSummary[]> {
   const words = preloaded?.words ?? (await getWordProgress(level));
   const kanjiRows = preloaded?.kanji ?? (await getKanjiProgress(level));

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getLesson } from "@/lib/content";
-import { getKanjiProgress, getLessonProgress, getWordProgress } from "@/lib/progress";
+import { getUser } from "@/lib/supabase/server";
+import { getProgress } from "@/lib/progress";
 import { StudySession } from "@/components/app/StudySession";
 
 export const dynamic = "force-dynamic";
@@ -9,11 +10,10 @@ export default async function StudyPage({ params }: { params: { slug: string } }
   const lesson = getLesson(params.slug);
   if (!lesson) notFound();
 
-  const [wordRows, kanjiRows, lessonRows] = await Promise.all([
-    getWordProgress(),
-    getKanjiProgress(),
-    getLessonProgress(),
-  ]);
+  // A guest has no stored rows, so they always start at the first character
+  // and every card is built as if the words were new.
+  const user = await getUser();
+  const { words: wordRows, kanji: kanjiRows, lessons: lessonRows } = await getProgress(user);
 
   // The checkpoint counts characters finished, so resuming starts at the next
   // one. A cursor at or past the end means the lesson was completed, and
@@ -40,6 +40,7 @@ export default async function StudyPage({ params }: { params: { slug: string } }
     <div style={{ maxWidth: 620, margin: "0 auto" }}>
       <StudySession
         mode="lesson"
+        guest={!user}
         lessonSlug={lesson.slug}
         lessonTitle={lesson.title}
         kanji={kanji}

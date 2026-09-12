@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLesson, strokeViewBox } from "@/lib/content";
-import { getKanjiProgress, getLessonProgress, getWordProgress } from "@/lib/progress";
+import { getUser } from "@/lib/supabase/server";
+import { getProgress } from "@/lib/progress";
 import { bandFor, BAND_LABEL, KNOWN_STAGE, type MasteryBand } from "@/lib/srs";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
@@ -21,11 +22,11 @@ export default async function LessonPage({ params }: { params: { slug: string } 
   const lesson = getLesson(params.slug);
   if (!lesson) notFound();
 
-  const [wordRows, kanjiRows, lessonRows] = await Promise.all([
-    getWordProgress(),
-    getKanjiProgress(),
-    getLessonProgress(),
-  ]);
+  const {
+    words: wordRows,
+    kanji: kanjiRows,
+    lessons: lessonRows,
+  } = await getProgress(await getUser());
   const row = lessonRows.get(lesson.slug);
 
   const known = lesson.kanji.filter(

@@ -21,6 +21,12 @@ import { WritingPad } from "./WritingPad";
 
 type Props = {
   mode: "lesson" | "review" | "writing";
+  /**
+   * Not signed in. The session runs exactly the same, but nothing is sent to
+   * the server — every write would only come back 401 and raise the "not
+   * being saved" alarm for something the guest already knows.
+   */
+  guest?: boolean;
   lessonSlug: string | null;
   lessonTitle: string;
   kanji: Kanji[];
@@ -63,6 +69,7 @@ const FURIGANA_KEY = "kanjikan-furigana";
 
 export function StudySession({
   mode,
+  guest = false,
   lessonSlug,
   lessonTitle,
   kanji,
@@ -127,20 +134,29 @@ export function StudySession({
   const total = queue.length;
   const isLast = index === total - 1;
 
+  /** Every write goes through here, so a guest session can make none. */
+  const save = useCallback(
+    (url: string, body: unknown) => {
+      if (!guest) post(url, body, setSaveError);
+    },
+    [guest],
+  );
+
   const finish = useCallback(
     (right: number, asked: number) => {
       setDone(true);
-      if (asked > 0) post("/api/session", { mode, lessonSlug, total: asked, correct: right }, setSaveError);
+      if (asked > 0) save("/api/session", { mode, lessonSlug, total: asked, correct: right });
       if (lessonSlug) {
-        post(
-          "/api/checkpoint",
-          { lessonSlug, cursor: lessonLength ?? cursorOffset + kanji.length, completed: true },
-          setSaveError,
-        );
+        save("/api/checkpoint", {
+          lessonSlug,
+          cursor: lessonLength ?? cursorOffset + kanji.length,
+          completed: true,
+        });
       }
-      router.refresh();
+      // Picks up the progress just written. A guest wrote none.
+      if (!guest) router.refresh();
     },
-    [mode, lessonSlug, kanji.length, cursorOffset, lessonLength, router],
+    [mode, guest, save, lessonSlug, kanji.length, cursorOffset, lessonLength, router],
   );
 
   const advance = useCallback(() => {
@@ -155,15 +171,11 @@ export function StudySession({
       // place to resume from — mid-cycle would re-teach words already seen.
       if (lessonSlug && queue[i]?.kind === "kanji-write") {
         const doneChars = queue.slice(0, next).filter((c) => c.kind === "kanji-write").length;
-        post(
-          "/api/checkpoint",
-          { lessonSlug, cursor: cursorOffset + doneChars, completed: false },
-          setSaveError,
-        );
+        save("/api/checkpoint", { lessonSlug, cursor: cursorOffset + doneChars, completed: false });
       }
       return next;
     });
-  }, [isLast, finish, correctCount, answered, lessonSlug, queue, cursorOffset]);
+  }, [isLast, finish, correctCount, answered, lessonSlug, queue, cursorOffset, save]);
 
   /** Records one graded answer against a word or a character. */
   const grade = useCallback(
@@ -173,14 +185,14 @@ export function StudySession({
       if (right) setCorrectCount((n) => n + 1);
 
       if (card.kind === "kanji-write") {
-        post("/api/kanji", { char: card.kanji.char, correct: right, skill: "writing" }, setSaveError);
+        save("/api/kanji", { char: card.kanji.char, correct: right, skill: "writing" });
       } else if (card.kind === "kanji-meaning") {
-        post("/api/kanji", { char: card.kanji.char, correct: right, skill: "recognition" }, setSaveError);
+        save("/api/kanji", { char: card.kanji.char, correct: right, skill: "recognition" });
       } else if ("word" in card) {
-        post("/api/answer", { wordId: card.word.id, correct: right }, setSaveError);
+        save("/api/answer", { wordId: card.word.id, correct: right });
       }
     },
-    [card],
+    [card, save],
   );
 
   const choose = useCallback(
@@ -244,7 +256,14 @@ export function StudySession({
     return (
       <div className="stack" style={{ gap: 20 }}>
         {saveError && <SaveWarning detail={saveError} />}
-        <Summary correct={correctCount} total={answered} mode={mode} lessonTitle={lessonTitle} />
+        <Summary
+          correct={correctCount}
+          total={answered}
+          mode={mode}
+          guest={guest}
+          lessonSlug={lessonSlug}
+          lessonTitle={lessonTitle}
+        />
       </div>
     );
   }
@@ -687,11 +706,15 @@ function Summary({
   correct,
   total,
   mode,
+  guest,
+  lessonSlug,
   lessonTitle,
 }: {
   correct: number;
   total: number;
   mode: "lesson" | "review" | "writing";
+  guest: boolean;
+  lessonSlug: string | null;
   lessonTitle: string;
 }) {
   const percent = total ? Math.round((correct / total) * 100) : 0;
@@ -742,23 +765,52 @@ function Summary({
           ))}
         </div>
 
-        <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
-          Everything you answered is scheduled. What you missed comes back within minutes; what you
-          knew moves further out.
-        </p>
+        {guest ? (
+          <>
+            <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
+              None of this was saved, because you are not signed in. With an account, every answer
+              is scheduled: what you missed comes back within minutes, and what you knew moves
+              further out.
+            </p>
 
-        <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
-          <Link href="/dashboard" className="reset-link">
-            <Button variant="accent" size="lg" icon="chevron-right">
-              Back to Dashboard
-            </Button>
-          </Link>
-          <Link href={mode === "review" ? "/lessons" : "/review"} className="reset-link">
-            <Button variant="outline-inverse" size="lg">
-              {mode === "review" ? "Browse Lessons" : "Start a Review"}
-            </Button>
-          </Link>
-        </div>
+            <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
+              {/* Back to this lesson, so it can be taken again and kept. */}
+              <Link
+                href={`/login?next=${encodeURIComponent(lessonSlug ? `/lessons/${lessonSlug}` : "/lessons")}`}
+                className="reset-link"
+              >
+                <Button variant="accent" size="lg" icon="chevron-right">
+                  Sign In to Save Progress
+                </Button>
+              </Link>
+              <Link href="/lessons" className="reset-link">
+                <Button variant="outline-inverse" size="lg">
+                  Browse Lessons
+                </Button>
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
+              Everything you answered is scheduled. What you missed comes back within minutes; what
+              you knew moves further out.
+            </p>
+
+            <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
+              <Link href="/dashboard" className="reset-link">
+                <Button variant="accent" size="lg" icon="chevron-right">
+                  Back to Dashboard
+                </Button>
+              </Link>
+              <Link href={mode === "review" ? "/lessons" : "/review"} className="reset-link">
+                <Button variant="outline-inverse" size="lg">
+                  {mode === "review" ? "Browse Lessons" : "Start a Review"}
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </Card>
   );

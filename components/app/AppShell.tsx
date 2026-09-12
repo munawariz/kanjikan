@@ -5,8 +5,15 @@ import { usePathname } from "next/navigation";
 import { Wordmark } from "./Wordmark";
 import { Avatar } from "@/components/atlas/data/Avatar.jsx";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
+import { Button } from "@/components/atlas/core/Button.jsx";
 import { Icon } from "@/components/atlas/core/Icon.jsx";
 import { ThemeToggle } from "./ThemeToggle";
+
+export type ShellAccount = {
+  name: string;
+  dueCount: number;
+  signOut: React.ReactNode;
+};
 
 /**
  * Seven destinations, seven distinct glyphs.
@@ -28,19 +35,21 @@ const NAV = [
 /**
  * Application chrome. Atlas keeps its header static rather than sticky, and
  * marks the active item with a lime underline instead of a filled pill.
+ *
+ * With no account the visitor is a guest on one of the open pages. The nav
+ * stays whole — the other tabs lead to sign-in, which is the honest answer to
+ * "what is behind this" — and a strip under the header says that nothing is
+ * being saved, since that is the one thing a guest cannot see for themselves.
  */
 export function AppShell({
-  name,
-  dueCount,
-  signOut,
+  account,
   children,
 }: {
-  name: string;
-  dueCount: number;
-  signOut: React.ReactNode;
+  account: ShellAccount | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const signIn = `/login?next=${encodeURIComponent(pathname)}`;
 
   return (
     <>
@@ -50,7 +59,7 @@ export function AppShell({
           style={{ height: 76, justifyContent: "space-between", gap: 16 }}
         >
           <div className="row" style={{ gap: 40, minWidth: 0 }}>
-            <Link href="/dashboard" className="reset-link">
+            <Link href={account ? "/dashboard" : "/"} className="reset-link">
               <Wordmark />
             </Link>
 
@@ -82,13 +91,13 @@ export function AppShell({
                   >
                     <Icon name={item.icon} size={18} />
                     <span className="nav-label">{item.label}</span>
-                    {item.href === "/review" && dueCount > 0 && (
+                    {item.href === "/review" && account && account.dueCount > 0 && (
                       <Badge
                         tone="accent"
                         className="nav-badge"
                         style={{ height: 20, padding: "0 8px" }}
                       >
-                        {dueCount}
+                        {account.dueCount}
                       </Badge>
                     )}
                   </Link>
@@ -99,17 +108,57 @@ export function AppShell({
 
           <div className="row" style={{ gap: 12 }}>
             <ThemeToggle />
-            <span
-              className="body-sm app-username"
-              style={{ fontWeight: "var(--weight-semibold)", color: "var(--text-heading)" }}
-            >
-              {name}
-            </span>
-            <Avatar name={name || "Learner"} size={38} />
-            {signOut}
+            {account ? (
+              <>
+                <span
+                  className="body-sm app-username"
+                  style={{ fontWeight: "var(--weight-semibold)", color: "var(--text-heading)" }}
+                >
+                  {account.name}
+                </span>
+                <Avatar name={account.name || "Learner"} size={38} />
+                {account.signOut}
+              </>
+            ) : (
+              <Link href={signIn} className="reset-link">
+                <Button variant="primary" size="sm" shape="pill">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
+
+      {!account && (
+        <div style={{ background: "var(--surface-card-sage)", borderBottom: "1px solid var(--border-subtle)" }}>
+          <div
+            className="page row body-sm"
+            style={{
+              gap: 12,
+              paddingTop: 12,
+              paddingBottom: 12,
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              color: "var(--on-tint-body)",
+            }}
+          >
+            <span className="row" style={{ gap: 10 }}>
+              <Icon name="circle" size={14} color="var(--on-tint-body)" />
+              <span>
+                <strong style={{ color: "var(--on-tint-heading)" }}>You are studying as a guest.</strong>{" "}
+                Lessons work in full, but nothing you answer is saved.
+              </span>
+            </span>
+            <Link
+              href={signIn}
+              style={{ color: "var(--on-tint-heading)", fontWeight: "var(--weight-semibold)" }}
+            >
+              Sign in to keep your progress
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="page app-content" style={{ paddingTop: 40, paddingBottom: 96 }}>
         {children}
