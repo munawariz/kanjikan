@@ -283,6 +283,21 @@ Readings, meanings and parts of speech should be spot-checked against a dictiona
 relies on them for an exam. Corrections are one edit to one JSON file, and
 `npm run validate:content` will catch a structural mistake.
 
+### How meanings are written
+
+**A kanji's meanings are only what the kanji means by itself.** 火 is *Fire* — not *Tuesday*, which
+is 火曜日, and not *Fireworks*, which is 花火. Those meanings belong to the words, and the words teach
+them. A sense the kanji carries wherever it appears stays, including as a counter, prefix or suffix:
+分 *Minute*, 円 *Yen*, 毎 *Every*, 語 *Language* (日本語). What goes is the meaning of one particular
+word: 日 *Japan* (日本), 分 *Understand* (分かる), 休 *Day Off* (休み). A few kanji — 午, 電, 校 —
+are almost never a word on their own, but *Noon*, *Electricity* and *School* are still what they mean.
+This takes judgement, so it is not checked automatically.
+
+**Every meaning is in Title Case**: *Fire*, *Ten Thousand*, *Coming to Japan*. Short joining words stay
+lowercase inside a phrase, and qualifiers in parentheses stay as written: *Father (polite)*.
+`scripts/title-case.mjs` is the rule, and `npm run validate:content` fails on any meaning — kanji,
+word, part or role — that does not follow it.
+
 ### Radicals, parts and mnemonics
 
 `data/jlpt/n5/mnemonics.json` gives every kanji three things, shown when a lesson introduces it,

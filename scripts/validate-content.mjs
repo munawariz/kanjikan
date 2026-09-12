@@ -12,6 +12,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { titleCase } from "./title-case.mjs";
 
 const LEVELS = ["n5"];
 const DATA_ROOT = path.join(process.cwd(), "data", "jlpt");
@@ -36,6 +37,12 @@ const errors = [];
 const warnings = [];
 const notes = [];
 
+/** Meanings are shown as written, so they are written in Title Case. */
+function checkCase(where, meaning) {
+  const expected = titleCase(meaning);
+  if (meaning !== expected) errors.push(`${where}: write ${JSON.stringify(meaning)} as ${JSON.stringify(expected)}`);
+}
+
 for (const level of LEVELS) {
   const levelDir = path.join(DATA_ROOT, level);
   const lessonDir = path.join(levelDir, "lessons");
@@ -48,6 +55,10 @@ for (const level of LEVELS) {
     if (!k.char || !Number.isInteger(k.strokes) || !k.meanings?.length) {
       errors.push(`${level}/kanji.json: incomplete entry ${JSON.stringify(k.char)}`);
     }
+    // Only what the kanji means by itself belongs here — 火 is Fire, not
+    // Tuesday, which is 火曜日. That needs judgement, so it is not checked;
+    // the casing can be.
+    for (const m of k.meanings ?? []) checkCase(`${level}/kanji.json ${k.char}`, m);
   }
 
   // Stroke data is optional, but if present it must cover every kanji.
@@ -104,6 +115,7 @@ for (const level of LEVELS) {
           errors.push(`${rel}: ${k.char} has a malformed part ${JSON.stringify(raw)}`);
           continue;
         }
+        if (typeof raw === "object") checkCase(`${rel} ${k.char} part ${p}`, raw.as);
         used.add(p);
         if (p === k.char) errors.push(`${rel}: ${k.char} lists itself as a part`);
         if (!defined(p)) errors.push(`${rel}: ${k.char} part ${p} is neither a kanji nor in primitives`);
@@ -125,6 +137,7 @@ for (const level of LEVELS) {
       // A kanji of the level takes its meaning from kanji.json; anything else
       // has nowhere else to get one.
       if (!def.meaning && !kanjiSet.has(c)) errors.push(`${rel}: primitive ${c} has no meaning`);
+      if (def.meaning) checkCase(`${rel} primitive ${c}`, def.meaning);
       if (!used.has(c) && !kanjiSet.has(c)) warnings.push(`${rel}: primitive ${c} is never used`);
     }
 
@@ -195,6 +208,8 @@ for (const level of LEVELS) {
         if (!w.reading) errors.push(`${where}: missing reading`);
         if (!Array.isArray(w.meanings) || w.meanings.length === 0) {
           errors.push(`${where}: missing meanings`);
+        } else {
+          for (const m of w.meanings) checkCase(where, m);
         }
         if (!POS.has(w.pos)) errors.push(`${where}: unknown pos ${JSON.stringify(w.pos)}`);
 
