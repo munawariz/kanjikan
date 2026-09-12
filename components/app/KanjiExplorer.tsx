@@ -4,9 +4,11 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
+import type { Kanji } from "@/lib/content";
+import { KanjiAnatomy } from "./KanjiAnatomy";
 import { StrokeDiagram } from "./StrokeDiagram";
 
-export type KanjiEntry = {
+export type KanjiEntry = Pick<Kanji, "parts" | "radicalPart" | "mnemonic" | "usedIn"> & {
   char: string;
   strokes: number;
   meanings: string[];
@@ -131,7 +133,6 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
                   </div>
                   <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
                     <Badge tone="sage">{active.strokes} strokes</Badge>
-                    {active.radical && <Badge tone="cream">radical {active.radical}</Badge>}
                   </div>
                 </div>
               </div>
@@ -151,6 +152,8 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
                   </div>
                 ))}
               </div>
+
+              <KanjiAnatomy kanji={active} variant="reference" onTint />
 
               <div style={{ height: 1, background: "var(--border-default)" }} />
 

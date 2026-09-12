@@ -16,6 +16,7 @@ import {
   PROMPT,
   type StudyCard,
 } from "@/lib/study";
+import { KanjiAnatomy } from "./KanjiAnatomy";
 import { StrokeDiagram } from "./StrokeDiagram";
 import { WritingPad } from "./WritingPad";
 
@@ -449,10 +450,13 @@ function KanjiTeachCard({ kanji, onNext }: { kanji: Kanji; onNext: () => void })
 
             <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
               <Badge tone="sage">{kanji.strokes} strokes</Badge>
-              {kanji.radical && <Badge tone="cream">radical {kanji.radical}</Badge>}
             </div>
           </div>
         </div>
+
+        {/* The radical badge that sat above is gone: the anatomy names the
+            radical, says what it means, and shows it among the parts. */}
+        <KanjiAnatomy kanji={kanji} variant="teach" />
 
         <Button variant="primary" size="lg" fullWidth onClick={onNext} icon="chevron-right">
           Got It

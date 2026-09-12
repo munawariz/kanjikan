@@ -69,6 +69,73 @@ for (const level of LEVELS) {
     warnings.push(`${level}: no strokes.json - run npm run fetch:strokes`);
   }
 
+  // Mnemonics are optional too, but if present every kanji needs one, and
+  // every part and radical must resolve to something the app can explain.
+  const memoFile = path.join(levelDir, "mnemonics.json");
+  if (fs.existsSync(memoFile)) {
+    const rel = `${level}/mnemonics.json`;
+    const memo = JSON.parse(fs.readFileSync(memoFile, "utf8"));
+    const primitives = memo.primitives ?? {};
+    const defined = (c) => kanjiSet.has(c) || Object.hasOwn(primitives, c);
+    const used = new Set();
+
+    for (const k of kanjiList) {
+      const m = memo.kanji?.[k.char];
+      if (!m) {
+        errors.push(`${rel}: no entry for ${k.char}`);
+        continue;
+      }
+      if (!m.mnemonic?.trim()) errors.push(`${rel}: ${k.char} has no mnemonic`);
+      if (!m.radical) {
+        errors.push(`${rel}: ${k.char} has no radical`);
+      } else {
+        used.add(m.radical);
+        if (!defined(m.radical)) errors.push(`${rel}: ${k.char} radical ${m.radical} is not defined in primitives`);
+      }
+      if (!Array.isArray(m.parts)) {
+        errors.push(`${rel}: ${k.char} parts must be an array`);
+        continue;
+      }
+      for (const raw of m.parts) {
+        // A part is its character, or { char, as } when it plays a role
+        // here that differs from its usual meaning.
+        const p = typeof raw === "string" ? raw : raw?.char;
+        if (typeof p !== "string" || (typeof raw === "object" && !raw.as?.trim())) {
+          errors.push(`${rel}: ${k.char} has a malformed part ${JSON.stringify(raw)}`);
+          continue;
+        }
+        used.add(p);
+        if (p === k.char) errors.push(`${rel}: ${k.char} lists itself as a part`);
+        if (!defined(p)) errors.push(`${rel}: ${k.char} part ${p} is neither a kanji nor in primitives`);
+        // The story is what makes a part stick. One it never mentions is a
+        // label the learner is shown and given no reason to remember.
+        if (m.mnemonic && !m.mnemonic.includes(p)) {
+          errors.push(`${rel}: ${k.char} part ${p} is not mentioned in its mnemonic`);
+        }
+        // Outside the Basic Multilingual Plane most Japanese fonts have no
+        // glyph, and the part renders as a box.
+        if (p.codePointAt(0) > 0xffff) warnings.push(`${rel}: ${k.char} part ${p} may not render`);
+      }
+    }
+
+    for (const c of Object.keys(memo.kanji ?? {})) {
+      if (!kanjiSet.has(c)) errors.push(`${rel}: entry for ${c}, which is not in kanji.json`);
+    }
+    for (const [c, def] of Object.entries(primitives)) {
+      // A kanji of the level takes its meaning from kanji.json; anything else
+      // has nowhere else to get one.
+      if (!def.meaning && !kanjiSet.has(c)) errors.push(`${rel}: primitive ${c} has no meaning`);
+      if (!used.has(c) && !kanjiSet.has(c)) warnings.push(`${rel}: primitive ${c} is never used`);
+    }
+
+    notes.push(
+      `${level}: mnemonics for ${Object.keys(memo.kanji ?? {}).length} kanji, ` +
+        `${Object.keys(primitives).length} parts defined`,
+    );
+  } else {
+    warnings.push(`${level}: no mnemonics.json - new kanji are taught without parts or stories`);
+  }
+
   const files = fs.readdirSync(lessonDir).filter((f) => f.endsWith(".json")).sort();
   const slugs = new Set();
   const triples = new Map();

@@ -115,7 +115,7 @@ npm run dev
 | `npm run dev` | Dev server on :3000 |
 | `npm run build` | Production build |
 | `npm run migrate` | Apply `supabase/migrations/*.sql`. Idempotent; tracks applied files in `schema_migrations` |
-| `npm run validate:content` | Check the JSON: duplicate ids, kana-only readings, unknown parts of speech, kanji coverage |
+| `npm run validate:content` | Check the JSON: duplicate ids, kana-only readings, unknown parts of speech, kanji coverage, mnemonics |
 | `npm run doctor` | Check the Supabase side: credentials present, project reachable, every table created. Run this first whenever progress is not saving. Prints no secrets. |
 
 ---
@@ -237,6 +237,7 @@ resume target the dashboard offers.
 ```
 data/jlpt/n5/
   kanji.json            80 kanji: readings, meanings, stroke counts
+  mnemonics.json        Radical, parts and a memory story for each kanji
   lessons/*.json        40 lessons, hand-editable, grouped by theme
 lib/
   content.ts            Loads and indexes the JSON; derives word ids
@@ -281,6 +282,24 @@ covers the words consistently taught at N5 and every one of the 80 kanji.
 Readings, meanings and parts of speech should be spot-checked against a dictionary before anyone
 relies on them for an exam. Corrections are one edit to one JSON file, and
 `npm run validate:content` will catch a structural mistake.
+
+### Radicals, parts and mnemonics
+
+`data/jlpt/n5/mnemonics.json` gives every kanji three things, shown when a lesson introduces it,
+on the lesson page, and in the kanji browser:
+
+- **radical** — the dictionary (Kangxi) radical, as Japanese dictionaries file the character. This
+  overrides the radical in `strokes.json`: KanjiVG sometimes records a stroke there instead, giving
+  丿 for 年, 東, 来, 千 and 午, which dictionaries file under 干, 木, 木, 十 and 十.
+- **parts** — the pieces you can see and reuse, each defined under `primitives` (with its meaning and,
+  for radicals, its Japanese name) or as another N5 kanji. A part written `{ "char": "人", "as": "lid" }`
+  plays a different role in that one kanji and is shown as such.
+- **mnemonic** — a one- or two-sentence story that uses every part. One that says *once a picture
+  of* describes the character's real origin; the rest are memory aids, not etymology.
+
+A lesson card marks the parts a learner has not met before and explains them, and says where the rest
+were first seen. `npm run validate:content` checks that every kanji has an entry, that every part
+and radical is defined, and that every part appears in its story.
 
 Two duplicate surface forms are intentional and reported as warnings: が appears as a conjunction
 and as a particle, and 本 as both *book* and the counter for long thin objects.

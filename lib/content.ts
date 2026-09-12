@@ -37,17 +37,64 @@ export type RawKanji = {
   kunyomi: string[];
 };
 
+/**
+ * A building block of a kanji — a radical, a primitive, or a whole kanji
+ * reused inside another. Learning these is what turns a new character from a
+ * tangle of strokes into a few pieces already known.
+ */
+export type KanjiPart = {
+  char: string;
+  meaning: string;
+  /**
+   * What it stands for in this one kanji, where that differs from its usual
+   * meaning: 人 is a person, but in 食 it is the lid. Null elsewhere.
+   */
+  role: string | null;
+  /** Japanese name of the radical or radical form, e.g. にんべん. */
+  name: string | null;
+  /** How it looks or behaves inside other characters. */
+  note: string | null;
+  /** The first kanji of the curriculum built from this part, or that is it. */
+  firstSeen: string;
+  /** 1-based lesson number of {@link firstSeen}. */
+  firstLesson: number;
+};
+
 export type Kanji = RawKanji & {
   level: Level;
   /** Slug of the lesson that introduces this character. */
   lessonSlug: string;
   /** 1-based position in the level's kanji curriculum. */
   order: number;
+  /** 1-based position of the introducing lesson. */
+  lessonOrder: number;
   /** Ordered SVG path data, one entry per stroke. Empty if not vendored. */
   strokePaths: string[];
-  /** The character's radical, from KanjiVG. */
+  /** The dictionary radical, in the form it takes inside this character. */
   radical: string | null;
+  radicalPart: KanjiPart | null;
+  /** The visible pieces it is built from. Empty for a kanji that is itself a basic shape. */
+  parts: KanjiPart[];
+  /** A short story tying the parts to the meaning. */
+  mnemonic: string | null;
+  /** Other kanji of this level built from this one, in curriculum order. */
+  usedIn: RelatedKanji[];
 };
+
+/** Just enough of another kanji to say what it is without leaving the page. */
+export type RelatedKanji = Pick<RawKanji, "char" | "meanings" | "onyomi" | "kunyomi"> & {
+  lessonOrder: number;
+};
+
+/** A part as authored: its character, or its character and the role it plays here. */
+type RawPart = string | { char: string; as: string };
+
+type MnemonicFile = {
+  primitives: Record<string, { meaning?: string; name?: string; note?: string }>;
+  kanji: Record<string, { radical: string; parts: RawPart[]; mnemonic: string }>;
+};
+
+const partChar = (p: RawPart) => (typeof p === "string" ? p : p.char);
 
 export type RawLesson = {
   slug: string;
@@ -126,6 +173,13 @@ function loadLevel(level: Level) {
     ? readJson<StrokeFile>(strokeFile)
     : { viewBox: "0 0 109 109", kanji: {} };
 
+  // Also optional: without it a new kanji is taught by its glyph and readings
+  // alone, and the radical falls back to KanjiVG's.
+  const memoFile = path.join(levelDir, "mnemonics.json");
+  const memo: MnemonicFile = fs.existsSync(memoFile)
+    ? readJson<MnemonicFile>(memoFile)
+    : { primitives: {}, kanji: {} };
+
   const files = fs.readdirSync(lessonDir).filter((f) => f.endsWith(".json")).sort();
 
   const lessons: Lesson[] = [];
@@ -140,8 +194,16 @@ function loadLevel(level: Level) {
           level,
           lessonSlug: raw.slug,
           order: kanji.length + 1,
+          lessonOrder: lessons.length + 1,
           strokePaths: strokeData.kanji[char]?.strokes ?? [],
-          radical: strokeData.kanji[char]?.radical ?? null,
+          // KanjiVG sometimes records a stroke — 丿 for 年 — where a
+          // dictionary files the character under 干, so the authored radical
+          // wins wherever there is one.
+          radical: memo.kanji[char]?.radical ?? strokeData.kanji[char]?.radical ?? null,
+          radicalPart: null,
+          parts: [],
+          mnemonic: memo.kanji[char]?.mnemonic ?? null,
+          usedIn: [],
         };
         kanji.push(entry);
         return entry;
@@ -169,7 +231,60 @@ function loadLevel(level: Level) {
     }
   }
 
+  attachParts(kanji, memo);
+
   return { lessons, kanji, strokeViewBox: strokeData.viewBox };
+}
+
+/**
+ * Resolves each kanji's parts once the whole curriculum is known, because
+ * both things worth saying about a part depend on the order: where a learner
+ * first meets it, and which later characters reuse it.
+ */
+function attachParts(kanji: Kanji[], memo: MnemonicFile) {
+  const byChar = new Map(kanji.map((k) => [k.char, k]));
+
+  // A part is first met either as a kanji in its own right or inside one,
+  // whichever the curriculum reaches first.
+  const firstSeen = new Map<string, Kanji>();
+  for (const k of kanji) {
+    for (const c of [k.char, ...(memo.kanji[k.char]?.parts ?? []).map(partChar)]) {
+      if (!firstSeen.has(c)) firstSeen.set(c, k);
+    }
+  }
+
+  function part(raw: RawPart): KanjiPart {
+    const char = partChar(raw);
+    const defined = memo.primitives[char];
+    const asKanji = byChar.get(char);
+    const first = firstSeen.get(char);
+    return {
+      char,
+      // The first two meanings of a kanji: 日 is used as "sun" far more
+      // often than as "day", and one alone would hide that.
+      meaning: defined?.meaning ?? asKanji?.meanings.slice(0, 2).join("; ") ?? char,
+      role: typeof raw === "string" ? null : raw.as,
+      name: defined?.name ?? null,
+      note: defined?.note ?? null,
+      firstSeen: first?.char ?? char,
+      firstLesson: first?.lessonOrder ?? 0,
+    };
+  }
+
+  for (const k of kanji) {
+    const entry = memo.kanji[k.char];
+    k.parts = (entry?.parts ?? []).map(part);
+    k.radicalPart = k.radical ? part(k.radical) : null;
+    k.usedIn = kanji
+      .filter((other) => other !== k && memo.kanji[other.char]?.parts.some((p) => partChar(p) === k.char))
+      .map(({ char, meanings, onyomi, kunyomi, lessonOrder }) => ({
+        char,
+        meanings,
+        onyomi,
+        kunyomi,
+        lessonOrder,
+      }));
+  }
 }
 
 /**

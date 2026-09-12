@@ -8,6 +8,7 @@ import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { StrokeDiagram } from "@/components/app/StrokeDiagram";
+import { KanjiAnatomy } from "@/components/app/KanjiAnatomy";
 
 export const dynamic = "force-dynamic";
 
@@ -132,11 +133,17 @@ export default async function LessonPage({ params }: { params: { slug: string } 
 
                     <div className="row body-sm" style={{ gap: 18, flexWrap: "wrap" }}>
                       <span className="muted">{k.strokes} strokes</span>
-                      {k.radical && <span className="muted">radical {k.radical}</span>}
+                      {k.radicalPart && (
+                        <span className="muted">
+                          radical <span className="jp">{k.radicalPart.char}</span> {k.radicalPart.meaning}
+                        </span>
+                      )}
                       <span className="jp" style={{ color: "var(--text-body)" }}>
                         {[...k.onyomi, ...k.kunyomi].join("・")}
                       </span>
                     </div>
+
+                    <KanjiAnatomy kanji={k} variant="compact" />
 
                     <div className="row" style={{ gap: 8, flexWrap: "wrap", marginTop: 4 }}>
                       {words.map((w) => (
