@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
-import { getDashboard, getLessonSummaries } from "@/lib/progress";
+import { getDailyQuiz, getDashboard, getLessonSummaries, type DailyQuiz } from "@/lib/progress";
 import { levelStats } from "@/lib/content";
+import { DAILY_QUIZ_SIZE, localDate, requestTimeZone } from "@/lib/daily";
 import { BAND_LABEL, type MasteryBand } from "@/lib/srs";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
@@ -21,12 +22,78 @@ const BAND_COLOUR: Record<MasteryBand, string> = {
   mastered: "var(--band-mastered)",
 };
 
+/**
+ * Today's quiz in one line: locked, waiting, half done, or done with a score.
+ * The dashboard is where a day starts, so this is where the quiz is found — it
+ * has no tab of its own, since seven already only just fit on a phone.
+ */
+function DailyQuizCard({ quiz }: { quiz: DailyQuiz }) {
+  const locked = quiz.questions.length === 0;
+  const answered = quiz.answers.length;
+  const finished = !locked && answered >= quiz.questions.length;
+  const correct = quiz.answers.filter((a) => a.correct).length;
+
+  const [title, body] = locked
+    ? [
+        "Daily quiz",
+        `Unlocks once you have learned ${DAILY_QUIZ_SIZE} kanji — you have ${quiz.learned}. A character joins the day after you first study it.`,
+      ]
+    : finished
+      ? [`Today’s quiz: ${correct} of ${answered} correct`, "Five new questions tomorrow."]
+      : answered > 0
+        ? [`Daily quiz: ${answered} of ${quiz.questions.length} answered`, "Finish today’s questions."]
+        : ["Daily quiz", `${DAILY_QUIZ_SIZE} questions on kanji you have already learned. One try each.`];
+
+  return (
+    <Card tone="sage" pad="md" radius="lg">
+      <div className="row" style={{ gap: 20, justifyContent: "space-between", flexWrap: "wrap" }}>
+        <div className="row" style={{ gap: 14, minWidth: 0, flex: "1 1 280px" }}>
+          <div
+            className="row"
+            style={{
+              width: 44,
+              height: 44,
+              flex: "0 0 auto",
+              borderRadius: "var(--radius-full)",
+              background: finished ? "var(--lime-500)" : "var(--surface-card)",
+              justifyContent: "center",
+            }}
+          >
+            {finished ? (
+              <Icon name="check" size={20} color="var(--forest-800)" />
+            ) : (
+              <Sparkle size={18} color="var(--forest-800)" />
+            )}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: "var(--weight-semibold)", color: "var(--on-tint-heading)" }}>{title}</div>
+            <div className="body-sm" style={{ color: "var(--on-tint-body)" }}>
+              {body}
+            </div>
+          </div>
+        </div>
+        {!locked && (
+          <Link href="/daily-quiz" className="reset-link">
+            <Button variant={finished ? "outline" : "primary"} size="md" icon="chevron-right">
+              {finished ? "See Results" : answered > 0 ? "Continue Quiz" : "Take Today’s Quiz"}
+            </Button>
+          </Link>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 export default async function DashboardPage() {
   const user = await getUser();
   if (!user) redirect("/login");
 
-  const data = await getDashboard(user.id);
-  const lessons = await getLessonSummaries();
+  const timeZone = requestTimeZone();
+  const [data, lessons, daily] = await Promise.all([
+    getDashboard(user.id),
+    getLessonSummaries(),
+    getDailyQuiz(user.id, localDate(timeZone), timeZone),
+  ]);
   const stats = levelStats("N5");
 
   const name = data.profile.display_name || user.email?.split("@")[0] || "there";
@@ -145,6 +212,7 @@ export default async function DashboardPage() {
             </div>
           </div>
         </Card>
+        <DailyQuizCard quiz={daily} />
       </section>
 
       {/* ---- Numbers ----------------------------------------------------- */}

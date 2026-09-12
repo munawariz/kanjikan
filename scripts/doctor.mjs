@@ -11,7 +11,14 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const TABLES = ["profiles", "word_progress", "lesson_progress", "study_sessions"];
+const TABLES = [
+  "profiles",
+  "word_progress",
+  "lesson_progress",
+  "study_sessions",
+  "kanji_progress",
+  "daily_quiz_answers",
+];
 
 /** Next.js loads .env.local over .env; mirror that order here. */
 function loadEnv() {

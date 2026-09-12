@@ -116,7 +116,7 @@ npm run dev
 | `npm run build` | Production build |
 | `npm run migrate` | Apply `supabase/migrations/*.sql`. Idempotent; tracks applied files in `schema_migrations` |
 | `npm run validate:content` | Check the JSON: duplicate ids, kana-only readings, unknown parts of speech, kanji coverage |
-| `npm run doctor` | Check the Supabase side: credentials present, project reachable, all four tables created. Run this first whenever progress is not saving. Prints no secrets. |
+| `npm run doctor` | Check the Supabase side: credentials present, project reachable, every table created. Run this first whenever progress is not saving. Prints no secrets. |
 
 ---
 
@@ -193,6 +193,36 @@ Question type is chosen by stage: meaning first, readings once a word has kanji 
 
 ---
 
+## Daily quiz
+
+`/daily-quiz`, reached from a card on the dashboard. Five questions a day — the meaning of a
+character — one attempt each.
+
+- **Which kanji.** Only characters first studied *before* today, so the pool holds still all day and
+  nothing is asked minutes after it was taught. It unlocks at five, i.e. the day after the first
+  lesson.
+- **Which five.** A uniform sample, seeded by user and date: the same five on every reload, and not
+  biased towards weak characters, since the results are meant to measure retention.
+- **Which day.** The learner's own. `TimeZoneScript` writes the browser's zone to a cookie, and the
+  server reckons dates in it; without the cookie it falls back to UTC.
+- **Grading.** The browser sends only the option picked. The server rebuilds the question and grades
+  it, and stores the character, all four options, the answer, the choice, the verdict and the
+  character's SRS stage at that moment in `daily_quiz_answers`. RLS allows select and insert but no
+  update, so an answer cannot be changed.
+- **Not scheduling.** The quiz does not touch `kanji_progress` or `study_sessions`. It records how
+  much has stuck without moving the review schedule it is measuring.
+
+Every answer is kept for analysis. To pull them:
+
+```sql
+select quiz_date, position, char, answer, chosen, correct, srs_stage, answered_at
+from daily_quiz_answers
+where user_id = '<uuid>'
+order by quiz_date, position;
+```
+
+---
+
 ## Checkpoints
 
 `lesson_progress.cursor` records how many of a lesson's words have been covered. It is written
@@ -212,6 +242,7 @@ lib/
   content.ts            Loads and indexes the JSON; derives word ids
   srs.ts                Scheduling, mastery bands, streaks
   study.ts              Queue building and distractor selection (pure, seeded)
+  daily.ts              The learner's day: time zone cookie, local dates, quiz seed
   progress.ts           Everything that touches the database
 components/
   atlas/                Components copied from the Atlas Design System

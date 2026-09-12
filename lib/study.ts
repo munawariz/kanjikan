@@ -28,6 +28,8 @@ export type StudyCard =
 
 export type CardKind = StudyCard["kind"];
 
+export type KanjiQuizCard = Extract<StudyCard, { kind: "kanji-meaning" }>;
+
 /** Cards that grade a word rather than a character. */
 export const WORD_QUIZ_KINDS = ["word-meaning", "word-reading", "word-recall"] as const;
 
@@ -164,7 +166,7 @@ function wordQuiz(
 }
 
 /** Meaning quiz for a character, with other characters as distractors. */
-function kanjiQuiz(kanji: Kanji, pool: Kanji[], rand: () => number): StudyCard {
+function kanjiQuiz(kanji: Kanji, pool: Kanji[], rand: () => number): KanjiQuizCard {
   const taken = new Set([kanji.meanings[0]]);
   const distractors: Choice[] = [];
   for (const k of shuffle(pool.filter((k) => k.char !== kanji.char), rand)) {
@@ -246,6 +248,27 @@ export function buildReviewQueue(
   return words.map((w) =>
     wordQuiz(w, pool.length >= 8 ? pool : words, wordKind(w, wordStages[w.id] ?? 0, rand), rand),
   );
+}
+
+/**
+ * A day's quiz: the meaning of a few characters already learned.
+ *
+ * Drawn uniformly, not weakest-first. Reviews already chase the weak
+ * characters; this is a sample of what has stuck, and the answers are recorded
+ * to measure exactly that — a sample biased towards failures would make the
+ * record worthless as a measure. Distractors come from the whole level, so
+ * knowing only the learned characters is no help in eliminating options.
+ */
+export function buildDailyQuiz(
+  learned: Kanji[],
+  pool: Kanji[],
+  size: number,
+  seed: number,
+): KanjiQuizCard[] {
+  const rand = rng(seed);
+  return shuffle(learned, rand)
+    .slice(0, size)
+    .map((k) => kanjiQuiz(k, pool, rand));
 }
 
 /** A writing run: reproduce each due character from memory. */

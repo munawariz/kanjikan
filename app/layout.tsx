@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeScript } from "@/components/app/ThemeScript";
+import { TimeZoneScript } from "@/components/app/TimeZoneScript";
 import { ServiceWorker } from "@/components/app/ServiceWorker";
 import "@/styles/atlas/styles.css";
 import "./globals.css";
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeScript />
+        <TimeZoneScript />
       </head>
       <body>
         {children}

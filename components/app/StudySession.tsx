@@ -42,26 +42,31 @@ type Props = {
 };
 
 /**
- * A failed write must never stall the queue, so this does not block. It must
+ * A failed write must never stall the queue, so nothing waits on this. It must
  * not be silent either: dropping the error is what makes "my progress did not
  * save" impossible to notice until much later.
+ *
+ * Resolves to whether the write landed, for a caller that has to know when
+ * every write is in. It never rejects.
  */
-function post(url: string, body: unknown, onFail?: (detail: string) => void) {
-  void fetch(url, {
+export function post(url: string, body: unknown, onFail?: (detail: string) => void): Promise<boolean> {
+  return fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
     keepalive: true,
   })
     .then(async (res) => {
-      if (res.ok) return;
+      if (res.ok) return true;
       const text = await res.text().catch(() => "");
       console.error(`[kanjikan] POST ${url} -> ${res.status} ${text}`);
       onFail?.(res.status === 401 ? "Your session expired. Sign in again." : "Could not reach the database.");
+      return false;
     })
     .catch((e) => {
       console.error(`[kanjikan] POST ${url} failed`, e);
       onFail?.("Could not reach the server.");
+      return false;
     });
 }
 
@@ -137,7 +142,7 @@ export function StudySession({
   /** Every write goes through here, so a guest session can make none. */
   const save = useCallback(
     (url: string, body: unknown) => {
-      if (!guest) post(url, body, setSaveError);
+      if (!guest) void post(url, body, setSaveError);
     },
     [guest],
   );
@@ -378,7 +383,7 @@ export function StudySession({
 
 /* -------------------------------------------------------------------------- */
 
-function SaveWarning({ detail }: { detail: string }) {
+export function SaveWarning({ detail }: { detail: string }) {
   return (
     <div
       role="alert"
@@ -495,7 +500,7 @@ function WordTeachCard({ word, onNext }: { word: Word; onNext: () => void }) {
   );
 }
 
-function QuizCard({
+export function QuizCard({
   card,
   picked,
   onChoose,

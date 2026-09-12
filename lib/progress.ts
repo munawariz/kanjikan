@@ -2,6 +2,8 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getAllWords, getKanji, getLessons, type Kanji, type Level, type Word } from "@/lib/content";
 import { bandFor, grade, KNOWN_STAGE, streakFromDates, type MasteryBand } from "@/lib/srs";
+import { buildDailyQuiz, type KanjiQuizCard } from "@/lib/study";
+import { DAILY_QUIZ_SIZE, dailySeed, localDate } from "@/lib/daily";
 
 export type WordProgressRow = {
   word_id: string;
@@ -485,6 +487,160 @@ export async function recordSession(
     total,
     correct,
   });
+}
+
+export type DailyAnswerRow = {
+  position: number;
+  char: string;
+  answer: string;
+  chosen: string;
+  correct: boolean;
+};
+
+export type DailyQuiz = {
+  date: string;
+  /** Characters first studied before this date — the pool the quiz draws on. */
+  learned: number;
+  /** The whole day's quiz in order, answered or not. Empty until enough are learned. */
+  questions: KanjiQuizCard[];
+  /** What has been answered so far, by position. */
+  answers: DailyAnswerRow[];
+  /** Recognition stage per learned character, for the record. */
+  stages: Map<string, number>;
+};
+
+/**
+ * One learner's quiz for one day.
+ *
+ * Built rather than stored: the questions follow from the date and the
+ * characters learned before it, so every reload shows the same five and the
+ * answer route can rebuild them to grade an answer itself.
+ *
+ * "Learned before the date", not "learned": today's characters join tomorrow.
+ * That holds the pool still for the whole day, so a half-finished quiz cannot
+ * change under the learner, and it keeps the quiz from asking about something
+ * taught ten minutes ago — which would measure short-term recall rather than
+ * whether it stuck.
+ */
+export async function getDailyQuiz(
+  userId: string,
+  date: string,
+  timeZone: string,
+  level: Level = "N5",
+): Promise<DailyQuiz> {
+  const supabase = createClient();
+  const [progress, answered] = await Promise.all([
+    supabase.from("kanji_progress").select("char, recognition_stage, created_at").eq("level", level),
+    supabase
+      .from("daily_quiz_answers")
+      .select("position, char, answer, chosen, correct")
+      .eq("level", level)
+      .eq("quiz_date", date)
+      .order("position", { ascending: true }),
+  ]);
+  report("getDailyQuiz progress", progress.error);
+  report("getDailyQuiz answers", answered.error);
+
+  const stages = new Map<string, number>();
+  for (const r of progress.data ?? []) {
+    // YYYY-MM-DD compares correctly as a string.
+    if (localDate(timeZone, new Date(r.created_at as string)) < date) {
+      stages.set(r.char as string, Number(r.recognition_stage ?? 0));
+    }
+  }
+
+  // Curriculum order, so the shuffle has the same input on every rebuild.
+  const all = getKanji(level);
+  const learned = all.filter((k) => stages.has(k.char));
+  const questions =
+    learned.length >= DAILY_QUIZ_SIZE
+      ? buildDailyQuiz(learned, all, DAILY_QUIZ_SIZE, dailySeed(userId, date))
+      : [];
+
+  return {
+    date,
+    learned: learned.length,
+    questions,
+    answers: (answered.data ?? []) as DailyAnswerRow[],
+    stages,
+  };
+}
+
+export type DailyAnswerResult =
+  | { status: "recorded"; correct: boolean }
+  /** The position already had an answer. The first one stands. */
+  | { status: "already-answered" }
+  | { status: "invalid"; reason: string };
+
+/**
+ * Grades one daily quiz answer and stores it.
+ *
+ * The browser sends only which option was picked. The question is rebuilt
+ * here and graded against the rebuild, so the stored verdict — and the
+ * character, and the options — are the server's, not the client's.
+ */
+export async function recordDailyAnswer(
+  userId: string,
+  date: string,
+  timeZone: string,
+  position: number,
+  choiceId: string,
+  level: Level = "N5",
+): Promise<DailyAnswerResult> {
+  const quiz = await getDailyQuiz(userId, date, timeZone, level);
+  const card = quiz.questions[position - 1];
+  if (!card) return { status: "invalid", reason: "No such question" };
+
+  const chosen = card.choices.find((c) => c.id === choiceId);
+  if (!chosen) return { status: "invalid", reason: "Not one of the options" };
+
+  const answer = card.choices.find((c) => c.id === card.answerId)!;
+  const correct = chosen.id === card.answerId;
+
+  const supabase = createClient();
+  const { error } = await supabase.from("daily_quiz_answers").insert({
+    user_id: userId,
+    level,
+    quiz_date: date,
+    position,
+    kind: card.kind,
+    char: card.kanji.char,
+    answer: answer.label,
+    chosen: chosen.label,
+    options: card.choices.map((c) => c.label),
+    correct,
+    srs_stage: quiz.stages.get(card.kanji.char) ?? 0,
+    time_zone: timeZone,
+  });
+
+  // A plain insert, not an upsert: there is deliberately no update policy, and
+  // a second answer to the same question must not replace the first.
+  if (error?.code === "23505") return { status: "already-answered" };
+  if (error) throw new Error(error.message);
+  return { status: "recorded", correct };
+}
+
+/** Correct answers per day from `since` (inclusive), for the history strip. */
+export async function getDailyHistory(
+  since: string,
+  level: Level = "N5",
+): Promise<Map<string, { answered: number; correct: number }>> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("daily_quiz_answers")
+    .select("quiz_date, correct")
+    .eq("level", level)
+    .gte("quiz_date", since);
+  report("getDailyHistory", error);
+
+  const out = new Map<string, { answered: number; correct: number }>();
+  for (const r of data ?? []) {
+    const day = out.get(r.quiz_date as string) ?? { answered: 0, correct: 0 };
+    day.answered++;
+    if (r.correct) day.correct++;
+    out.set(r.quiz_date as string, day);
+  }
+  return out;
 }
 
 /** Number of words currently due, for the nav badge. */
