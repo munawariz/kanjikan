@@ -59,6 +59,13 @@ export async function middleware(request: NextRequest) {
   const isPublic = isPublicPath(pathname);
 
   if (!user && !isPublic) {
+    // An API call must not be redirected to the sign-in page: fetch follows
+    // the redirect, receives the login page's HTML with a 200, and the caller
+    // reports a save that never happened. Answer with the 401 the routes give
+    // themselves, which is what lets the study screen say the session expired.
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+    }
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
