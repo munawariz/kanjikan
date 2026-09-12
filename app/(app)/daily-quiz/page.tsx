@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { DAILY_QUIZ_SIZE, localDate, requestTimeZone, shiftDate } from "@/lib/daily";
 import { getDailyHistory, getDailyQuiz } from "@/lib/progress";
 import { Button } from "@/components/atlas/core/Button.jsx";
@@ -22,7 +22,7 @@ export default async function DailyQuizPage() {
   const since = shiftDate(today, -(HISTORY_DAYS - 1));
   const [quiz, history] = await Promise.all([
     getDailyQuiz(user.id, today, timeZone),
-    getDailyHistory(since),
+    getDailyHistory(user.id, since),
   ]);
 
   if (quiz.questions.length === 0) {

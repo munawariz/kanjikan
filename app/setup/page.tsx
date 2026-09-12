@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { isDatabaseConfigured } from "@/lib/db";
 import { levelStats } from "@/lib/content";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
@@ -10,29 +10,25 @@ export const dynamic = "force-dynamic";
 const STEPS = [
   {
     title: "Create a Supabase project.",
-    body: "Any region, free tier is enough. Copy the Project URL and the anon public key from Project Settings, API.",
+    body: "Any region; the free tier is enough. Kanjikan only uses its Postgres database — accounts are kept in the app's own tables, not in Supabase Auth.",
   },
   {
-    title: "Add them to .env.local.",
-    body: "Copy .env.example to .env.local, paste both values in, then restart the dev server so Next.js picks them up.",
+    title: "Add the database URL to .env.",
+    body: "From the Connect button at the top of the dashboard, copy the Session pooler connection string and set it as SUPABASE_DB_URL in .env. Then restart the dev server so Next.js picks it up.",
   },
   {
     title: "Run the migration.",
-    body: "Add SUPABASE_DB_URL to .env (the Postgres connection string, from the Connect button), then run npm run migrate. It creates the tables, the row level security policies and the username lookup.",
-  },
-  {
-    title: "Turn off email confirmation.",
-    body: "Authentication, Providers, Email: switch off Confirm email. Accounts are usernames with no real address behind them, so a confirmation link would have nowhere to go and no new account could ever be opened.",
+    body: "npm run migrate creates the tables, the accounts and sessions, and the row level security policies. npm run doctor checks the result.",
   },
 ];
 
 /**
- * Shown by the middleware whenever Supabase credentials are missing, which is
- * the state of a fresh clone. Content is bundled with the app, so the numbers
+ * Shown by the middleware whenever the database URL is missing, which is the
+ * state of a fresh clone. Content is bundled with the app, so the numbers
  * below are real even before a database exists.
  */
 export default function SetupPage() {
-  if (isSupabaseConfigured) redirect("/");
+  if (isDatabaseConfigured) redirect("/");
 
   const stats = levelStats("N5");
 
@@ -51,11 +47,11 @@ export default function SetupPage() {
               lineHeight: "var(--leading-display)",
             }}
           >
-            Four steps and you are learning.
+            Three steps and you are learning.
           </h1>
           <p style={{ margin: 0, maxWidth: 520 }}>
             The {stats.words} N5 words and {stats.kanji} kanji are already in this repository and
-            need no setup. Supabase is only there to hold accounts and progress.
+            need no setup. The database is only there to hold accounts and progress.
           </p>
         </div>
 
@@ -89,13 +85,9 @@ export default function SetupPage() {
           <p className="body-sm" style={{ margin: 0, color: "var(--forest-200)" }}>
             This page is served whenever{" "}
             <code style={{ fontFamily: "var(--font-mono)", color: "var(--lime-500)" }}>
-              NEXT_PUBLIC_SUPABASE_URL
+              SUPABASE_DB_URL
             </code>{" "}
-            or{" "}
-            <code style={{ fontFamily: "var(--font-mono)", color: "var(--lime-500)" }}>
-              NEXT_PUBLIC_SUPABASE_ANON_KEY
-            </code>{" "}
-            is missing. Set both and it redirects to the app on its own.
+            is missing. Set it and restart, and it redirects to the app on its own.
           </p>
         </Card>
       </div>

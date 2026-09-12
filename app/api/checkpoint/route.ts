@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUser } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { getLesson } from "@/lib/content";
 import { saveCheckpoint } from "@/lib/progress";
 

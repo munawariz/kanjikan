@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getLesson } from "@/lib/content";
-import { getUser } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { getProgress } from "@/lib/progress";
 import { StudySession } from "@/components/app/StudySession";
 

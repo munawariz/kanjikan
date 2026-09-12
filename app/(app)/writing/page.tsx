@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getUser } from "@/lib/auth";
 import { getWritingQueue } from "@/lib/progress";
 import { StudySession } from "@/components/app/StudySession";
 import { Button } from "@/components/atlas/core/Button.jsx";
@@ -8,7 +10,10 @@ import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 export const dynamic = "force-dynamic";
 
 export default async function WritingPage() {
-  const queue = await getWritingQueue("N5", 12);
+  const user = await getUser();
+  if (!user) redirect("/login");
+
+  const queue = await getWritingQueue(user.id, "N5", 12);
 
   if (queue.length === 0) {
     return (

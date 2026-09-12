@@ -1,12 +1,20 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getUser } from "@/lib/auth";
 import { AuthLayout } from "@/components/app/AuthLayout";
 import { AuthForm } from "@/components/app/AuthForm";
 
-export default function LoginPage({
+export const dynamic = "force-dynamic";
+
+export default async function LoginPage({
   searchParams,
 }: {
   searchParams: { next?: string };
 }) {
+  // Checked here rather than in the middleware, which cannot tell a live
+  // session from a stale cookie.
+  if (await getUser()) redirect("/dashboard");
+
   // A guest sent here from a lesson goes back to that lesson; anyone else
   // lands on the list.
   const next = searchParams.next;

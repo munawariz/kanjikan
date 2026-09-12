@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getKanjiChar, getLessons, levelStats } from "@/lib/content";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { getUser } from "@/lib/supabase/server";
+import { isDatabaseConfigured } from "@/lib/db";
+import { getUser } from "@/lib/auth";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Wordmark } from "@/components/app/Wordmark";
@@ -21,7 +21,7 @@ const ISSUES_URL = `${REPO_URL}/issues`;
  * with AI and can only be checked so far.
  */
 export default async function LandingPage() {
-  if (isSupabaseConfigured && (await getUser())) redirect("/dashboard");
+  if (isDatabaseConfigured && (await getUser())) redirect("/dashboard");
 
   const stats = levelStats("N5");
   const first = getLessons("N5")[0];

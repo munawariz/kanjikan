@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { getLevelPath, getLessons } from "@/lib/content";
-import { getDashboard, getLessonSummaries } from "@/lib/progress";
+import { getDashboard } from "@/lib/progress";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
@@ -16,7 +16,7 @@ export default async function PathPage() {
 
   const path = getLevelPath();
   const data = await getDashboard(user.id);
-  const lessons = await getLessonSummaries();
+  const lessons = data.lessons;
 
   const totalTarget = path.reduce((n, l) => n + l.kanjiTarget, 0);
   const resume = data.resumeLesson ?? data.nextLesson;

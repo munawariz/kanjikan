@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUser } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { localDate, requestTimeZone, shiftDate } from "@/lib/daily";
 import { recordDailyAnswer } from "@/lib/progress";
 

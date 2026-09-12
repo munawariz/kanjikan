@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getAllWords } from "@/lib/content";
+import { getUser } from "@/lib/auth";
 import { getReviewQueue, getWordProgress } from "@/lib/progress";
 import { StudySession } from "@/components/app/StudySession";
 import { Button } from "@/components/atlas/core/Button.jsx";
@@ -11,7 +13,10 @@ export const dynamic = "force-dynamic";
 const BATCH = 30;
 
 export default async function ReviewPage() {
-  const queue = await getReviewQueue("N5", BATCH);
+  const user = await getUser();
+  if (!user) redirect("/login");
+
+  const queue = await getReviewQueue(user.id, "N5", BATCH);
 
   if (queue.length === 0) {
     return (
@@ -51,7 +56,7 @@ export default async function ReviewPage() {
     );
   }
 
-  const progress = await getWordProgress();
+  const progress = await getWordProgress(user.id);
   const wordStages: Record<string, number> = {};
   for (const w of queue) {
     const p = progress.get(w.id);

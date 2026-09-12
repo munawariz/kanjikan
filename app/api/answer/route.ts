@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUser } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { getAllWords } from "@/lib/content";
 import { recordAnswer } from "@/lib/progress";
 

@@ -1,4 +1,4 @@
-import { getUser } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { getLessonSummaries, getProgress } from "@/lib/progress";
 import { levelStats } from "@/lib/content";
 import { LessonCard } from "@/components/app/LessonCard";
@@ -7,7 +7,7 @@ import { Card } from "@/components/atlas/layout/Card.jsx";
 export const dynamic = "force-dynamic";
 
 export default async function LessonsPage() {
-  const lessons = await getLessonSummaries("N5", await getProgress(await getUser()));
+  const lessons = getLessonSummaries(await getProgress(await getUser()));
   const stats = levelStats("N5");
 
   const completed = lessons.filter((l) => l.status === "completed").length;

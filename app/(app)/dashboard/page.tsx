@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/supabase/server";
-import { getDailyQuiz, getDashboard, getLessonSummaries, type DailyQuiz } from "@/lib/progress";
+import { getUser } from "@/lib/auth";
+import { getDailyQuiz, getDashboard, type DailyQuiz } from "@/lib/progress";
 import { levelStats } from "@/lib/content";
 import { DAILY_QUIZ_SIZE, localDate, requestTimeZone } from "@/lib/daily";
 import { BAND_LABEL, type MasteryBand } from "@/lib/srs";
@@ -89,14 +89,14 @@ export default async function DashboardPage() {
   if (!user) redirect("/login");
 
   const timeZone = requestTimeZone();
-  const [data, lessons, daily] = await Promise.all([
+  const [data, daily] = await Promise.all([
     getDashboard(user.id),
-    getLessonSummaries(),
     getDailyQuiz(user.id, localDate(timeZone), timeZone),
   ]);
+  const lessons = data.lessons;
   const stats = levelStats("N5");
 
-  const name = data.profile.display_name || user.email?.split("@")[0] || "there";
+  const name = data.profile.display_name || user.username;
   const resume = data.resumeLesson ?? data.nextLesson;
   const upNext = lessons.filter((l) => l.status !== "completed").slice(0, 3);
   const percent = Math.round((data.kanjiKnown / Math.max(data.totalKanji, 1)) * 100);

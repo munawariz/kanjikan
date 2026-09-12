@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/supabase/server";
-import { getDashboard, getLessonSummaries, getWordProgress } from "@/lib/progress";
+import { getUser } from "@/lib/auth";
+import { getDashboard } from "@/lib/progress";
 import { getAllWords } from "@/lib/content";
 import { BAND_LABEL, type MasteryBand } from "@/lib/srs";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
@@ -21,8 +21,9 @@ export default async function ProgressPage() {
   const user = await getUser();
   if (!user) redirect("/login");
 
-  const [data, progress] = await Promise.all([getDashboard(user.id), getWordProgress()]);
-  const lessons = await getLessonSummaries("N5", { words: progress });
+  const data = await getDashboard(user.id);
+  const progress = data.progress.words;
+  const lessons = data.lessons;
 
   const words = getAllWords();
 

@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { SessionUser } from "@/lib/auth";
 import { getDueCount, getProfile } from "@/lib/progress";
 import { signOut } from "@/app/auth/actions";
 import { AppShell } from "./AppShell";
@@ -8,11 +8,11 @@ import { AppShell } from "./AppShell";
  * gets a sign-in button in its place. Shared by both route groups, so a lesson
  * page looks the same whether or not anyone is signed in.
  */
-export async function AppFrame({ user, children }: { user: User | null; children: React.ReactNode }) {
+export async function AppFrame({ user, children }: { user: SessionUser | null; children: React.ReactNode }) {
   if (!user) return <AppShell account={null}>{children}</AppShell>;
 
-  const [profile, dueCount] = await Promise.all([getProfile(user.id), getDueCount()]);
-  const name = profile.display_name || user.email?.split("@")[0] || "Learner";
+  const [profile, dueCount] = await Promise.all([getProfile(user.id), getDueCount(user.id)]);
+  const name = profile.display_name || user.username;
 
   return (
     <AppShell

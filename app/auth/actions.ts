@@ -2,14 +2,15 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createAccount, endSession, startSession, verifyLogin } from "@/lib/auth";
 import {
+  PASSWORD_MAX_BYTES,
   PASSWORD_MIN,
   USERNAME_MAX,
   USERNAME_MIN,
   isValidUsername,
   normalizeUsername,
-  usernameToEmail,
+  passwordTooLong,
 } from "@/lib/username";
 
 export type AuthState = {
@@ -26,10 +27,15 @@ function safeNext(next: string): string {
   return next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 }
 
+const UNREACHABLE = { error: "Could not reach the database. Try again in a moment." };
+
 /**
  * One form for everyone. A username that exists is signed in; one that does
  * not comes back as confirmCreate, and the form resubmits with intent=create
  * once the user has agreed to open that account.
+ *
+ * redirect() works by throwing, so it is only ever called outside the
+ * try/catch blocks that turn a database failure into a message.
  */
 export async function authenticate(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const typed = String(formData.get("username") ?? "").trim();
@@ -45,79 +51,57 @@ export async function authenticate(_prev: AuthState, formData: FormData): Promis
       error: `Usernames are ${USERNAME_MIN} to ${USERNAME_MAX} letters, numbers, underscores or hyphens.`,
     };
   }
-
-  const supabase = createClient();
-  const email = usernameToEmail(username);
+  if (passwordTooLong(password)) {
+    return { error: `Passwords can be at most ${PASSWORD_MAX_BYTES} characters.` };
+  }
 
   if (formData.get("intent") === "create") {
     if (password.length < PASSWORD_MIN) {
       return { error: `Use at least ${PASSWORD_MIN} characters for your password.` };
     }
+    try {
+      // Keeps the capitalisation they typed for greetings; the login itself
+      // is case-insensitive.
+      const account = await createAccount(username, typed, password);
+      if (!account) return { error: "That username was taken a moment ago. Choose another." };
+      await startSession(account.id);
+    } catch (e) {
+      console.error(`[kanjikan] createAccount failed: ${(e as Error).message}`);
+      return UNREACHABLE;
+    }
+    revalidatePath("/", "layout");
+    redirect(next);
+  }
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      // Keeps the capitalisation they typed for greetings; the login itself is
-      // case-insensitive.
-      options: { data: { display_name: typed } },
-    });
+  let result: Awaited<ReturnType<typeof verifyLogin>>;
+  try {
+    result = await verifyLogin(username, password);
+    if (result.status === "ok") await startSession(result.id);
+  } catch (e) {
+    console.error(`[kanjikan] sign-in failed: ${(e as Error).message}`);
+    return UNREACHABLE;
+  }
 
-    if (error) {
-      if (error.code === "user_already_exists") {
-        return { error: "That username was taken a moment ago. Choose another." };
+  switch (result.status) {
+    case "ok":
+      revalidatePath("/", "layout");
+      redirect(next);
+    case "locked":
+      return { error: "Too many wrong passwords for that username. Wait a few minutes and try again." };
+    case "wrong-password":
+      return { error: "Wrong password for that username." };
+    case "no-account":
+      if (password.length < PASSWORD_MIN) {
+        return {
+          error: `There is no account called ${username} yet. To open it, choose a password of at least ${PASSWORD_MIN} characters.`,
+        };
       }
-      return { error: error.message };
-    }
-
-    // With Confirm email on, Supabase holds the account until a link is
-    // clicked, and the link goes to an address that cannot receive mail.
-    if (!data.session) {
-      return {
-        error:
-          "New accounts cannot be opened yet: switch off Confirm email in Supabase " +
-          "(Authentication, Providers, Email).",
-      };
-    }
-
-    revalidatePath("/", "layout");
-    redirect(next);
+      return { confirmCreate: username };
   }
-
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (!error) {
-    revalidatePath("/", "layout");
-    redirect(next);
-  }
-
-  // Rate limiting or an outage says nothing about whether the username is
-  // free, so only a credentials mismatch may lead to the create prompt.
-  if (error.code !== "invalid_credentials") {
-    return { error: "Could not sign in right now. Try again in a moment." };
-  }
-
-  const { data: exists, error: lookupError } = await supabase.rpc("username_exists", {
-    p_username: username,
-  });
-
-  if (lookupError) {
-    return { error: "Could not check that username. Try again in a moment." };
-  }
-  if (exists) {
-    return { error: "Wrong password for that username." };
-  }
-  if (password.length < PASSWORD_MIN) {
-    return {
-      error: `There is no account called ${username} yet. To open it, choose a password of at least ${PASSWORD_MIN} characters.`,
-    };
-  }
-
-  return { confirmCreate: username };
 }
 
 export async function signOut() {
-  const supabase = createClient();
-  await supabase.auth.signOut();
+  await endSession();
   revalidatePath("/", "layout");
   redirect("/login");
 }

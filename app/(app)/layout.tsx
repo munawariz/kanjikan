@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { AppFrame } from "@/components/app/AppFrame";
 
 /**

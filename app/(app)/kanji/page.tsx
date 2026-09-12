@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { getKanji, getLessons, getWordsUsingKanji, strokeViewBox } from "@/lib/content";
+import { getUser } from "@/lib/auth";
 import { getKanjiProgress } from "@/lib/progress";
 import { KNOWN_STAGE } from "@/lib/srs";
 import { KanjiExplorer, type KanjiEntry } from "@/components/app/KanjiExplorer";
@@ -6,8 +8,11 @@ import { KanjiExplorer, type KanjiEntry } from "@/components/app/KanjiExplorer";
 export const dynamic = "force-dynamic";
 
 export default async function KanjiPage() {
+  const user = await getUser();
+  if (!user) redirect("/login");
+
   const kanji = getKanji();
-  const progress = await getKanjiProgress();
+  const progress = await getKanjiProgress(user.id);
   const lessonTitles = new Map(getLessons().map((l) => [l.slug, l.title]));
 
   const entries: KanjiEntry[] = kanji.map((k) => {

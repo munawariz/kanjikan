@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUser } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { recordSession } from "@/lib/progress";
 
 /** Logs a finished run. Streaks and the activity chart are built from these. */

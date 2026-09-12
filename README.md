@@ -49,32 +49,28 @@ This matters:
 npm install
 ```
 
-### 2. Create a Supabase project
+### 2. Create a Supabase project and connect it
 
-Any region; the free tier is enough. From **Project Settings → API**, copy the Project URL and the
-`anon` public key.
+Any region; the free tier is enough. Kanjikan uses only its Postgres database — not Supabase Auth,
+and not the REST API.
+
+From the **Connect** button at the top of the dashboard, under *ORMs* or *Connection string*, copy the
+URI. Prefer the **Session pooler** one: the direct `db.<ref>.supabase.co` host is IPv6-only on newer
+projects and will not connect from most networks.
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
-
-```
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
-
-Until both are set, every route redirects to `/setup`, which repeats these steps in the browser.
-
-### 3. Run the migration
-
-Add one more line to `.env.local` — the Postgres connection string, which is **not** the same as
-`NEXT_PUBLIC_SUPABASE_URL`. Get it from the **Connect** button at the top of the dashboard, under
-*ORMs* or *Connection string*, and copy the URI. Prefer the **Session pooler** one: the direct
-`db.<ref>.supabase.co` host is IPv6-only on newer projects and will not connect from most networks.
 
 ```
 SUPABASE_DB_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
 ```
+
+This is the only setting, and it is a **secret**: it is used on the server, never sent to the
+browser, and must also be set wherever the app is deployed. Until it is set, every route redirects to
+`/setup`, which repeats these steps in the browser.
+
+### 3. Run the migration
 
 ```bash
 npm run migrate
@@ -90,17 +86,7 @@ a migration lands whole or not at all.
 | `npm run migrate -- --dry` | List the files without connecting |
 | `npm run migrate -- --redo` | Re-run every file, ignoring the ledger |
 
-It connects straight to Postgres rather than through the REST API, because PostgREST cannot run DDL
-— it only exposes tables that already exist. That is why the publishable key is not enough here.
-
-### 4. Turn off email confirmation
-
-**Authentication → Providers → Email.** Switch *Confirm email* **off**. This is required: accounts
-are usernames with no real address behind them (see [Authentication](#authentication)), so a
-confirmation link would have nowhere to go and no new account could be opened. `npm run doctor`
-checks this.
-
-### 5. Run it
+### 4. Run it
 
 ```bash
 npm run dev
@@ -116,7 +102,7 @@ npm run dev
 | `npm run build` | Production build |
 | `npm run migrate` | Apply `supabase/migrations/*.sql`. Idempotent; tracks applied files in `schema_migrations` |
 | `npm run validate:content` | Check the JSON: duplicate ids, kana-only readings, unknown parts of speech, kanji coverage, mnemonics |
-| `npm run doctor` | Check the Supabase side: credentials present, project reachable, every table created. Run this first whenever progress is not saving. Prints no secrets. |
+| `npm run doctor` | Check the database: reachable, every table created with row level security on, accounts and sessions closed to the API. Run this first whenever progress is not saving. Prints no secrets. |
 
 ---
 
@@ -131,22 +117,32 @@ and password:
   password, and creates it only once you confirm.
 
 Usernames are 3–24 letters, numbers, underscores or hyphens, and case-insensitive. New accounts need
-a password of at least 8 characters. There is no password reset, because there is no address to
-send one to.
+a password of 8 to 72 characters. There is no password reset, because there is no address to send
+one to.
 
-Supabase Auth only does password sign-in against an email, so `lib/username.ts` stores each username
-as `<username>@kanjikan.internal`. `.internal` is reserved for private networks and never resolves, so
-no mail can leave for these addresses. Sign-in cannot tell a wrong password from an unknown user on
-its own, so migration `0003_usernames.sql` adds `username_exists()`, a function the anon key may call
-that answers that one question and cannot be used to probe other addresses.
+**No email is stored anywhere.** Accounts do not use Supabase Auth, which cannot do password sign-in
+without an email or phone number — and which rejected the stand-in addresses an earlier version
+invented for it. Instead (`lib/auth.ts`, migration `0005_accounts.sql`):
 
-Telling the two cases apart means anyone can check whether a username is taken. That is the cost of
-the create-on-first-sign-in flow.
+- `accounts` holds a username and a bcrypt hash of the password.
+- Signing in creates a row in `sessions` and an httpOnly cookie holding a random token. The table
+  keeps only the token's SHA-256, so reading it does not let anyone sign in.
+- Ten wrong passwords in a row lock a username for fifteen minutes.
+- Neither table is reachable through Supabase's REST API: row level security is on with no policies,
+  and the API roles have no grants on them.
+
+Telling a wrong password apart from an unknown username means anyone can check whether a username is
+taken. That is the cost of the create-on-first-sign-in flow; the lockout is what stops it being a
+free way to guess passwords.
+
+Accounts from the Supabase Auth era were carried over by `0005_accounts.sql` with the same id, so
+their progress stayed attached, and the same password. Their username is the part of the old email
+address before the @.
 
 ### Guest mode
 
 Lessons can be taken without an account. `/lessons`, a lesson page, and its study session are open
-to anyone; the landing page offers *Try a Lesson First* and the login page links there too. A guest
+to anyone; the landing page offers *Start with Lesson 1* and the login page links there too. A guest
 gets exactly the same session, but **nothing is saved**: `StudySession` makes no calls to `/api/`,
 every lesson starts at the first character, and a strip under the header says so. The end-of-lesson
 summary sends them to sign in and back to the same lesson.
@@ -166,7 +162,9 @@ request, and gives the server no session to hang per-user progress off. It canno
 multi-user progress tracking you asked for in the same sentence.
 
 Isolation is enforced in Postgres, not in application code. Every table has an RLS policy of
-`auth.uid() = user_id`, so a bug in a query cannot leak one learner's progress to another.
+`auth.uid() = user_id`, and the app connects to Postgres directly (`lib/db.ts`) and runs each
+learner's queries in a transaction as the `authenticated` role, with the claims that make
+`auth.uid()` their account id. So a bug in a query cannot leak one learner's progress to another.
 
 ---
 
@@ -244,14 +242,16 @@ lib/
   srs.ts                Scheduling, mastery bands, streaks
   study.ts              Queue building and distractor selection (pure, seeded)
   daily.ts              The learner's day: time zone cookie, local dates, quiz seed
-  progress.ts           Everything that touches the database
+  db.ts                 The Postgres pool; runs queries as one learner, under RLS
+  auth.ts               Accounts, passwords, sessions
+  progress.ts           Everything about a learner's progress
 components/
   atlas/                Components copied from the Atlas Design System
   app/                  Kanjikan screens
 supabase/migrations/    Schema, RLS policies, triggers
 scripts/
   migrate.mjs           Applies migrations straight to Postgres
-  doctor.mjs            Checks credentials, reachability and that tables exist
+  doctor.mjs            Checks the database: tables, row level security, access
   validate-content.mjs  Checks the vocabulary JSON
 ```
 

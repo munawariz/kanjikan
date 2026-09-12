@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLesson, strokeViewBox } from "@/lib/content";
-import { getUser } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { getProgress } from "@/lib/progress";
 import { bandFor, BAND_LABEL, KNOWN_STAGE, type MasteryBand } from "@/lib/srs";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
