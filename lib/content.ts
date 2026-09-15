@@ -289,7 +289,8 @@ function attachParts(kanji: Kanji[], memo: MnemonicFile) {
 
 /**
  * Content is static and read-only, so it is parsed once per server process.
- * Adding N4-N1 means dropping a directory beside n5 and extending this list.
+ * Adding N4-N1 means dropping a directory beside n5 and extending this list,
+ * and the loaders in lib/strokeBank.ts.
  */
 const LEVELS: Level[] = ["N5"];
 

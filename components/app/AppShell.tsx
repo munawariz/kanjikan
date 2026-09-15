@@ -16,19 +16,23 @@ export type ShellAccount = {
 };
 
 /**
- * Seven destinations, seven distinct glyphs.
+ * Eight destinations, eight distinct glyphs.
  *
  * They have to be distinguishable on their own: on a narrow phone the labels
- * are dropped so all seven tabs fit, and two items sharing an icon there would
+ * are dropped so all eight tabs fit, and two items sharing an icon there would
  * be indistinguishable. See the label breakpoint in the style block below.
+ *
+ * `guest` marks the pages that work without an account — the ones under
+ * app/(open), which the middleware lets through.
  */
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: "house" },
   { href: "/path", label: "Path", icon: "route" },
-  { href: "/lessons", label: "Lessons", icon: "file-text" },
+  { href: "/lessons", label: "Lessons", icon: "file-text", guest: true },
   { href: "/review", label: "Review", icon: "zap" },
   { href: "/writing", label: "Writing", icon: "pen-line" },
   { href: "/kanji", label: "Kanji", icon: "grid-2x2" },
+  { href: "/practice", label: "Practice", icon: "target", guest: true },
   { href: "/progress", label: "Progress", icon: "chart-line" },
 ];
 
@@ -36,10 +40,11 @@ const NAV = [
  * Application chrome. Atlas keeps its header static rather than sticky, and
  * marks the active item with a lime underline instead of a filled pill.
  *
- * With no account the visitor is a guest on one of the open pages. The nav
- * stays whole — the other tabs lead to sign-in, which is the honest answer to
- * "what is behind this" — and a strip under the header says that nothing is
- * being saved, since that is the one thing a guest cannot see for themselves.
+ * With no account the visitor is a guest on one of the open pages, and the
+ * nav shows only those pages: every other tab would lead straight to a
+ * sign-in form. The Sign In button stands for everything else. A strip under
+ * the header says that nothing is being saved, since that is the one thing a
+ * guest cannot see for themselves.
  */
 export function AppShell({
   account,
@@ -50,6 +55,7 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const signIn = `/login?next=${encodeURIComponent(pathname)}`;
+  const nav = account ? NAV : NAV.filter((item) => item.guest);
 
   return (
     <>
@@ -63,8 +69,8 @@ export function AppShell({
               <Wordmark />
             </Link>
 
-            <nav className="row app-nav" style={{ gap: 4 }}>
-              {NAV.map((item) => {
+            <nav className={`row app-nav${nav.length <= 3 ? " app-nav-few" : ""}`} style={{ gap: 4 }}>
+              {nav.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
                   <Link
@@ -147,7 +153,7 @@ export function AppShell({
               <Icon name="circle" size={14} color="var(--on-tint-body)" />
               <span>
                 <strong style={{ color: "var(--on-tint-heading)" }}>You are studying as a guest.</strong>{" "}
-                Lessons work in full, but nothing you answer is saved.
+                Lessons and practice work in full, but nothing you answer is saved.
               </span>
             </span>
             <Link
@@ -168,7 +174,7 @@ export function AppShell({
 
           The first moves the nav out of the header and pins it to the bottom,
           within thumb reach. The second, further down, drops the tab labels
-          once seven of them stop fitting across the width — and shortens the
+          once all eight stop fitting across the width — and shortens the
           bar to match, since an icon needs less height than an icon over a
           label. Both heights come from --nav-tab-h so the page's bottom
           padding tracks them automatically.
@@ -211,7 +217,7 @@ export function AppShell({
             padding: 0 6px env(safe-area-inset-bottom, 0px);
             /* The inline gap:4 and space-around were dividing the leftover
                space unevenly. Equal flex tabs give every destination exactly
-               one seventh, which is what makes the row look regular. */
+               an equal share, which is what makes the row look regular. */
             gap: 2px !important;
             /* Equal-height tabs regardless of which ones carry a label; the
                base .row centres them, which would leave them ragged. */
@@ -270,8 +276,8 @@ export function AppShell({
           .app-username { display: none; }
         }
 
-        /* Seven labels stop fitting well before 480px: at 560px each tab is
-           80px, and "Dashboard" at 10px is already most of that.
+        /* Eight labels stop fitting well before 480px: at 560px each tab is
+           70px, and "Dashboard" at 10px is already most of that.
 
            Dropping the label leaves only the icon, so the bar shortens to
            match. 44px is the floor: it is the minimum comfortable tap target,
@@ -286,6 +292,15 @@ export function AppShell({
           }
 
           .app-nav a .nav-label { display: none; }
+
+          /* A guest has two tabs, and two fit with their labels at any width.
+             Icon and label sit side by side so the shorter bar still holds
+             them, and the whole tab takes the highlight in place of the
+             icon-sized square, which would sit oddly off to one side. */
+          .app-nav.app-nav-few a { flex-direction: row; gap: 8px !important; }
+          .app-nav.app-nav-few a .nav-label { display: inline; font-size: 12px; }
+          .app-nav.app-nav-few a::before { display: none; }
+          .app-nav.app-nav-few a[data-active="true"] { background: var(--surface-sunken) !important; }
 
           /* The tab is still the full-width tap target — only the visible
              highlight shrinks to the square. Making the tab itself square

@@ -11,17 +11,30 @@ import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import type { Kanji, Word } from "@/lib/content";
 import {
   buildLessonQueue,
+  buildPracticeQueue,
   buildReviewQueue,
   buildWritingQueue,
   PROMPT,
+  type KanjiGloss,
+  type PracticeType,
   type StudyCard,
 } from "@/lib/study";
 import { KanjiAnatomy } from "./KanjiAnatomy";
 import { StrokeDiagram } from "./StrokeDiagram";
 import { WritingPad } from "./WritingPad";
 
+type Mode = "lesson" | "review" | "writing" | "practice";
+
 type Props = {
-  mode: "lesson" | "review" | "writing";
+  /**
+   * Practice runs over characters picked on the practice page, signed in or
+   * not, and is never saved: it exists to drill a few characters without the
+   * result moving them through the review schedule or counting towards what
+   * the learner is shown to know.
+   */
+  mode: Mode;
+  /** What a practice run drills. Ignored by every other mode. */
+  practiceTypes?: PracticeType[];
   /**
    * Not signed in. The session runs exactly the same, but nothing is sent to
    * the server — every write would only come back 401 and raise the "not
@@ -34,6 +47,8 @@ type Props = {
   words: Word[];
   /** Wider candidate set for review distractors. */
   pool?: Word[];
+  /** Every character of the level, for practice distractors. */
+  kanjiPool?: KanjiGloss[];
   kanjiStages: Record<string, number>;
   wordStages: Record<string, number>;
   seed: number;
@@ -72,15 +87,18 @@ export function post(url: string, body: unknown, onFail?: (detail: string) => vo
 }
 
 const FURIGANA_KEY = "kanjikan-furigana";
+const HINTS_KEY = "kanjikan-writing-hints";
 
 export function StudySession({
   mode,
+  practiceTypes,
   guest = false,
   lessonSlug,
   lessonTitle,
   kanji,
   words,
   pool,
+  kanjiPool,
   kanjiStages,
   wordStages,
   seed,
@@ -88,12 +106,34 @@ export function StudySession({
   lessonLength,
 }: Props) {
   const router = useRouter();
+  const practice = mode === "practice";
+
+  /**
+   * Which pass through a practice run this is. Going again reshuffles by
+   * moving the seed on; it only changes after the first render, so the server
+   * and the client still build the same first queue.
+   */
+  const [round, setRound] = useState(0);
 
   const queue = useMemo<StudyCard[]>(() => {
     if (mode === "lesson") return buildLessonQueue(kanji, words, kanjiStages, wordStages, seed);
     if (mode === "writing") return buildWritingQueue(kanji);
+    if (mode === "practice") {
+      return buildPracticeQueue(
+        practiceTypes ?? ["reading"],
+        kanji,
+        words,
+        kanjiPool ?? kanji,
+        pool ?? words,
+        wordStages,
+        seed + round,
+      );
+    }
     return buildReviewQueue(words, wordStages, pool ?? words, seed);
-  }, [mode, kanji, words, pool, kanjiStages, wordStages, seed]);
+  }, [mode, practiceTypes, kanji, words, pool, kanjiPool, kanjiStages, wordStages, seed, round]);
+
+  /** A review has no writing card, and so no use for the hint toggle. */
+  const hasWriting = useMemo(() => queue.some((c) => c.kind === "kanji-write"), [queue]);
 
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
@@ -116,11 +156,21 @@ export function StudySession({
    */
   const [showFurigana, setShowFurigana] = useState(true);
 
+  /**
+   * Whether the writing pad checks each stroke as it is drawn.
+   *
+   * The opposite default to the reading: writing from memory is the point of
+   * the card, so hints are something to ask for rather than something to turn
+   * off. Read after mount for the same hydration reason as the reading.
+   */
+  const [hints, setHints] = useState(false);
+
   useEffect(() => {
     try {
       setShowFurigana(localStorage.getItem(FURIGANA_KEY) !== "off");
+      setHints(localStorage.getItem(HINTS_KEY) === "on");
     } catch {
-      // Private browsing can refuse storage; the default stands.
+      // Private browsing can refuse storage; the defaults stand.
     }
   }, []);
 
@@ -136,16 +186,31 @@ export function StudySession({
     });
   }, []);
 
+  const toggleHints = useCallback(() => {
+    setHints((on) => {
+      const next = !on;
+      try {
+        localStorage.setItem(HINTS_KEY, next ? "on" : "off");
+      } catch {
+        // Applies for this session; it just will not be remembered.
+      }
+      return next;
+    });
+  }, []);
+
   const card = queue[index];
   const total = queue.length;
   const isLast = index === total - 1;
 
-  /** Every write goes through here, so a guest session can make none. */
+  /**
+   * Every write goes through here, so a guest session or a practice run can
+   * make none — not an answer, not a session in the history, not a checkpoint.
+   */
   const save = useCallback(
     (url: string, body: unknown) => {
-      if (!guest) void post(url, body, setSaveError);
+      if (!guest && !practice) void post(url, body, setSaveError);
     },
-    [guest],
+    [guest, practice],
   );
 
   const finish = useCallback(
@@ -159,11 +224,21 @@ export function StudySession({
           completed: true,
         });
       }
-      // Picks up the progress just written. A guest wrote none.
-      if (!guest) router.refresh();
+      // Picks up the progress just written. A guest or a practice run wrote none.
+      if (!guest && !practice) router.refresh();
     },
-    [mode, guest, save, lessonSlug, kanji.length, cursorOffset, lessonLength, router],
+    [mode, guest, practice, save, lessonSlug, kanji.length, cursorOffset, lessonLength, router],
   );
+
+  /** Another pass over the same characters, reshuffled. */
+  const restart = useCallback(() => {
+    setRound((r) => r + 1);
+    setIndex(0);
+    setPicked(null);
+    setAnswered(0);
+    setCorrectCount(0);
+    setDone(false);
+  }, []);
 
   const advance = useCallback(() => {
     if (isLast) {
@@ -235,6 +310,12 @@ export function StudySession({
         toggleFurigana();
         return;
       }
+      // Likewise hints, which matter most on the writing pad itself.
+      if ((e.key === "h" || e.key === "H") && hasWriting) {
+        e.preventDefault();
+        toggleHints();
+        return;
+      }
 
       // The writing pad wants the pointer, and Space there would skip past the
       // character being drawn.
@@ -256,7 +337,7 @@ export function StudySession({
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [card, picked, done, advance, choose, toggleFurigana]);
+  }, [card, picked, done, advance, choose, toggleFurigana, toggleHints, hasWriting]);
 
   if (done) {
     return (
@@ -269,6 +350,12 @@ export function StudySession({
           guest={guest}
           lessonSlug={lessonSlug}
           lessonTitle={lessonTitle}
+          practiceHref={
+            practice
+              ? `/practice?kanji=${encodeURIComponent(kanji.map((k) => k.char).join(""))}&types=${(practiceTypes ?? []).join(",")}`
+              : null
+          }
+          onRestart={restart}
         />
       </div>
     );
@@ -306,10 +393,30 @@ export function StudySession({
             {cursorOffset > 0 && ` · resumed at kanji ${cursorOffset + 1}`}
           </span>
           <div className="row" style={{ gap: 10 }}>
-            <button
-              type="button"
+            {hasWriting && (
+              <SessionToggle
+                onClick={toggleHints}
+                pressed={hints}
+                applies={card.kind === "kanji-write"}
+                icon={hints ? "lightbulb" : "lightbulb-off"}
+                label={hints ? "Turn off writing hints" : "Turn on writing hints"}
+                title={
+                  card.kind === "kanji-write"
+                    ? hints
+                      ? "Turn off hints (H)"
+                      : "Hint each stroke as you write it (H)"
+                    : hints
+                      ? "No writing on this card. Hints stay on for the next one."
+                      : "No writing on this card. Hints stay off for the next one."
+                }
+              />
+            )}
+            <SessionToggle
               onClick={toggleFurigana}
-              aria-pressed={!showFurigana}
+              pressed={!showFurigana}
+              applies={cardHasReading}
+              icon={showFurigana ? "eye" : "eye-off"}
+              label={showFurigana ? "Hide the reading" : "Show the reading"}
               title={
                 cardHasReading
                   ? showFurigana
@@ -319,31 +426,7 @@ export function StudySession({
                     ? "No reading on this card. Readings stay on for the next word."
                     : "No reading on this card. Readings stay hidden for the next word."
               }
-              aria-label={showFurigana ? "Hide the reading" : "Show the reading"}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 30,
-                height: 30,
-                flex: "0 0 auto",
-                borderRadius: "var(--radius-full)",
-                // Stays clickable when the card has no reading, so the setting
-                // can be made ahead of the next word, but drops to a hairline
-                // outline so it does not promise a change it cannot make here.
-                border: `1px solid ${cardHasReading ? "var(--border-default)" : "var(--border-subtle)"}`,
-                background: !showFurigana && cardHasReading ? "var(--surface-sunken)" : "transparent",
-                color: cardHasReading
-                  ? showFurigana
-                    ? "var(--text-muted)"
-                    : "var(--text-heading)"
-                  : "var(--border-default)",
-                cursor: "pointer",
-                transition: "var(--transition-control)",
-              }}
-            >
-              <Icon name={showFurigana ? "eye" : "eye-off"} size={15} />
-            </button>
+            />
             <span className="eyebrow" style={{ color: "var(--text-body)" }}>
               {index + 1} / {total}
             </span>
@@ -364,6 +447,8 @@ export function StudySession({
             paths={card.kanji.strokePaths}
             meaning={card.kanji.meanings.join(", ")}
             expectedStrokes={card.kanji.strokes}
+            level={card.kanji.level}
+            hints={hints}
             onGrade={gradeWriting}
           />
         </Card>
@@ -383,6 +468,56 @@ export function StudySession({
 }
 
 /* -------------------------------------------------------------------------- */
+
+/**
+ * A session setting in the header: the reading, or writing hints.
+ *
+ * `applies` is whether the current card has anything for it to change. It
+ * stays clickable when not, so the setting can be made ahead of the card it is
+ * for, but drops to a hairline outline so it does not promise a change it
+ * cannot make here.
+ */
+function SessionToggle({
+  onClick,
+  pressed,
+  applies,
+  icon,
+  label,
+  title,
+}: {
+  onClick: () => void;
+  pressed: boolean;
+  applies: boolean;
+  icon: string;
+  label: string;
+  title: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={pressed}
+      title={title}
+      aria-label={label}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 30,
+        height: 30,
+        flex: "0 0 auto",
+        borderRadius: "var(--radius-full)",
+        border: `1px solid ${applies ? "var(--border-default)" : "var(--border-subtle)"}`,
+        background: pressed && applies ? "var(--surface-sunken)" : "transparent",
+        color: applies ? (pressed ? "var(--text-heading)" : "var(--text-muted)") : "var(--border-default)",
+        cursor: "pointer",
+        transition: "var(--transition-control)",
+      }}
+    >
+      <Icon name={icon} size={15} />
+    </button>
+  );
+}
 
 export function SaveWarning({ detail }: { detail: string }) {
   return (
@@ -718,13 +853,18 @@ function Summary({
   guest,
   lessonSlug,
   lessonTitle,
+  practiceHref,
+  onRestart,
 }: {
   correct: number;
   total: number;
-  mode: "lesson" | "review" | "writing";
+  mode: Mode;
   guest: boolean;
   lessonSlug: string | null;
   lessonTitle: string;
+  /** Back to the practice page with this run's choices, or null for a run that counts. */
+  practiceHref: string | null;
+  onRestart: () => void;
 }) {
   const percent = total ? Math.round((correct / total) * 100) : 0;
 
@@ -774,7 +914,28 @@ function Summary({
           ))}
         </div>
 
-        {guest ? (
+        {practiceHref !== null ? (
+          <>
+            <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
+              {guest
+                ? "This was practice, so none of it was saved."
+                : "This was practice, so none of it was saved. Your progress and your review schedule are exactly as they were."}
+            </p>
+
+            <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
+              <Button variant="accent" size="lg" icon="chevron-right" onClick={onRestart}>
+                Practise Again
+              </Button>
+              {/* Back with the same choices still made, so the set can be
+                  adjusted rather than chosen again from nothing. */}
+              <Link href={practiceHref} className="reset-link">
+                <Button variant="outline-inverse" size="lg">
+                  Change Practice
+                </Button>
+              </Link>
+            </div>
+          </>
+        ) : guest ? (
           <>
             <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
               None of this was saved, because you are not signed in. With an account, every answer

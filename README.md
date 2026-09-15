@@ -151,12 +151,17 @@ gets exactly the same session, but **nothing is saved**: `StudySession` makes no
 every lesson starts at the first character, and a strip under the header says so. The end-of-lesson
 summary sends them to sign in and back to the same lesson.
 
+`/practice` is open too. There anyone picks kanji — single characters or a whole level — and what to
+drill (reading, writing), and runs a session that is never saved for anyone, signed in or not: it does
+not touch progress, reviews, streaks or the session history. A guest's nav shows only Lessons and
+Practice.
+
 Every other page still requires a session. The split is by route group:
 
 | | |
 |---|---|
 | `app/(app)/` | Signed in only. The layout redirects to `/login`. |
-| `app/(open)/` | With or without a session. Currently just `lessons/`. |
+| `app/(open)/` | With or without a session: `lessons/` and `practice/`. |
 
 Opening a page to guests means moving it into `(open)` **and** adding its path to `GUEST_SECTIONS`
 in `middleware.ts`.

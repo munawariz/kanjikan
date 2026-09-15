@@ -165,8 +165,11 @@ function wordQuiz(
   return { kind, word, choices: shuffle(options, rand), answerId: word.id };
 }
 
+/** All a distractor needs of another character: what it is, and what it means. */
+export type KanjiGloss = Pick<Kanji, "char" | "meanings">;
+
 /** Meaning quiz for a character, with other characters as distractors. */
-function kanjiQuiz(kanji: Kanji, pool: Kanji[], rand: () => number): KanjiQuizCard {
+function kanjiQuiz(kanji: Kanji, pool: KanjiGloss[], rand: () => number): KanjiQuizCard {
   const taken = new Set([kanji.meanings[0]]);
   const distractors: Choice[] = [];
   for (const k of shuffle(pool.filter((k) => k.char !== kanji.char), rand)) {
@@ -274,6 +277,56 @@ export function buildDailyQuiz(
 /** A writing run: reproduce each due character from memory. */
 export function buildWritingQueue(kanji: Kanji[]): StudyCard[] {
   return kanji.map((k) => ({ kind: "kanji-write", kanji: k }));
+}
+
+/**
+ * What a practice run can drill. Reading is the multiple-choice cards: what
+ * each character means, and what the words it teaches mean and how they are
+ * read. Writing is the pad. Hearing is planned and not built.
+ */
+export const PRACTICE_TYPES = ["reading", "writing"] as const;
+export type PracticeType = (typeof PRACTICE_TYPES)[number];
+
+export function isPracticeType(value: string): value is PracticeType {
+  return (PRACTICE_TYPES as readonly string[]).includes(value);
+}
+
+/**
+ * A practice run over characters the learner picked for themselves.
+ *
+ * Nothing here is due, so there is no order to respect and the cards are
+ * shuffled: reading cards grouped by character would let each meaning card
+ * give away the words that follow it, and writing in curriculum order lets the
+ * learner know what is coming. Distractors come from the whole level, since a
+ * pick of two characters has too few of its own to offer three wrong answers.
+ *
+ * With both kinds chosen, all the writing comes first. Every reading card
+ * shows a character, so writing one after its meaning card would be copying
+ * something just seen rather than recalling it.
+ */
+export function buildPracticeQueue(
+  types: readonly PracticeType[],
+  kanji: Kanji[],
+  words: Word[],
+  kanjiPool: KanjiGloss[],
+  wordPool: Word[],
+  wordStages: Record<string, number>,
+  seed: number,
+): StudyCard[] {
+  const rand = rng(seed);
+  const writing = types.includes("writing") ? buildWritingQueue(shuffle(kanji, rand)) : [];
+
+  const reading: StudyCard[] = [];
+  if (types.includes("reading")) {
+    for (const k of kanji) {
+      reading.push(kanjiQuiz(k, kanjiPool, rand));
+      for (const w of words.filter((w) => w.teaches === k.char)) {
+        reading.push(wordQuiz(w, wordPool, wordKind(w, wordStages[w.id] ?? 0, rand), rand));
+      }
+    }
+  }
+
+  return [...writing, ...shuffle(reading, rand)];
 }
 
 export const PROMPT: Record<Exclude<CardKind, "kanji-teach" | "kanji-write" | "word-teach">, string> = {

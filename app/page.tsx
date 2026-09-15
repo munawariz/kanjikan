@@ -104,7 +104,7 @@ export default async function LandingPage() {
                 ],
                 [
                   "Writing by hand.",
-                  "You watch the stroke order, then draw the kanji yourself from memory.",
+                  "You watch the stroke order, then draw the kanji yourself from memory. Each stroke is checked against the model for its order, direction, length and shape.",
                 ],
                 [
                   "Reviews before you forget.",

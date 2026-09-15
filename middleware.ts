@@ -4,10 +4,11 @@ import { SESSION_COOKIE } from "@/lib/session-cookie";
 const PUBLIC_PATHS = ["/", "/login", "/setup"];
 
 /**
- * Whole sections a guest may use: lessons can be taken without an account,
- * just without anything being saved. These are the pages under app/(open).
+ * Whole sections a guest may use: lessons and practice work without an
+ * account, just without anything being saved. These are the pages under
+ * app/(open), and the tabs a guest sees in the nav.
  */
-const GUEST_SECTIONS = ["/lessons"];
+const GUEST_SECTIONS = ["/lessons", "/practice"];
 
 function isPublicPath(pathname: string) {
   return (
