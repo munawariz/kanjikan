@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { getDailyQuiz, getDashboard, type DailyQuiz } from "@/lib/progress";
-import { levelStats } from "@/lib/content";
+import { getAllWords, levelStats } from "@/lib/content";
 import { DAILY_QUIZ_SIZE, localDate, requestTimeZone } from "@/lib/daily";
 import { BAND_LABEL, type MasteryBand } from "@/lib/srs";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
@@ -100,6 +100,25 @@ export default async function DashboardPage() {
   const resume = data.resumeLesson ?? data.nextLesson;
   const upNext = lessons.filter((l) => l.status !== "completed").slice(0, 3);
   const percent = Math.round((data.kanjiKnown / Math.max(data.totalKanji, 1)) * 100);
+
+  // Accuracy across every answer ever recorded, not just this session.
+  const progress = data.progress.words;
+  let correct = 0;
+  let attempts = 0;
+  for (const p of progress.values()) {
+    correct += p.correct_count;
+    attempts += p.correct_count + p.incorrect_count;
+  }
+  const accuracy = attempts ? Math.round((correct / attempts) * 100) : 0;
+
+  // The words getting missed most often — the honest part of a progress page.
+  const words = getAllWords();
+  const trouble = [...progress.values()]
+    .filter((p) => p.incorrect_count > 0)
+    .sort((a, b) => b.incorrect_count - a.incorrect_count)
+    .slice(0, 8)
+    .map((p) => ({ row: p, word: words.find((w) => w.id === p.word_id) }))
+    .filter((x) => x.word);
 
   return (
     <div className="stack" style={{ gap: 48 }}>
@@ -216,12 +235,14 @@ export default async function DashboardPage() {
       </section>
 
       {/* ---- Numbers ----------------------------------------------------- */}
-      <section className="grid grid-4">
+      <section className="grid grid-3">
         {[
           { label: "Kanji started", value: data.kanjiStarted, sub: `of ${stats.kanji}`, icon: "grid-2x2" },
           { label: "Can write", value: data.kanjiWritten, sub: "from memory", icon: "file-text" },
           { label: "Answered today", value: data.reviewedToday, sub: `goal ${data.profile.daily_goal}`, icon: "check" },
           { label: "Day streak", value: data.streak, sub: "consecutive days", icon: "star" },
+          { label: "Accuracy", value: `${accuracy}%`, sub: `${attempts} answers, all time`, icon: "chart-line" },
+          { label: "Due now", value: data.dueNow, sub: "waiting for review", icon: "zap" },
         ].map((stat) => (
           <Card key={stat.label} tone="white" pad="md" radius="lg" bordered>
             <div className="stack" style={{ gap: 14 }}>
@@ -278,6 +299,10 @@ export default async function DashboardPage() {
             <div>
               <p className="eyebrow">Where your kanji sit</p>
               <h3 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-3)" }}>Kanji mastery</h3>
+              <p className="body-sm muted" style={{ margin: "8px 0 0" }}>
+                A kanji counts as known once its meaning has survived a week-long gap, not once you
+                have seen it.
+              </p>
             </div>
 
             <div style={{ display: "flex", height: 12, borderRadius: "var(--radius-full)", overflow: "hidden" }}>
@@ -343,6 +368,106 @@ export default async function DashboardPage() {
           </div>
         </section>
       )}
+
+      {/* ---- Trouble words ----------------------------------------------- */}
+      {trouble.length > 0 && (
+        <section className="stack" style={{ gap: 20 }}>
+          <div>
+            <p className="eyebrow">Needs another look</p>
+            <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-1)" }}>
+              The words tripping you up
+            </h2>
+          </div>
+
+          <div className="grid grid-4">
+            {trouble.map(({ row, word }) => (
+              <Card key={row.word_id} tone="white" pad="md" radius="md" bordered>
+                <div className="stack" style={{ gap: 10 }}>
+                  <div className="jp" style={{ fontSize: 26, color: "var(--text-heading)" }}>
+                    {word!.word}
+                  </div>
+                  {word!.reading !== word!.word && (
+                    <div className="jp body-sm muted">{word!.reading}</div>
+                  )}
+                  <div className="body-sm" style={{ color: "var(--text-heading)" }}>
+                    {word!.meanings[0]}
+                  </div>
+                  <Badge tone="negative">
+                    {row.incorrect_count} {row.incorrect_count === 1 ? "miss" : "misses"}
+                  </Badge>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ---- Every lesson ------------------------------------------------ */}
+      <section className="stack" style={{ gap: 20 }}>
+        <div>
+          <p className="eyebrow">By lesson</p>
+          <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-1)" }}>
+            All {lessons.length} lessons
+          </h2>
+        </div>
+
+        <Card tone="white" pad="none" radius="lg" bordered>
+          {lessons.map((lesson, i) => (
+            <Link
+              key={lesson.slug}
+              href={`/lessons/${lesson.slug}`}
+              className="reset-link row"
+              style={{
+                gap: 20,
+                padding: "16px 24px",
+                borderTop: i === 0 ? "none" : "1px solid var(--border-subtle)",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+              }}
+            >
+              <div className="row" style={{ gap: 18, minWidth: 0, flex: 1 }}>
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "var(--text-body-xs)",
+                    color: "var(--text-muted)",
+                    width: 24,
+                    flex: "0 0 auto",
+                  }}
+                >
+                  {String(lesson.order).padStart(2, "0")}
+                </span>
+                <span
+                  style={{
+                    fontWeight: "var(--weight-semibold)",
+                    color: "var(--text-heading)",
+                    minWidth: 0,
+                  }}
+                >
+                  {lesson.title}
+                </span>
+              </div>
+
+              <div className="row lesson-row-meter" style={{ gap: 16 }}>
+                <div className="meter" style={{ width: "100%", minWidth: 80 }}>
+                  <span style={{ width: `${lesson.percent}%` }} />
+                </div>
+                <span
+                  className="body-sm"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--text-heading)",
+                    width: 68,
+                    textAlign: "right",
+                  }}
+                >
+                  {lesson.kanjiKnown}/{lesson.kanji.length}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </Card>
+      </section>
     </div>
   );
 }

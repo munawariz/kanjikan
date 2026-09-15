@@ -16,11 +16,14 @@ export type ShellAccount = {
 };
 
 /**
- * Eight destinations, eight distinct glyphs.
+ * Seven destinations, seven distinct glyphs.
  *
  * They have to be distinguishable on their own: on a narrow phone the labels
- * are dropped so all eight tabs fit, and two items sharing an icon there would
+ * are dropped so all seven tabs fit, and two items sharing an icon there would
  * be indistinguishable. See the label breakpoint in the style block below.
+ *
+ * Progress has no tab: its figures live on the dashboard, and /progress
+ * redirects there (next.config.mjs).
  *
  * `guest` marks the pages that work without an account — the ones under
  * app/(open), which the middleware lets through.
@@ -33,7 +36,6 @@ const NAV = [
   { href: "/writing", label: "Writing", icon: "pen-line" },
   { href: "/kanji", label: "Kanji", icon: "grid-2x2" },
   { href: "/practice", label: "Practice", icon: "target", guest: true },
-  { href: "/progress", label: "Progress", icon: "chart-line" },
 ];
 
 /**
@@ -174,7 +176,7 @@ export function AppShell({
 
           The first moves the nav out of the header and pins it to the bottom,
           within thumb reach. The second, further down, drops the tab labels
-          once all eight stop fitting across the width — and shortens the
+          once all seven stop fitting across the width — and shortens the
           bar to match, since an icon needs less height than an icon over a
           label. Both heights come from --nav-tab-h so the page's bottom
           padding tracks them automatically.
@@ -276,8 +278,8 @@ export function AppShell({
           .app-username { display: none; }
         }
 
-        /* Eight labels stop fitting well before 480px: at 560px each tab is
-           70px, and "Dashboard" at 10px is already most of that.
+        /* Seven labels stop fitting well before 480px: at 560px each tab is
+           80px, and "Dashboard" at 10px is already most of that.
 
            Dropping the label leaves only the icon, so the bar shortens to
            match. 44px is the floor: it is the minimum comfortable tap target,

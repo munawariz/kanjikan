@@ -193,7 +193,7 @@ learner's queries in a transaction as the `authenticated` role, with the claims 
 | 8 | 3 months — **mastered** |
 
 Correct promotes one stage; wrong demotes two, never below 1. A word counts as *known* once it has
-survived a week-long gap, which is the bar the progress screen measures against.
+survived a week-long gap, which is the bar the dashboard measures against.
 
 Question type is chosen by stage: meaning first, readings once a word has kanji and a stage above
 1, and English-to-Japanese production only at higher stages.
