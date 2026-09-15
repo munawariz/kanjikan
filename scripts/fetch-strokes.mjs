@@ -7,9 +7,10 @@
  * stays under that licence; see data/jlpt/STROKES-LICENSE.md.
  *
  * Only the ordered path geometry and the radical element are kept, so the file
- * is a fraction of the size of 80 full SVGs and needs no XML parsing at runtime.
+ * is a fraction of the size of the full SVGs and needs no XML parsing at runtime.
  *
- * Run: npm run fetch:strokes
+ * Run: npm run fetch:strokes            (N5)
+ *      npm run fetch:strokes -- n4      (any other level)
  */
 import fs from "node:fs";
 import path from "node:path";

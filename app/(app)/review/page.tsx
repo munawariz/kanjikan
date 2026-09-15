@@ -21,8 +21,8 @@ export default async function ReviewPage() {
   const profile = await getProfile(user.id);
   const writing = studiesWriting(profile);
   const [queue, writingQueue] = await Promise.all([
-    getReviewQueue(user.id, "N5", BATCH),
-    writing ? getWritingReviewQueue(user.id, "N5", WRITING_BATCH) : [],
+    getReviewQueue(user.id, BATCH),
+    writing ? getWritingReviewQueue(user.id, WRITING_BATCH) : [],
   ]);
 
   if (queue.length === 0 && writingQueue.length === 0) {
@@ -70,6 +70,7 @@ export default async function ReviewPage() {
     const p = progress.get(w.id);
     if (p) wordStages[w.id] = p.srs_stage;
   }
+  const levels = new Set(queue.map((w) => w.level));
 
   return (
     <div style={{ maxWidth: 620, margin: "0 auto" }}>
@@ -79,9 +80,10 @@ export default async function ReviewPage() {
         lessonTitle="Review"
         kanji={writingQueue}
         words={queue}
-        // Distractors are drawn from the whole level so a review question is
-        // not answerable by elimination within one lesson.
-        pool={getAllWords()}
+        // Distractors are drawn from the whole of each level being reviewed,
+        // so a question is not answerable by elimination within one lesson,
+        // and a learner still in N5 is not offered N4 words as options.
+        pool={getAllWords().filter((w) => levels.has(w.level))}
         wordStages={wordStages}
         seed={Date.now() % 2147483647}
       />

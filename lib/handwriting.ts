@@ -725,8 +725,9 @@ function verdictFor(score: number): string {
 /**
  * Scores a finished drawing and says what is wrong with it.
  *
- * `bank` is every kanji of the level, by character, for the lookalike check.
- * Without it the drawing is only compared with its own model.
+ * `bank` is every kanji the learner could mistake it for — its level's and
+ * every earlier level's — by character, for the lookalike check. Without it
+ * the drawing is only compared with its own model.
  */
 export function assess(
   char: string,

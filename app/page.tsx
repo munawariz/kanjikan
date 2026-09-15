@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getKanjiChar, getLessons, levelStats } from "@/lib/content";
+import { getKanjiChar, getLessons, getLevelPath, levelStats } from "@/lib/content";
 import { isDatabaseConfigured } from "@/lib/db";
 import { getUser } from "@/lib/auth";
 import { Button } from "@/components/atlas/core/Button.jsx";
@@ -23,8 +23,11 @@ const ISSUES_URL = `${REPO_URL}/issues`;
 export default async function LandingPage() {
   if (isDatabaseConfigured && (await getUser())) redirect("/dashboard");
 
-  const stats = levelStats("N5");
-  const first = getLessons("N5")[0];
+  const stats = levelStats();
+  const levels = getLevelPath();
+  const built = levels.filter((l) => l.available);
+  const unbuilt = levels.filter((l) => !l.available);
+  const first = getLessons()[0];
   // A real entry from the content, so the example is exactly what a lesson shows.
   const example = getKanjiChar("休");
 
@@ -49,7 +52,7 @@ export default async function LandingPage() {
           {/* ---- What this is ------------------------------------------------ */}
           <section className="stack" style={{ gap: 20 }}>
             <p className="eyebrow" style={{ margin: 0 }}>
-              A free study aid for the JLPT N5 kanji
+              A free study aid for the JLPT {built.map((l) => l.level).join(" and ")} kanji
             </p>
             <h1
               style={{
@@ -63,7 +66,7 @@ export default async function LandingPage() {
             </h1>
             <p style={{ margin: 0, fontSize: "var(--text-body-lg)" }}>
               If you have ever learned a kanji on Monday and lost it by Wednesday, you are not alone.
-              Kanjikan goes slowly: five kanji a lesson. It shows how each one is built, gives you a
+              Kanjikan goes slowly: about five kanji a lesson. It shows how each one is built, gives you a
               short story to hang it on, teaches the everyday words that use it, and brings it back
               for review before you forget.
             </p>
@@ -92,7 +95,7 @@ export default async function LandingPage() {
               {[
                 [
                   "A few at a time.",
-                  "Each lesson has five kanji, and each one is finished — seen, used in words, quizzed and, if you like, written — before the next one starts.",
+                  "Each lesson has about five kanji, and each one is finished — seen, used in words, quizzed and, if you like, written — before the next one starts.",
                 ],
                 [
                   "Built from parts.",
@@ -155,10 +158,18 @@ export default async function LandingPage() {
             <h2 style={{ margin: 0, fontSize: "var(--text-heading-2)" }}>What is here, and what is not</h2>
             <ul className="stack" style={{ gap: 12, margin: 0, paddingLeft: 22 }}>
               <li>
-                All {stats.kanji} N5 kanji, in {stats.lessons} lessons, with {stats.words} words that
-                use them.
+                {built.map((l, i) => `${i === 0 ? "All" : "all"} ${l.kanji} ${l.level} kanji`).join(" and ")}, in{" "}
+                {stats.lessons}{" "}
+                lessons, with {stats.words} words that use them.
               </li>
-              <li>N4 to N1 are not written yet.</li>
+              {unbuilt.length > 0 && (
+                <li>
+                  {unbuilt.length === 1
+                    ? `${unbuilt[0].level} is`
+                    : `${unbuilt[0].level} to ${unbuilt[unbuilt.length - 1].level} are`}{" "}
+                  not written yet.
+                </li>
+              )}
               <li>It is free. There are no ads, nothing to buy, and no premium version.</li>
               <li>
                 An account is only a username and a password — no email address. That also means

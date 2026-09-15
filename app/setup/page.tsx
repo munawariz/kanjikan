@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { isDatabaseConfigured } from "@/lib/db";
-import { levelStats } from "@/lib/content";
+import { availableLevels, levelStats } from "@/lib/content";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Wordmark } from "@/components/app/Wordmark";
@@ -30,7 +30,8 @@ const STEPS = [
 export default function SetupPage() {
   if (isDatabaseConfigured) redirect("/");
 
-  const stats = levelStats("N5");
+  const stats = levelStats();
+  const levels = availableLevels().join(" and ");
 
   return (
     <main className="page" style={{ paddingTop: 64, paddingBottom: 96, maxWidth: 760 }}>
@@ -50,7 +51,7 @@ export default function SetupPage() {
             Three steps and you are learning.
           </h1>
           <p style={{ margin: 0, maxWidth: 520 }}>
-            The {stats.words} N5 words and {stats.kanji} kanji are already in this repository and
+            The {stats.words} {levels} words and {stats.kanji} kanji are already in this repository and
             need no setup. The database is only there to hold accounts and progress.
           </p>
         </div>

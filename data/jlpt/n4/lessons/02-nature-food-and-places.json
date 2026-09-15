@@ -1,0 +1,301 @@
+[
+  {
+    "slug": "animals",
+    "title": "Animals and meat",
+    "summary": "The animals keep their native names on their own — いぬ, うし, さかな, とり — and switch to on readings in compounds: 牛肉 ぎゅうにく, 人魚 にんぎょ, 白鳥 はくちょう. 肉 has no native reading at all: にく is on.",
+    "kanji": ["犬", "牛", "魚", "鳥", "肉"],
+    "words": [
+      { "word": "犬", "reading": "いぬ", "meanings": ["Dog"], "pos": "noun", "teaches": "犬" },
+      { "word": "子犬", "reading": "こいぬ", "meanings": ["Puppy"], "pos": "noun", "teaches": "犬" },
+      { "word": "愛犬", "reading": "あいけん", "meanings": ["Pet Dog", "Beloved Dog"], "pos": "noun", "teaches": "犬" },
+      { "word": "名犬", "reading": "めいけん", "meanings": ["Fine Dog", "Famous Dog"], "pos": "noun", "teaches": "犬" },
+      { "word": "犬かき", "reading": "いぬかき", "meanings": ["Dog Paddle"], "pos": "noun", "teaches": "犬" },
+
+      { "word": "牛", "reading": "うし", "meanings": ["Cow", "Cattle"], "pos": "noun", "teaches": "牛" },
+      { "word": "牛肉", "reading": "ぎゅうにく", "meanings": ["Beef"], "pos": "noun", "teaches": "牛" },
+      { "word": "牛乳", "reading": "ぎゅうにゅう", "meanings": ["Milk"], "pos": "noun", "teaches": "牛" },
+      { "word": "子牛", "reading": "こうし", "meanings": ["Calf"], "pos": "noun", "teaches": "牛" },
+      { "word": "水牛", "reading": "すいぎゅう", "meanings": ["Water Buffalo"], "pos": "noun", "teaches": "牛" },
+
+      { "word": "魚", "reading": "さかな", "meanings": ["Fish"], "pos": "noun", "teaches": "魚" },
+      { "word": "生魚", "reading": "なまざかな", "meanings": ["Raw Fish"], "pos": "noun", "teaches": "魚" },
+      { "word": "小魚", "reading": "こざかな", "meanings": ["Small Fish"], "pos": "noun", "teaches": "魚" },
+      { "word": "川魚", "reading": "かわざかな", "meanings": ["River Fish", "Freshwater Fish"], "pos": "noun", "teaches": "魚" },
+      { "word": "人魚", "reading": "にんぎょ", "meanings": ["Mermaid"], "pos": "noun", "teaches": "魚" },
+
+      { "word": "鳥", "reading": "とり", "meanings": ["Bird"], "pos": "noun", "teaches": "鳥" },
+      { "word": "焼き鳥", "reading": "やきとり", "meanings": ["Grilled Chicken Skewers", "Yakitori"], "pos": "noun", "teaches": "鳥" },
+      { "word": "白鳥", "reading": "はくちょう", "meanings": ["Swan"], "pos": "noun", "teaches": "鳥" },
+      { "word": "水鳥", "reading": "みずどり", "meanings": ["Waterbird"], "pos": "noun", "teaches": "鳥" },
+      { "word": "親鳥", "reading": "おやどり", "meanings": ["Parent Bird"], "pos": "noun", "teaches": "鳥" },
+
+      { "word": "肉", "reading": "にく", "meanings": ["Meat"], "pos": "noun", "teaches": "肉" },
+      { "word": "豚肉", "reading": "ぶたにく", "meanings": ["Pork"], "pos": "noun", "teaches": "肉" },
+      { "word": "ひき肉", "reading": "ひきにく", "meanings": ["Minced Meat"], "pos": "noun", "teaches": "肉" },
+      { "word": "肉食", "reading": "にくしょく", "meanings": ["Meat-Eating", "Carnivorous"], "pos": "noun", "teaches": "肉" },
+      { "word": "肉体", "reading": "にくたい", "meanings": ["Physical Body", "Flesh"], "pos": "noun", "teaches": "肉" }
+    ]
+  },
+  {
+    "slug": "food-and-drink",
+    "title": "Food and drink",
+    "summary": "ご飯 is both cooked rice and a meal, so 朝ご飯, 昼ご飯 and 晩ご飯 are simply breakfast, lunch and dinner. 料 is a fee as often as an ingredient: 無料 is free of charge, and 給料 is what you are paid.",
+    "kanji": ["飲", "飯", "料", "理", "味"],
+    "words": [
+      { "word": "飲む", "reading": "のむ", "meanings": ["To Drink", "To Take (medicine)"], "pos": "verb (godan)", "teaches": "飲" },
+      { "word": "飲み水", "reading": "のみみず", "meanings": ["Drinking Water"], "pos": "noun", "teaches": "飲" },
+      { "word": "飲食", "reading": "いんしょく", "meanings": ["Eating and Drinking"], "pos": "noun", "teaches": "飲" },
+      { "word": "飲料", "reading": "いんりょう", "meanings": ["Beverage"], "pos": "noun", "teaches": "飲" },
+      { "word": "飲み込む", "reading": "のみこむ", "meanings": ["To Swallow", "To Grasp (an idea)"], "pos": "verb (godan)", "teaches": "飲" },
+
+      { "word": "ご飯", "reading": "ごはん", "meanings": ["Cooked Rice", "Meal"], "pos": "noun", "teaches": "飯" },
+      { "word": "朝ご飯", "reading": "あさごはん", "meanings": ["Breakfast"], "pos": "noun", "teaches": "飯" },
+      { "word": "昼ご飯", "reading": "ひるごはん", "meanings": ["Lunch"], "pos": "noun", "teaches": "飯" },
+      { "word": "晩ご飯", "reading": "ばんごはん", "meanings": ["Dinner"], "pos": "noun", "teaches": "飯" },
+      { "word": "夕飯", "reading": "ゆうはん", "meanings": ["Evening Meal", "Supper"], "pos": "noun", "teaches": "飯" },
+      { "word": "飯", "reading": "めし", "meanings": ["Meal (casual)", "Rice (casual)"], "pos": "noun", "teaches": "飯" },
+
+      { "word": "無料", "reading": "むりょう", "meanings": ["Free of Charge"], "pos": "noun", "teaches": "料" },
+      { "word": "給料", "reading": "きゅうりょう", "meanings": ["Salary", "Pay"], "pos": "noun", "teaches": "料" },
+      { "word": "食料", "reading": "しょくりょう", "meanings": ["Food", "Provisions"], "pos": "noun", "teaches": "料" },
+      { "word": "手料理", "reading": "てりょうり", "meanings": ["Home Cooking"], "pos": "noun", "teaches": "料" },
+      { "word": "日本料理", "reading": "にほんりょうり", "meanings": ["Japanese Cuisine"], "pos": "noun", "teaches": "料" },
+
+      { "word": "料理", "reading": "りょうり", "meanings": ["Cooking", "Cuisine", "Dish"], "pos": "noun", "teaches": "理" },
+      { "word": "理由", "reading": "りゆう", "meanings": ["Reason"], "pos": "noun", "teaches": "理" },
+      { "word": "無理", "reading": "むり", "meanings": ["Impossible", "Unreasonable", "Too Much"], "pos": "na-adjective", "teaches": "理" },
+      { "word": "心理", "reading": "しんり", "meanings": ["Psychology", "State of Mind"], "pos": "noun", "teaches": "理" },
+      { "word": "代理", "reading": "だいり", "meanings": ["Substitute", "Proxy"], "pos": "noun", "teaches": "理" },
+
+      { "word": "味", "reading": "あじ", "meanings": ["Taste", "Flavour"], "pos": "noun", "teaches": "味" },
+      { "word": "味わう", "reading": "あじわう", "meanings": ["To Savour", "To Taste"], "pos": "verb (godan)", "teaches": "味" },
+      { "word": "意味", "reading": "いみ", "meanings": ["Meaning"], "pos": "noun", "teaches": "味" },
+      { "word": "趣味", "reading": "しゅみ", "meanings": ["Hobby", "Taste (in things)"], "pos": "noun", "teaches": "味" },
+      { "word": "味見", "reading": "あじみ", "meanings": ["Tasting", "Sampling"], "pos": "noun", "teaches": "味" }
+    ]
+  },
+  {
+    "slug": "land-sea-and-sky",
+    "title": "Land, sea and sky",
+    "summary": "空 needs three readings: そら for the sky, あく for a seat or room coming free, から for empty (空っぽ, 空手). 地 has no native reading but two on readings — ち in 地下 and 地理, じ in 地震 and 地味.",
+    "kanji": ["地", "海", "空", "野", "花"],
+    "words": [
+      { "word": "地下", "reading": "ちか", "meanings": ["Underground", "Below Ground"], "pos": "noun", "teaches": "地" },
+      { "word": "地理", "reading": "ちり", "meanings": ["Geography"], "pos": "noun", "teaches": "地" },
+      { "word": "地上", "reading": "ちじょう", "meanings": ["Above Ground", "Ground Level"], "pos": "noun", "teaches": "地" },
+      { "word": "地震", "reading": "じしん", "meanings": ["Earthquake"], "pos": "noun", "teaches": "地" },
+      { "word": "地味", "reading": "じみ", "meanings": ["Plain", "Sober", "Unshowy"], "pos": "na-adjective", "teaches": "地" },
+      { "word": "空き地", "reading": "あきち", "meanings": ["Vacant Lot"], "pos": "noun", "teaches": "地" },
+
+      { "word": "海", "reading": "うみ", "meanings": ["Sea", "Ocean"], "pos": "noun", "teaches": "海" },
+      { "word": "海岸", "reading": "かいがん", "meanings": ["Coast", "Seashore"], "pos": "noun", "teaches": "海" },
+      { "word": "海水", "reading": "かいすい", "meanings": ["Seawater"], "pos": "noun", "teaches": "海" },
+      { "word": "海風", "reading": "うみかぜ", "meanings": ["Sea Breeze"], "pos": "noun", "teaches": "海" },
+      { "word": "海の日", "reading": "うみのひ", "meanings": ["Marine Day"], "pos": "noun", "teaches": "海" },
+
+      { "word": "空", "reading": "そら", "meanings": ["Sky"], "pos": "noun", "teaches": "空" },
+      { "word": "青空", "reading": "あおぞら", "meanings": ["Blue Sky"], "pos": "noun", "teaches": "空" },
+      { "word": "空港", "reading": "くうこう", "meanings": ["Airport"], "pos": "noun", "teaches": "空" },
+      { "word": "空く", "reading": "あく", "meanings": ["To Become Vacant", "To Free Up"], "pos": "verb (godan)", "teaches": "空" },
+      { "word": "空っぽ", "reading": "からっぽ", "meanings": ["Empty"], "pos": "na-adjective", "teaches": "空" },
+      { "word": "空手", "reading": "からて", "meanings": ["Karate"], "pos": "noun", "teaches": "空" },
+
+      { "word": "野菜", "reading": "やさい", "meanings": ["Vegetable"], "pos": "noun", "teaches": "野" },
+      { "word": "野外", "reading": "やがい", "meanings": ["Outdoors", "Open Air"], "pos": "noun", "teaches": "野" },
+      { "word": "野生", "reading": "やせい", "meanings": ["Wild", "In the Wild"], "pos": "noun", "teaches": "野" },
+      { "word": "野球", "reading": "やきゅう", "meanings": ["Baseball"], "pos": "noun", "teaches": "野" },
+      { "word": "分野", "reading": "ぶんや", "meanings": ["Field (of study)", "Area"], "pos": "noun", "teaches": "野" },
+      { "word": "野山", "reading": "のやま", "meanings": ["Hills and Fields"], "pos": "noun", "teaches": "野" },
+
+      { "word": "花", "reading": "はな", "meanings": ["Flower"], "pos": "noun", "teaches": "花" },
+      { "word": "花びら", "reading": "はなびら", "meanings": ["Petal"], "pos": "noun", "teaches": "花" },
+      { "word": "生け花", "reading": "いけばな", "meanings": ["Flower Arranging", "Ikebana"], "pos": "noun", "teaches": "花" },
+      { "word": "花瓶", "reading": "かびん", "meanings": ["Vase"], "pos": "noun", "teaches": "花" }
+    ]
+  },
+  {
+    "slug": "fields-to-the-world",
+    "title": "From the fields to the world",
+    "summary": "町 and 界 both stand on a rice field (田) and take their sound from the other half: 丁 チョウ, 介 カイ. 世界 is the world on a map; 世の中 is the world of people, society.",
+    "kanji": ["田", "町", "京", "世", "界"],
+    "words": [
+      { "word": "田", "reading": "た", "meanings": ["Rice Field"], "pos": "noun", "teaches": "田" },
+      { "word": "田んぼ", "reading": "たんぼ", "meanings": ["Rice Paddy"], "pos": "noun", "teaches": "田" },
+      { "word": "田舎", "reading": "いなか", "meanings": ["Countryside", "Home Town"], "pos": "noun", "teaches": "田" },
+      { "word": "水田", "reading": "すいでん", "meanings": ["Paddy Field"], "pos": "noun", "teaches": "田" },
+
+      { "word": "町", "reading": "まち", "meanings": ["Town"], "pos": "noun", "teaches": "町" },
+      { "word": "下町", "reading": "したまち", "meanings": ["Old Downtown"], "pos": "noun", "teaches": "町" },
+      { "word": "町外れ", "reading": "まちはずれ", "meanings": ["Edge of Town", "Outskirts"], "pos": "noun", "teaches": "町" },
+      { "word": "町長", "reading": "ちょうちょう", "meanings": ["Town Mayor"], "pos": "noun", "teaches": "町" },
+      { "word": "町内", "reading": "ちょうない", "meanings": ["Neighbourhood", "Within the Town"], "pos": "noun", "teaches": "町" },
+
+      { "word": "京都", "reading": "きょうと", "meanings": ["Kyoto"], "pos": "noun", "teaches": "京" },
+      { "word": "上京", "reading": "じょうきょう", "meanings": ["Moving to Tokyo", "Going to the Capital"], "pos": "noun", "teaches": "京" },
+      { "word": "京料理", "reading": "きょうりょうり", "meanings": ["Kyoto Cuisine"], "pos": "noun", "teaches": "京" },
+      { "word": "京風", "reading": "きょうふう", "meanings": ["Kyoto Style"], "pos": "noun", "teaches": "京" },
+
+      { "word": "世の中", "reading": "よのなか", "meanings": ["Society", "The World"], "pos": "noun", "teaches": "世" },
+      { "word": "世話", "reading": "せわ", "meanings": ["Care", "Looking After"], "pos": "noun", "teaches": "世" },
+      { "word": "世代", "reading": "せだい", "meanings": ["Generation"], "pos": "noun", "teaches": "世" },
+      { "word": "世紀", "reading": "せいき", "meanings": ["Century"], "pos": "noun", "teaches": "世" },
+      { "word": "出世", "reading": "しゅっせ", "meanings": ["Getting Ahead", "Success in Life"], "pos": "noun", "teaches": "世" },
+      { "word": "世間", "reading": "せけん", "meanings": ["The Public", "People"], "pos": "noun", "teaches": "世" },
+
+      { "word": "世界", "reading": "せかい", "meanings": ["World"], "pos": "noun", "teaches": "界" },
+      { "word": "世界中", "reading": "せかいじゅう", "meanings": ["All Over the World"], "pos": "noun", "teaches": "界" },
+      { "word": "世界一", "reading": "せかいいち", "meanings": ["Best in the World"], "pos": "noun", "teaches": "界" },
+      { "word": "限界", "reading": "げんかい", "meanings": ["Limit"], "pos": "noun", "teaches": "界" }
+    ]
+  },
+  {
+    "slug": "around-town",
+    "title": "Around town",
+    "summary": "道 is also the way of an art: 書道 is the way of the brush, 茶道 the way of tea. 図 is ず in 地図 but と in 図書, the と of 図書館.",
+    "kanji": ["道", "図", "駅", "館", "店"],
+    "words": [
+      { "word": "道", "reading": "みち", "meanings": ["Road", "Way"], "pos": "noun", "teaches": "道" },
+      { "word": "道具", "reading": "どうぐ", "meanings": ["Tool"], "pos": "noun", "teaches": "道" },
+      { "word": "書道", "reading": "しょどう", "meanings": ["Calligraphy"], "pos": "noun", "teaches": "道" },
+      { "word": "茶道", "reading": "さどう", "meanings": ["Tea Ceremony"], "pos": "noun", "teaches": "道" },
+      { "word": "国道", "reading": "こくどう", "meanings": ["National Highway"], "pos": "noun", "teaches": "道" },
+
+      { "word": "地図", "reading": "ちず", "meanings": ["Map"], "pos": "noun", "teaches": "図" },
+      { "word": "図", "reading": "ず", "meanings": ["Diagram", "Figure"], "pos": "noun", "teaches": "図" },
+      { "word": "図書", "reading": "としょ", "meanings": ["Books"], "pos": "noun", "teaches": "図" },
+      { "word": "合図", "reading": "あいず", "meanings": ["Signal", "Sign"], "pos": "noun", "teaches": "図" },
+      { "word": "天気図", "reading": "てんきず", "meanings": ["Weather Map"], "pos": "noun", "teaches": "図" },
+
+      { "word": "駅", "reading": "えき", "meanings": ["Station"], "pos": "noun", "teaches": "駅" },
+      { "word": "駅長", "reading": "えきちょう", "meanings": ["Stationmaster"], "pos": "noun", "teaches": "駅" },
+      { "word": "駅名", "reading": "えきめい", "meanings": ["Station Name"], "pos": "noun", "teaches": "駅" },
+      { "word": "駅弁", "reading": "えきべん", "meanings": ["Station Lunch Box"], "pos": "noun", "teaches": "駅" },
+      { "word": "駅ビル", "reading": "えきビル", "meanings": ["Station Building"], "pos": "noun", "teaches": "駅" },
+
+      { "word": "水族館", "reading": "すいぞくかん", "meanings": ["Aquarium"], "pos": "noun", "teaches": "館" },
+      { "word": "美術館", "reading": "びじゅつかん", "meanings": ["Art Museum"], "pos": "noun", "teaches": "館" },
+      { "word": "本館", "reading": "ほんかん", "meanings": ["Main Building"], "pos": "noun", "teaches": "館" },
+      { "word": "館長", "reading": "かんちょう", "meanings": ["Director (of a museum or library)"], "pos": "noun", "teaches": "館" },
+
+      { "word": "店", "reading": "みせ", "meanings": ["Shop", "Store"], "pos": "noun", "teaches": "店" },
+      { "word": "喫茶店", "reading": "きっさてん", "meanings": ["Coffee Shop", "Café"], "pos": "noun", "teaches": "店" },
+      { "word": "店長", "reading": "てんちょう", "meanings": ["Store Manager"], "pos": "noun", "teaches": "店" },
+      { "word": "書店", "reading": "しょてん", "meanings": ["Bookshop"], "pos": "noun", "teaches": "店" },
+      { "word": "飲食店", "reading": "いんしょくてん", "meanings": ["Restaurant", "Eatery"], "pos": "noun", "teaches": "店" }
+    ]
+  },
+  {
+    "slug": "rooms-and-buildings",
+    "title": "Rooms and buildings",
+    "summary": "屋 on the end of a word is the shop, or the person who runs it: 花屋, 魚屋. 部屋 is the everyday word for a room; 室 is a room with a purpose, as in 図書室 and 和室.",
+    "kanji": ["屋", "室", "住", "台", "堂"],
+    "words": [
+      { "word": "部屋", "reading": "へや", "meanings": ["Room"], "pos": "noun", "teaches": "屋" },
+      { "word": "屋上", "reading": "おくじょう", "meanings": ["Rooftop"], "pos": "noun", "teaches": "屋" },
+      { "word": "花屋", "reading": "はなや", "meanings": ["Florist"], "pos": "noun", "teaches": "屋" },
+      { "word": "魚屋", "reading": "さかなや", "meanings": ["Fishmonger"], "pos": "noun", "teaches": "屋" },
+      { "word": "屋台", "reading": "やたい", "meanings": ["Food Stall"], "pos": "noun", "teaches": "屋" },
+      { "word": "小屋", "reading": "こや", "meanings": ["Hut", "Shed"], "pos": "noun", "teaches": "屋" },
+
+      { "word": "図書室", "reading": "としょしつ", "meanings": ["Library Room", "Reading Room"], "pos": "noun", "teaches": "室" },
+      { "word": "和室", "reading": "わしつ", "meanings": ["Japanese-Style Room"], "pos": "noun", "teaches": "室" },
+      { "word": "地下室", "reading": "ちかしつ", "meanings": ["Basement"], "pos": "noun", "teaches": "室" },
+      { "word": "空室", "reading": "くうしつ", "meanings": ["Vacant Room", "Vacancy"], "pos": "noun", "teaches": "室" },
+      { "word": "茶室", "reading": "ちゃしつ", "meanings": ["Tea Room"], "pos": "noun", "teaches": "室" },
+
+      { "word": "住む", "reading": "すむ", "meanings": ["To Live", "To Reside"], "pos": "verb (godan)", "teaches": "住" },
+      { "word": "住所", "reading": "じゅうしょ", "meanings": ["Address"], "pos": "noun", "teaches": "住" },
+      { "word": "住まい", "reading": "すまい", "meanings": ["Home", "Residence"], "pos": "noun", "teaches": "住" },
+      { "word": "住人", "reading": "じゅうにん", "meanings": ["Resident", "Inhabitant"], "pos": "noun", "teaches": "住" },
+
+      { "word": "台", "reading": "だい", "meanings": ["Stand", "Platform"], "pos": "noun", "teaches": "台" },
+      { "word": "一台", "reading": "いちだい", "meanings": ["One Machine", "One Vehicle"], "pos": "counter", "teaches": "台" },
+      { "word": "台所", "reading": "だいどころ", "meanings": ["Kitchen"], "pos": "noun", "teaches": "台" },
+      { "word": "台風", "reading": "たいふう", "meanings": ["Typhoon"], "pos": "noun", "teaches": "台" },
+      { "word": "土台", "reading": "どだい", "meanings": ["Foundation", "Base"], "pos": "noun", "teaches": "台" },
+
+      { "word": "講堂", "reading": "こうどう", "meanings": ["Auditorium", "Lecture Hall"], "pos": "noun", "teaches": "堂" },
+      { "word": "本堂", "reading": "ほんどう", "meanings": ["Main Hall (of a temple)"], "pos": "noun", "teaches": "堂" },
+      { "word": "食堂車", "reading": "しょくどうしゃ", "meanings": ["Dining Car"], "pos": "noun", "teaches": "堂" },
+      { "word": "堂々", "reading": "どうどう", "meanings": ["Confidently", "With Dignity"], "pos": "adverb", "teaches": "堂" }
+    ]
+  },
+  {
+    "slug": "standing-and-building",
+    "title": "Standing, building, places",
+    "summary": "立てる and 建てる are both たてる: 立てる stands something up, 建てる puts up a building. 場 is じょう in 工場 and 入場 but ば on its own and in 場所 and 立場.",
+    "kanji": ["立", "建", "場", "工", "公"],
+    "words": [
+      { "word": "立つ", "reading": "たつ", "meanings": ["To Stand"], "pos": "verb (godan)", "teaches": "立" },
+      { "word": "立てる", "reading": "たてる", "meanings": ["To Stand (something) Up", "To Set Up"], "pos": "verb (ichidan)", "teaches": "立" },
+      { "word": "目立つ", "reading": "めだつ", "meanings": ["To Stand Out"], "pos": "verb (godan)", "teaches": "立" },
+      { "word": "役に立つ", "reading": "やくにたつ", "meanings": ["To Be Useful"], "pos": "expression", "teaches": "立" },
+      { "word": "国立", "reading": "こくりつ", "meanings": ["National", "State-Run"], "pos": "noun", "teaches": "立" },
+      { "word": "私立", "reading": "しりつ", "meanings": ["Private", "Privately Run"], "pos": "noun", "teaches": "立" },
+
+      { "word": "建てる", "reading": "たてる", "meanings": ["To Build"], "pos": "verb (ichidan)", "teaches": "建" },
+      { "word": "建つ", "reading": "たつ", "meanings": ["To Be Built"], "pos": "verb (godan)", "teaches": "建" },
+      { "word": "建国", "reading": "けんこく", "meanings": ["Founding of a Nation"], "pos": "noun", "teaches": "建" },
+      { "word": "建設", "reading": "けんせつ", "meanings": ["Construction"], "pos": "noun", "teaches": "建" },
+      { "word": "建前", "reading": "たてまえ", "meanings": ["Public Stance", "Official Position"], "pos": "noun", "teaches": "建" },
+
+      { "word": "場", "reading": "ば", "meanings": ["Spot", "Scene", "Occasion"], "pos": "noun", "teaches": "場" },
+      { "word": "場所", "reading": "ばしょ", "meanings": ["Place", "Location"], "pos": "noun", "teaches": "場" },
+      { "word": "立場", "reading": "たちば", "meanings": ["Standpoint", "Position"], "pos": "noun", "teaches": "場" },
+      { "word": "入場", "reading": "にゅうじょう", "meanings": ["Admission", "Entrance"], "pos": "noun", "teaches": "場" },
+      { "word": "出場", "reading": "しゅつじょう", "meanings": ["Taking Part", "Appearance (in a contest)"], "pos": "noun", "teaches": "場" },
+      { "word": "場合", "reading": "ばあい", "meanings": ["Case", "Situation", "When"], "pos": "noun", "teaches": "場" },
+
+      { "word": "工場", "reading": "こうじょう", "meanings": ["Factory"], "pos": "noun", "teaches": "工" },
+      { "word": "大工", "reading": "だいく", "meanings": ["Carpenter"], "pos": "noun", "teaches": "工" },
+      { "word": "人工", "reading": "じんこう", "meanings": ["Artificial", "Man-Made"], "pos": "noun", "teaches": "工" },
+      { "word": "工学", "reading": "こうがく", "meanings": ["Engineering"], "pos": "noun", "teaches": "工" },
+      { "word": "工夫", "reading": "くふう", "meanings": ["Ingenuity", "A Clever Idea"], "pos": "noun", "teaches": "工" },
+      { "word": "図工", "reading": "ずこう", "meanings": ["Arts and Crafts"], "pos": "noun", "teaches": "工" },
+
+      { "word": "公園", "reading": "こうえん", "meanings": ["Park"], "pos": "noun", "teaches": "公" },
+      { "word": "公立", "reading": "こうりつ", "meanings": ["Publicly Run", "Public"], "pos": "noun", "teaches": "公" },
+      { "word": "主人公", "reading": "しゅじんこう", "meanings": ["Main Character", "Protagonist"], "pos": "noun", "teaches": "公" },
+      { "word": "公", "reading": "おおやけ", "meanings": ["Public", "Official"], "pos": "noun", "teaches": "公" }
+    ]
+  },
+  {
+    "slug": "work",
+    "title": "Work and the company",
+    "summary": "会 is meet and 社 a shrine or firm: 会社 is a company, and the same two turned round, 社会, is society. 員 on the end makes a member of something: 会社員, 店員, 駅員.",
+    "kanji": ["仕", "事", "会", "社", "員"],
+    "words": [
+      { "word": "仕事", "reading": "しごと", "meanings": ["Work", "Job"], "pos": "noun", "teaches": "仕" },
+      { "word": "仕上げる", "reading": "しあげる", "meanings": ["To Finish (something) Off", "To Complete"], "pos": "verb (ichidan)", "teaches": "仕" },
+      { "word": "仕上がる", "reading": "しあがる", "meanings": ["To Be Finished", "To Turn Out"], "pos": "verb (godan)", "teaches": "仕" },
+      { "word": "仕える", "reading": "つかえる", "meanings": ["To Serve"], "pos": "verb (ichidan)", "teaches": "仕" },
+      { "word": "仕組み", "reading": "しくみ", "meanings": ["Mechanism", "How Something Works"], "pos": "noun", "teaches": "仕" },
+
+      { "word": "事", "reading": "こと", "meanings": ["Thing", "Matter"], "pos": "noun", "teaches": "事" },
+      { "word": "大事", "reading": "だいじ", "meanings": ["Important", "Precious"], "pos": "na-adjective", "teaches": "事" },
+      { "word": "返事", "reading": "へんじ", "meanings": ["Reply", "Answer"], "pos": "noun", "teaches": "事" },
+      { "word": "工事", "reading": "こうじ", "meanings": ["Construction Work"], "pos": "noun", "teaches": "事" },
+      { "word": "家事", "reading": "かじ", "meanings": ["Housework"], "pos": "noun", "teaches": "事" },
+      { "word": "出来事", "reading": "できごと", "meanings": ["Event", "Incident"], "pos": "noun", "teaches": "事" },
+
+      { "word": "会う", "reading": "あう", "meanings": ["To Meet"], "pos": "verb (godan)", "teaches": "会" },
+      { "word": "出会う", "reading": "であう", "meanings": ["To Come Across", "To Meet by Chance"], "pos": "verb (godan)", "teaches": "会" },
+      { "word": "会社", "reading": "かいしゃ", "meanings": ["Company", "Firm"], "pos": "noun", "teaches": "会" },
+      { "word": "会議", "reading": "かいぎ", "meanings": ["Meeting", "Conference"], "pos": "noun", "teaches": "会" },
+      { "word": "大会", "reading": "たいかい", "meanings": ["Tournament", "Convention"], "pos": "noun", "teaches": "会" },
+      { "word": "会場", "reading": "かいじょう", "meanings": ["Venue", "Hall"], "pos": "noun", "teaches": "会" },
+
+      { "word": "社会", "reading": "しゃかい", "meanings": ["Society"], "pos": "noun", "teaches": "社" },
+      { "word": "社員", "reading": "しゃいん", "meanings": ["Employee", "Staff Member"], "pos": "noun", "teaches": "社" },
+      { "word": "入社", "reading": "にゅうしゃ", "meanings": ["Joining a Company"], "pos": "noun", "teaches": "社" },
+      { "word": "本社", "reading": "ほんしゃ", "meanings": ["Head Office"], "pos": "noun", "teaches": "社" },
+      { "word": "神社", "reading": "じんじゃ", "meanings": ["Shinto Shrine"], "pos": "noun", "teaches": "社" },
+
+      { "word": "会社員", "reading": "かいしゃいん", "meanings": ["Office Worker", "Company Employee"], "pos": "noun", "teaches": "員" },
+      { "word": "店員", "reading": "てんいん", "meanings": ["Shop Assistant", "Clerk"], "pos": "noun", "teaches": "員" },
+      { "word": "駅員", "reading": "えきいん", "meanings": ["Station Staff"], "pos": "noun", "teaches": "員" },
+      { "word": "会員", "reading": "かいいん", "meanings": ["Member"], "pos": "noun", "teaches": "員" },
+      { "word": "全員", "reading": "ぜんいん", "meanings": ["Everyone", "All Members"], "pos": "noun", "teaches": "員" }
+    ]
+  }
+]

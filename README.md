@@ -1,14 +1,15 @@
 # Kanjikan
 
-Learn Japanese JLPT vocabulary word-first. N5 is built; N4–N1 are structured for but not yet
-written.
+Learn Japanese JLPT vocabulary word-first. N5 and N4 are built; N3–N1 are structured for but not
+yet written.
 
 The premise is that **words, not characters, are the unit of learning**. You meet 日本語 as
 something you can say, and the three kanji come along inside it. The kanji screen is a reference
 for looking a character up, not a drill.
 
-- **813 N5 words** across **40 themed lessons**
-- **All 80 N5 kanji**, each covered by at least one word in the vocabulary
+- **N5**: all 80 kanji in 16 lessons, with 380 words
+- **N4**: all 166 kanji in 33 lessons, with 873 words
+- Every kanji taught by at least four words that fix its readings
 - Spaced repetition with 8 scheduling stages, from ten minutes to three months
 - Multi-user accounts with per-lesson resume checkpoints, and lessons open to guests without one
 - UI built on the **Atlas Design System** in this repository
@@ -38,6 +39,22 @@ This matters:
 
 `npm run validate:content` enforces the invariant that actually matters — that
 `(lesson, word, reading)` is unique within a level.
+
+### One curriculum, several levels
+
+Levels are not separate courses. `lib/content.ts` loads every built level in study order and runs
+them together:
+
+- **Lessons are numbered straight through.** N5 is lessons 1–16 and N4 carries on from 17, so a
+  lesson number means the same thing on every page.
+- **Parts carry over.** An N4 kanji is built from pieces met in N5 — 体 is 亻 and 本 — and its
+  lesson card says where each was first seen, even when that was in an earlier level.
+- **Nothing is per level except where it has to be.** Review, the daily quiz, the Kanji page and
+  Home cover every level at once, so a learner working through N4 keeps getting their N5 words back.
+  Home's headline figure is the kanji known in the level being worked through.
+
+A kanji, a lesson slug and a word each belong to one level only, and the validator checks it. That
+is why a lesson's address and a progress row need no level of their own.
 
 ---
 
@@ -236,8 +253,11 @@ character — one attempt each.
 - **Which kanji.** Only characters first studied *before* today — the day the first of a
   character's words was answered or marked known — so the pool holds still all day and nothing is
   asked minutes after it was taught. It unlocks at five, i.e. the day after the first lesson.
+  Characters of every level count.
 - **Which five.** A uniform sample, seeded by user and date: the same five on every reload, and not
-  biased towards weak characters, since the results are meant to measure retention.
+  biased towards weak characters, since the results are meant to measure retention. The wrong
+  options come from the levels the learner has learned something in, so an N5 learner is never
+  offered N4 meanings they could rule out for being unfamiliar.
 - **Which day.** The learner's own. `TimeZoneScript` writes the browser's zone to a cookie, and the
   server reckons dates in it; without the cookie it falls back to UTC.
 - **Grading.** The browser sends only the option picked. The server rebuilds the question and grades
@@ -272,10 +292,13 @@ resume target the dashboard offers.
 ## Project layout
 
 ```
-data/jlpt/n5/
-  kanji.json            80 kanji: readings, meanings, stroke counts
-  mnemonics.json        Radical, parts and a memory story for each kanji
-  lessons/*.json        40 lessons, hand-editable, grouped by theme
+data/jlpt/
+  levels.json           The N5-to-N1 roadmap: titles, descriptions, estimated counts
+  n5/, n4/              One directory per built level:
+    kanji.json            Readings, meanings, stroke counts
+    mnemonics.json        Radical, parts and a memory story for each kanji
+    strokes.json          Stroke order, from KanjiVG
+    lessons/*.json        Lessons, hand-editable, grouped by theme
 lib/
   content.ts            Loads and indexes the JSON; derives word ids
   srs.ts                Scheduling, mastery bands, streaks
@@ -315,8 +338,11 @@ face at the same `-0.045em` the system specifies for its own.
 ## Content accuracy
 
 The vocabulary was compiled for this project rather than imported from a licensed source. The JLPT
-publishes no official vocabulary list, so any N5 list is an informed reconstruction — this one
-covers the words consistently taught at N5 and every one of the 80 kanji.
+has published no official kanji or vocabulary list since 2010, so every level here is an informed
+reconstruction. The kanji are the widely used community lists — 80 for N5, 166 for N4 — and the
+words are ones consistently taught at each level, chosen so that every kanji has at least four.
+An N4 word uses only N5 kanji and N4 kanji already taught, apart from a few standard words that
+are always written with a character from a later level (部屋, 田舎).
 
 Readings, meanings and parts of speech should be spot-checked against a dictionary before anyone
 relies on them for an exam. Corrections are one edit to one JSON file, and
@@ -339,15 +365,16 @@ word, part or role — that does not follow it.
 
 ### Radicals, parts and mnemonics
 
-`data/jlpt/n5/mnemonics.json` gives every kanji three things, shown when a lesson introduces it,
+Each level's `mnemonics.json` gives every kanji three things, shown when a lesson introduces it,
 on the lesson page, and in the kanji browser:
 
 - **radical** — the dictionary (Kangxi) radical, as Japanese dictionaries file the character. This
   overrides the radical in `strokes.json`: KanjiVG sometimes records a stroke there instead, giving
   丿 for 年, 東, 来, 千 and 午, which dictionaries file under 干, 木, 木, 十 and 十.
 - **parts** — the pieces you can see and reuse, each defined under `primitives` (with its meaning and,
-  for radicals, its Japanese name) or as another N5 kanji. A part written `{ "char": "人", "as": "lid" }`
-  plays a different role in that one kanji and is shown as such.
+  for radicals, its Japanese name) or as a kanji of any level. A part written
+  `{ "char": "人", "as": "lid" }` plays a different role in that one kanji and is shown as such. A
+  primitive is defined once, by the first level that uses it: N4's file adds only what N5's lacked.
 - **mnemonic** — a one- or two-sentence story that uses every part. One that says *once a picture
   of* describes the character's real origin; the rest are memory aids, not etymology.
 
@@ -360,9 +387,12 @@ and as a particle, and 本 as both *book* and the counter for long thin objects.
 
 ---
 
-## Adding N4–N1
+## Adding N3–N1
 
-1. Create `data/jlpt/n4/` with `kanji.json` and `lessons/*.json` in the same shape.
-2. Add `"N4"` to `LEVELS` in `lib/content.ts` and to `LEVELS` in `scripts/validate-content.mjs`.
+1. Create `data/jlpt/n3/` with `kanji.json`, `mnemonics.json` and `lessons/*.json` in the same
+   shape. Pick lesson slugs no other level uses, and leave out any word an earlier level teaches.
+2. Add `"N3"` to `LEVELS` in `lib/content.ts`, `"n3"` to `LEVELS` in
+   `scripts/validate-content.mjs`, and a loader for its `strokes.json` to `lib/strokeBank.ts`.
+3. Run `npm run fetch:strokes -- n3`, then `npm run validate:content`.
 
 No schema change is needed — `level` is already a column on every table.

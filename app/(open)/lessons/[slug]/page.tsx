@@ -62,7 +62,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
       <header className="stack" style={{ gap: 20 }}>
         <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
           <Badge tone="sage" uppercase>
-            Lesson {String(lesson.order).padStart(2, "0")}
+            {lesson.level} · Lesson {String(lesson.order).padStart(2, "0")}
           </Badge>
           {row?.status === "completed" && <Badge tone="accent">Completed</Badge>}
         </div>
@@ -112,7 +112,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
                 state={writingMarkState(chars, kanjiRows)}
                 markLabel="I Can Write These Kanji"
                 markedLabel="Writing marked as known"
-                title="Mark all five kanji as ones you can write"
+                title={`Mark all ${chars.length} kanji as ones you can write`}
               />
             )}
           </div>

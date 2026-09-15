@@ -23,7 +23,8 @@ with no stroke-order playback; nothing else in the app depends on it.
 
 ## Regenerating
 
-    npm run fetch:strokes
+    npm run fetch:strokes            # N5
+    npm run fetch:strokes -- n4      # N4, or any other level
 
 Pulls the current data for whichever kanji are listed in that level's
 `kanji.json`. Only the ordered stroke geometry and the radical are kept.

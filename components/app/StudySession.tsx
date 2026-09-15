@@ -48,7 +48,7 @@ type Props = {
   words: Word[];
   /** Wider candidate set for review distractors. */
   pool?: Word[];
-  /** Every character of the level, for practice distractors. */
+  /** Every character of the levels in play, for practice distractors. */
   kanjiPool?: KanjiGloss[];
   wordStages: Record<string, number>;
   /** Lesson only: characters met before, which skip their introduction. */

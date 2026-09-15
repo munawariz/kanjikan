@@ -25,8 +25,6 @@ export type Word = RawWord & {
   lessonSlug: string;
   /** Every Han character in `word`, in order of first appearance. */
   kanji: string[];
-  /** The subset of `kanji` that this level studies and has data for. */
-  levelKanji: string[];
 };
 
 export type RawKanji = {
@@ -54,9 +52,12 @@ export type KanjiPart = {
   name: string | null;
   /** How it looks or behaves inside other characters. */
   note: string | null;
-  /** The first kanji of the curriculum built from this part, or that is it. */
+  /**
+   * The first kanji of the curriculum built from this part, or that is it —
+   * in any level, so a part of an N4 kanji can have been met in N5.
+   */
   firstSeen: string;
-  /** 1-based lesson number of {@link firstSeen}. */
+  /** Lesson number of {@link firstSeen}. See {@link Lesson.order}. */
   firstLesson: number;
 };
 
@@ -64,9 +65,9 @@ export type Kanji = RawKanji & {
   level: Level;
   /** Slug of the lesson that introduces this character. */
   lessonSlug: string;
-  /** 1-based position in the level's kanji curriculum. */
+  /** 1-based position in the whole curriculum, across levels. */
   order: number;
-  /** 1-based position of the introducing lesson. */
+  /** Number of the introducing lesson. See {@link Lesson.order}. */
   lessonOrder: number;
   /** Ordered SVG path data, one entry per stroke. Empty if not vendored. */
   strokePaths: string[];
@@ -77,7 +78,7 @@ export type Kanji = RawKanji & {
   parts: KanjiPart[];
   /** A short story tying the parts to the meaning. */
   mnemonic: string | null;
-  /** Other kanji of this level built from this one, in curriculum order. */
+  /** Later kanji built from this one, in curriculum order, in any level. */
   usedIn: RelatedKanji[];
 };
 
@@ -109,7 +110,12 @@ export type Lesson = {
   title: string;
   summary: string;
   level: Level;
-  /** 1-based position in the level's curriculum. */
+  /**
+   * 1-based position in the whole curriculum. Numbering runs on from one level
+   * into the next — N5 is lessons 1 to 16 and N4 starts at 17 — so a lesson
+   * number means the same thing on every page, and "seen in lesson 9" needs no
+   * level beside it.
+   */
   order: number;
   /** The characters this lesson introduces, in teaching order. */
   kanji: Kanji[];
@@ -155,35 +161,92 @@ type StrokeFile = {
 };
 
 /**
+ * The levels that are built, in the order they are studied. Content is static
+ * and read-only, so it is parsed once per server process.
+ *
+ * Adding a level means dropping a directory beside n5 and n4, extending this
+ * list, LEVELS in scripts/validate-content.mjs, and the loaders in
+ * lib/strokeBank.ts.
+ */
+const LEVELS: Level[] = ["N5", "N4"];
+
+type Curriculum = {
+  lessons: Lesson[];
+  kanji: Kanji[];
+  words: Word[];
+  lessonBySlug: Map<string, Lesson>;
+  kanjiByChar: Map<string, Kanji>;
+  wordById: Map<string, Word>;
+  strokeViewBox: string;
+};
+
+/**
+ * Every built level, run together into one curriculum: N5's lessons, then
+ * N4's, numbered straight through.
+ *
+ * Levels are loaded together rather than one at a time because they are not
+ * independent. An N4 kanji is built from parts a learner met in N5, and N5's
+ * 人 is reused inside N4's 体, so both what a part is and where it was first
+ * seen can only be worked out over the whole sequence.
+ */
+function loadCurriculum(): Curriculum {
+  const lessons: Lesson[] = [];
+  const kanji: Kanji[] = [];
+  // Primitives are shared: a level defines only the ones no earlier level
+  // did, and validate-content.mjs refuses a second definition.
+  const memo: MnemonicFile = { primitives: {}, kanji: {} };
+  let strokeViewBox = "0 0 109 109";
+
+  for (const level of LEVELS) {
+    const viewBox = loadLevel(level, lessons, kanji, memo);
+    if (viewBox) strokeViewBox = viewBox;
+  }
+
+  attachParts(kanji, memo);
+
+  const words = lessons.flatMap((l) => l.words);
+  return {
+    lessons,
+    kanji,
+    words,
+    lessonBySlug: new Map(lessons.map((l) => [l.slug, l])),
+    kanjiByChar: new Map(kanji.map((k) => [k.char, k])),
+    wordById: new Map(words.map((w) => [w.id, w])),
+    strokeViewBox,
+  };
+}
+
+/**
+ * Appends one level's lessons and kanji to the curriculum so far, and merges
+ * its mnemonics into `memo`. Returns the stroke data's viewBox, if it has any.
+ *
  * Lesson files are numbered so the filesystem order is the curriculum order.
  * A file holds several lessons; they keep their in-file order.
  */
-function loadLevel(level: Level) {
+function loadLevel(level: Level, lessons: Lesson[], kanji: Kanji[], memo: MnemonicFile): string | null {
   const levelDir = path.join(DATA_ROOT, level.toLowerCase());
   const lessonDir = path.join(levelDir, "lessons");
 
   const rawKanji = readJson<RawKanji[]>(path.join(levelDir, "kanji.json"));
   const byChar = new Map(rawKanji.map((k) => [k.char, k]));
-  const kanjiSet = new Set(byChar.keys());
 
   // Stroke data is optional: without it the app still teaches, it just cannot
   // animate stroke order. See data/jlpt/STROKES-LICENSE.md.
   const strokeFile = path.join(levelDir, "strokes.json");
-  const strokeData: StrokeFile = fs.existsSync(strokeFile)
-    ? readJson<StrokeFile>(strokeFile)
-    : { viewBox: "0 0 109 109", kanji: {} };
+  const strokeData: StrokeFile | null = fs.existsSync(strokeFile) ? readJson<StrokeFile>(strokeFile) : null;
 
   // Also optional: without it a new kanji is taught by its glyph and readings
   // alone, and the radical falls back to KanjiVG's.
   const memoFile = path.join(levelDir, "mnemonics.json");
-  const memo: MnemonicFile = fs.existsSync(memoFile)
-    ? readJson<MnemonicFile>(memoFile)
-    : { primitives: {}, kanji: {} };
+  if (fs.existsSync(memoFile)) {
+    const own = readJson<MnemonicFile>(memoFile);
+    for (const [char, def] of Object.entries(own.primitives)) {
+      if (!Object.hasOwn(memo.primitives, char)) memo.primitives[char] = def;
+    }
+    Object.assign(memo.kanji, own.kanji);
+  }
 
   const files = fs.readdirSync(lessonDir).filter((f) => f.endsWith(".json")).sort();
-
-  const lessons: Lesson[] = [];
-  const kanji: Kanji[] = [];
 
   for (const file of files) {
     for (const raw of readJson<RawLesson[]>(path.join(lessonDir, file))) {
@@ -195,11 +258,11 @@ function loadLevel(level: Level) {
           lessonSlug: raw.slug,
           order: kanji.length + 1,
           lessonOrder: lessons.length + 1,
-          strokePaths: strokeData.kanji[char]?.strokes ?? [],
+          strokePaths: strokeData?.kanji[char]?.strokes ?? [],
           // KanjiVG sometimes records a stroke — 丿 for 年 — where a
           // dictionary files the character under 干, so the authored radical
           // wins wherever there is one.
-          radical: memo.kanji[char]?.radical ?? strokeData.kanji[char]?.radical ?? null,
+          radical: memo.kanji[char]?.radical ?? strokeData?.kanji[char]?.radical ?? null,
           radicalPart: null,
           parts: [],
           mnemonic: memo.kanji[char]?.mnemonic ?? null,
@@ -216,24 +279,18 @@ function loadLevel(level: Level) {
         level,
         order: lessons.length + 1,
         kanji: lessonKanji,
-        words: raw.words.map((w) => {
-          const chars = [...new Set([...w.word].filter((ch) => HAN.test(ch)))];
-          return {
-            ...w,
-            id: wordId(level, raw.slug, w.word, w.reading),
-            level,
-            lessonSlug: raw.slug,
-            kanji: chars,
-            levelKanji: chars.filter((ch) => kanjiSet.has(ch)),
-          };
-        }),
+        words: raw.words.map((w) => ({
+          ...w,
+          id: wordId(level, raw.slug, w.word, w.reading),
+          level,
+          lessonSlug: raw.slug,
+          kanji: [...new Set([...w.word].filter((ch) => HAN.test(ch)))],
+        })),
       });
     }
   }
 
-  attachParts(kanji, memo);
-
-  return { lessons, kanji, strokeViewBox: strokeData.viewBox };
+  return strokeData?.viewBox ?? null;
 }
 
 /**
@@ -287,24 +344,14 @@ function attachParts(kanji: Kanji[], memo: MnemonicFile) {
   }
 }
 
-/**
- * Content is static and read-only, so it is parsed once per server process.
- * Adding N4-N1 means dropping a directory beside n5 and extending this list,
- * and the loaders in lib/strokeBank.ts.
- */
-const LEVELS: Level[] = ["N5"];
+let cache: Curriculum | null = null;
 
-const cache = new Map<Level, ReturnType<typeof loadLevel>>();
-
-function level(l: Level) {
-  let entry = cache.get(l);
-  if (!entry) {
-    entry = loadLevel(l);
-    cache.set(l, entry);
-  }
-  return entry;
+function curriculum(): Curriculum {
+  cache ??= loadCurriculum();
+  return cache;
 }
 
+/** The built levels, in study order. */
 export function availableLevels(): Level[] {
   return LEVELS;
 }
@@ -344,7 +391,7 @@ let levelsFile: LevelsFile | null = null;
  * kanji, words — are read from each level's own content, so an unbuilt level
  * reports zero rather than borrowing a number from the roadmap file. A level
  * becomes available purely by existing in LEVELS with a data directory, so
- * nothing here needs editing to ship N4.
+ * nothing here needs editing to ship another.
  */
 export function getLevelPath(): LevelPathEntry[] {
   levelsFile ??= readJson<LevelsFile>(path.join(DATA_ROOT, "levels.json"));
@@ -365,45 +412,66 @@ export function getLevelPath(): LevelPathEntry[] {
   });
 }
 
-export function getLessons(l: Level = "N5"): Lesson[] {
-  return level(l).lessons;
+/*
+ * The accessors below take an optional level. Without one they cover every
+ * built level, which is what a learner's lessons, reviews and reference pages
+ * want: a learner in N4 still has N5 words coming due.
+ */
+
+export function getLessons(l?: Level): Lesson[] {
+  const { lessons } = curriculum();
+  return l ? lessons.filter((x) => x.level === l) : lessons;
 }
 
-export function getLesson(slug: string, l: Level = "N5"): Lesson | undefined {
-  return level(l).lessons.find((x) => x.slug === slug);
+/** Slugs are unique across levels, so a slug alone names a lesson. */
+export function getLesson(slug: string): Lesson | undefined {
+  return curriculum().lessonBySlug.get(slug);
 }
 
 /** Every kanji in curriculum order. */
-export function getKanji(l: Level = "N5"): Kanji[] {
-  return level(l).kanji;
+export function getKanji(l?: Level): Kanji[] {
+  const { kanji } = curriculum();
+  return l ? kanji.filter((k) => k.level === l) : kanji;
 }
 
-export function getKanjiChar(char: string, l: Level = "N5"): Kanji | undefined {
-  return level(l).kanji.find((k) => k.char === char);
+/** A character belongs to exactly one level, so it alone names a kanji. */
+export function getKanjiChar(char: string): Kanji | undefined {
+  return curriculum().kanjiByChar.get(char);
 }
 
-export function strokeViewBox(l: Level = "N5"): string {
-  return level(l).strokeViewBox;
+/** KanjiVG draws every character on the same grid, whatever its level. */
+export function strokeViewBox(): string {
+  return curriculum().strokeViewBox;
 }
 
-export function getAllWords(l: Level = "N5"): Word[] {
-  return level(l).lessons.flatMap((x) => x.words);
+export function getAllWords(l?: Level): Word[] {
+  const { words } = curriculum();
+  return l ? words.filter((w) => w.level === l) : words;
+}
+
+/** Word ids carry their level, so an id alone names a word. */
+export function getWord(id: string): Word | undefined {
+  return curriculum().wordById.get(id);
 }
 
 /** The words chosen to demonstrate one character. */
-export function getWordsTeaching(char: string, l: Level = "N5"): Word[] {
-  return getAllWords(l).filter((w) => w.teaches === char);
+export function getWordsTeaching(char: string): Word[] {
+  return curriculum().words.filter((w) => w.teaches === char);
 }
 
-/** Every word whose written form contains the character, wherever it is taught. */
-export function getWordsUsingKanji(char: string, l: Level = "N5"): Word[] {
-  return getAllWords(l).filter((w) => w.kanji.includes(char));
+/**
+ * Every word whose written form contains the character, wherever it is
+ * taught: N5's 自転車 uses N4's 転, and belongs on 転's list.
+ */
+export function getWordsUsingKanji(char: string): Word[] {
+  return curriculum().words.filter((w) => w.kanji.includes(char));
 }
 
-export function levelStats(l: Level = "N5") {
+/** Counts for one level, or for every built level together. */
+export function levelStats(l?: Level) {
   const lessons = getLessons(l);
   return {
-    level: l,
+    level: l ?? null,
     lessons: lessons.length,
     kanji: getKanji(l).length,
     words: lessons.reduce((n, x) => n + x.words.length, 0),

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
-import { getAllWords } from "@/lib/content";
+import { getWord } from "@/lib/content";
 import { recordAnswer } from "@/lib/progress";
 
 /**
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
   // Resolve against file content: the client never gets to say what level or
   // lesson a word belongs to, so a forged id cannot write a bogus row.
-  const word = getAllWords().find((w) => w.id === wordId);
+  const word = getWord(wordId);
   if (!word) return NextResponse.json({ error: "Unknown word" }, { status: 404 });
 
   try {

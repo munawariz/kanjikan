@@ -90,8 +90,8 @@ export function WritingPad({
     return () => ro.disconnect();
   }, []);
 
-  // Fetched now, while the learner writes, so the check has every kanji of
-  // the level to compare against by the time the answer is shown.
+  // Fetched now, while the learner writes, so the check has every kanji up to
+  // this level to compare against by the time the answer is shown.
   useEffect(() => {
     void loadStrokeBank(level);
   }, [level]);

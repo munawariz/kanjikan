@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
-import type { Kanji } from "@/lib/content";
+import type { Kanji, Level } from "@/lib/content";
 import { BAND_LABEL, type KanjiReading, type MarkState } from "@/lib/srs";
 import { KanjiAnatomy } from "./KanjiAnatomy";
 import { MarkControl } from "./MarkControl";
@@ -18,7 +18,8 @@ export type KanjiEntry = Pick<Kanji, "parts" | "radicalPart" | "mnemonic" | "use
   kunyomi: string[];
   radical: string | null;
   strokePaths: string[];
-  order: number;
+  level: Level;
+  lessonOrder: number;
   lessonSlug: string;
   lessonTitle: string;
   /** How well it can be read, from its words. Known or past it tints the tile. */
@@ -32,7 +33,7 @@ export type KanjiEntry = Pick<Kanji, "parts" | "radicalPart" | "mnemonic" | "use
 };
 
 /**
- * The full character set, in curriculum order.
+ * The full character set, in curriculum order, one block of tiles per level.
  *
  * Selecting a tile shows the character at size with its stroke order, readings,
  * radical, and the words that teach it. This is the reference half of the app;
@@ -42,12 +43,13 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
   const [selected, setSelected] = useState(entries[0]?.char ?? "");
   const active = entries.find((e) => e.char === selected) ?? entries[0];
   const detailRef = useRef<HTMLDivElement | null>(null);
+  const levels = [...new Set(entries.map((e) => e.level))];
 
   /**
-   * Below 860px the detail panel stacks underneath eighty tiles, so choosing a
-   * character would otherwise update something entirely off screen. Scrolling
-   * to it is the difference between the page working and appearing not to
-   * respond at all.
+   * Below 860px the detail panel stacks underneath hundreds of tiles, so
+   * choosing a character would otherwise update something entirely off screen.
+   * Scrolling to it is the difference between the page working and appearing
+   * not to respond at all.
    */
   function select(char: string) {
     setSelected(char);
@@ -60,60 +62,73 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
 
   return (
     <div className="grid grid-split" style={{ gap: 24 }}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(64px, 1fr))",
-          gap: 8,
-          alignContent: "start",
-        }}
-      >
-        {entries.map((entry) => {
-          const isActive = entry.char === selected;
-          const known = entry.reading.band === "known" || entry.reading.band === "mastered";
-          return (
-            <button
-              key={entry.char}
-              type="button"
-              onClick={() => select(entry.char)}
-              aria-pressed={isActive}
-              title={entry.meanings.join(", ")}
+      <div className="stack" style={{ gap: 28, alignContent: "start" }}>
+        {levels.map((level) => (
+          <section key={level} className="stack" style={{ gap: 12 }}>
+            {levels.length > 1 && (
+              <p className="eyebrow">
+                {level} · {entries.filter((e) => e.level === level).length} kanji
+              </p>
+            )}
+            <div
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 2,
-                aspectRatio: "1",
-                border: `1px solid ${isActive ? "var(--border-strong)" : "var(--border-subtle)"}`,
-                borderRadius: "var(--radius-sm)",
-                background: isActive
-                  ? "var(--surface-inverse)"
-                  : known
-                    ? "var(--surface-card-sage)"
-                    : "var(--surface-card)",
-                color: isActive ? "var(--text-inverse)" : "var(--text-heading)",
-                cursor: "pointer",
-                transition: "var(--transition-control)",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(64px, 1fr))",
+                gap: 8,
+                alignContent: "start",
               }}
             >
-              <span className="jp" style={{ fontSize: 26, lineHeight: 1 }}>
-                {entry.char}
-              </span>
-              {entry.canWrite && (
-                <span
-                  aria-label="can write"
-                  style={{
-                    width: 5,
-                    height: 5,
-                    borderRadius: "var(--radius-full)",
-                    background: "var(--accent)",
-                  }}
-                />
-              )}
-            </button>
-          );
-        })}
+              {entries
+                .filter((e) => e.level === level)
+                .map((entry) => {
+                  const isActive = entry.char === selected;
+                  const known = entry.reading.band === "known" || entry.reading.band === "mastered";
+                  return (
+                    <button
+                      key={entry.char}
+                      type="button"
+                      onClick={() => select(entry.char)}
+                      aria-pressed={isActive}
+                      title={entry.meanings.join(", ")}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 2,
+                        aspectRatio: "1",
+                        border: `1px solid ${isActive ? "var(--border-strong)" : "var(--border-subtle)"}`,
+                        borderRadius: "var(--radius-sm)",
+                        background: isActive
+                          ? "var(--surface-inverse)"
+                          : known
+                            ? "var(--surface-card-sage)"
+                            : "var(--surface-card)",
+                        color: isActive ? "var(--text-inverse)" : "var(--text-heading)",
+                        cursor: "pointer",
+                        transition: "var(--transition-control)",
+                      }}
+                    >
+                      <span className="jp" style={{ fontSize: 26, lineHeight: 1 }}>
+                        {entry.char}
+                      </span>
+                      {entry.canWrite && (
+                        <span
+                          aria-label="can write"
+                          style={{
+                            width: 5,
+                            height: 5,
+                            borderRadius: "var(--radius-full)",
+                            background: "var(--accent)",
+                          }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+            </div>
+          </section>
+        ))}
       </div>
 
       {active && (
@@ -196,7 +211,7 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
 
               <div className="stack" style={{ gap: 12 }}>
                 <p className="eyebrow" style={{ color: "var(--on-tint-body)" }}>
-                  Taught in lesson {String(active.order <= 5 ? 1 : Math.ceil(active.order / 5)).padStart(2, "0")}
+                  {active.level} · Taught in lesson {String(active.lessonOrder).padStart(2, "0")}
                 </p>
                 <Link href={`/lessons/${active.lessonSlug}`} className="reset-link">
                   <span style={{ color: "var(--on-tint-heading)", fontWeight: "var(--weight-semibold)" }}>

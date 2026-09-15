@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
-import { getAllWords, getKanjiChar, getLesson, getWordsTeaching, type Kanji, type Word } from "@/lib/content";
+import { getKanjiChar, getLesson, getWord, getWordsTeaching, type Kanji, type Word } from "@/lib/content";
 import { markWordsKnown, markWritingKnown, unmarkWords, unmarkWriting } from "@/lib/progress";
 
 /**
@@ -31,7 +31,8 @@ export async function POST(request: Request) {
   let words: Word[] = [];
   let kanji: Kanji[] = [];
   if (scope === "word") {
-    words = getAllWords().filter((w) => w.id === id);
+    const w = getWord(id);
+    if (w) words = [w];
   } else if (scope === "kanji") {
     const k = getKanjiChar(id);
     if (k) {

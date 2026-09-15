@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
-import { getDailyQuiz, getDashboard, type DailyQuiz, type LessonSummary } from "@/lib/progress";
+import {
+  getDailyQuiz,
+  getDashboard,
+  type DailyQuiz,
+  type LessonSummary,
+  type LevelProgress,
+} from "@/lib/progress";
 import { getAllWords, getLevelPath } from "@/lib/content";
 import { DAILY_QUIZ_SIZE, localDate, requestTimeZone } from "@/lib/daily";
 import { BAND_LABEL, type MasteryBand } from "@/lib/srs";
@@ -21,6 +27,12 @@ const BAND_COLOUR: Record<MasteryBand, string> = {
   known: "var(--band-known)",
   mastered: "var(--band-mastered)",
 };
+
+/** "N5", "N5 and N4", "N3, N2 and N1". */
+function listLevels(entries: { level: string }[]) {
+  const names = entries.map((e) => e.level);
+  return names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0];
+}
 
 /**
  * Today's quiz in one line: locked, waiting, half done, or done with a score.
@@ -93,16 +105,14 @@ function DailyQuizCard({ quiz }: { quiz: DailyQuiz }) {
 function ContinueCard({
   dueNow,
   resume,
-  percent,
-  known,
-  total,
+  level,
 }: {
   dueNow: number;
   resume: LessonSummary | null;
-  percent: number;
-  known: number;
-  total: number;
+  /** The level being worked through, whose kanji the figure counts. */
+  level: LevelProgress;
 }) {
+  const percent = Math.round((level.kanjiKnown / Math.max(level.totalKanji, 1)) * 100);
   const lessonLabel = resume?.status === "learning" ? "Continue Lesson" : "Start Lesson";
 
   return (
@@ -132,7 +142,7 @@ function ContinueCard({
               ? `${dueNow} ${dueNow === 1 ? "review is" : "reviews are"} ready.`
               : resume
                 ? resume.title
-                : "Every N5 lesson is done."}
+                : "Every lesson is done."}
           </h2>
 
           <p style={{ margin: 0, color: "var(--forest-200)" }}>
@@ -181,13 +191,13 @@ function ContinueCard({
             {percent}%
           </div>
           <div className="eyebrow" style={{ color: "var(--forest-200)" }}>
-            N5 kanji known
+            {level.level} kanji known
           </div>
           <div className="meter" style={{ background: "rgba(255,255,255,.16)", marginTop: 10, width: 200 }}>
             <span style={{ width: `${percent}%`, background: "var(--lime-500)" }} />
           </div>
           <div className="body-sm" style={{ color: "var(--forest-200)", marginTop: 6 }}>
-            {known} of {total} kanji
+            {level.kanjiKnown} of {level.totalKanji} kanji
           </div>
         </div>
       </div>
@@ -196,7 +206,7 @@ function ContinueCard({
 }
 
 /**
- * The learning path: every lesson in order, each showing how its five kanji
+ * The learning path: one level's lessons in order, each showing how its kanji
  * stand. A kanji's mark fills in as most of its words become known and falls
  * back if they slip, so the path shows where the work is, not just what has
  * been started.
@@ -296,10 +306,12 @@ export default async function HomePage() {
   ]);
   const lessons = data.lessons;
   const levels = getLevelPath();
+  const built = levels.filter((l) => l.available);
+  const unbuilt = levels.filter((l) => !l.available);
 
   const name = data.profile.display_name || user.username;
   const resume = data.resumeLesson ?? data.nextLesson;
-  const percent = Math.round((data.kanjiKnown / Math.max(data.totalKanji, 1)) * 100);
+  const current = data.levels.find((l) => l.level === data.currentLevel)!;
 
   // Accuracy across every answer ever recorded, not just this session.
   const progress = data.progress.words;
@@ -337,7 +349,7 @@ export default async function HomePage() {
       <section className="stack" style={{ gap: 24 }}>
         <div className="row" style={{ justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
           <div>
-            <p className="eyebrow">JLPT N5</p>
+            <p className="eyebrow">JLPT {data.currentLevel}</p>
             <h1
               style={{
                 margin: "10px 0 0",
@@ -374,13 +386,7 @@ export default async function HomePage() {
           </Card>
         )}
 
-        <ContinueCard
-          dueNow={data.dueNow}
-          resume={resume}
-          percent={percent}
-          known={data.kanjiKnown}
-          total={data.totalKanji}
-        />
+        <ContinueCard dueNow={data.dueNow} resume={resume} level={current} />
         <DailyQuizCard quiz={daily} />
       </section>
 
@@ -390,7 +396,7 @@ export default async function HomePage() {
           <div>
             <p className="eyebrow">Your path</p>
             <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-1)" }}>
-              {lessons.length} lessons, five kanji each
+              {lessons.length} lessons, {data.totalKanji} kanji
             </h2>
             <p className="body-sm muted" style={{ margin: "8px 0 0", maxWidth: 560 }}>
               The line under each kanji shows how well you know it. Take them in order, or open any
@@ -407,7 +413,19 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <LessonPath lessons={lessons} next={resume?.slug ?? null} />
+        {data.levels.map((level) => (
+          <div key={level.level} className="stack" style={{ gap: 12 }}>
+            <div className="row" style={{ justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+              <h3 style={{ margin: 0, fontSize: "var(--text-heading-4)" }}>
+                {level.level} · {built.find((l) => l.level === level.level)?.title}
+              </h3>
+              <span className="body-sm" style={{ fontFamily: "var(--font-mono)", color: "var(--text-body)" }}>
+                {level.kanjiKnown}/{level.totalKanji} kanji known
+              </span>
+            </div>
+            <LessonPath lessons={lessons.filter((l) => l.level === level.level)} next={resume?.slug ?? null} />
+          </div>
+        ))}
       </section>
 
       {/* ---- Numbers ----------------------------------------------------- */}
@@ -546,14 +564,15 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ---- Beyond N5 --------------------------------------------------- */}
+      {/* ---- The road ahead ---------------------------------------------- */}
       <section className="stack" style={{ gap: 16 }}>
         <div>
-          <p className="eyebrow">Beyond N5</p>
+          <p className="eyebrow">Beyond {built[built.length - 1].level}</p>
           <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-2)" }}>The road ahead</h2>
           <p className="body-sm muted" style={{ margin: "8px 0 0", maxWidth: 620 }}>
-            N5 is built. The other levels are mapped but not written yet. Their counts are community
-            estimates, because the JLPT has published no official kanji list since 2010.
+            {listLevels(built)} {built.length === 1 ? "is" : "are"} built.
+            {unbuilt.length > 0 &&
+              ` ${listLevels(unbuilt)} ${unbuilt.length === 1 ? "is" : "are"} mapped but not written yet. Their counts are community estimates, because the JLPT has published no official kanji list since 2010.`}
           </p>
         </div>
         <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>

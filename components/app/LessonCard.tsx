@@ -12,7 +12,7 @@ const STATUS: Record<LessonSummary["status"], { label: string; tone: "sage" | "s
 /**
  * A lesson tile, leading with the characters it teaches.
  *
- * The five glyphs are the whole point of the lesson, so they get the largest
+ * The glyphs are the whole point of the lesson, so they get the largest
  * type on the card. Atlas alternates cream and sage across a grid, so tone is
  * driven by position; status is carried by the badge.
  */

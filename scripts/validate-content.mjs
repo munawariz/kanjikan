@@ -8,13 +8,20 @@
  * character with too little vocabulary to fix its readings, fails the build
  * rather than quietly shipping.
  *
+ * Levels are checked in study order and against each other, because the app
+ * runs them together as one curriculum (see lib/content.ts): a kanji, a lesson
+ * slug or a word belongs to one level only, a part may be a kanji or primitive
+ * from an earlier level, and a primitive is defined once, by the first level
+ * that needs it.
+ *
  * Run: npm run validate:content
  */
 import fs from "node:fs";
 import path from "node:path";
 import { titleCase } from "./title-case.mjs";
 
-const LEVELS = ["n5"];
+/** Study order. Keep in step with LEVELS in lib/content.ts. */
+const LEVELS = ["n5", "n4"];
 const DATA_ROOT = path.join(process.cwd(), "data", "jlpt");
 
 /** Minimum words per kanji. Below this, multiple readings do not get fixed. */
@@ -43,11 +50,31 @@ function checkCase(where, meaning) {
   if (meaning !== expected) errors.push(`${where}: write ${JSON.stringify(meaning)} as ${JSON.stringify(expected)}`);
 }
 
+const readJson = (file) => JSON.parse(fs.readFileSync(file, "utf8"));
+
+// Every level's characters, first, so a part can name a kanji of any level.
+const kanjiLevel = new Map();
+const kanjiLists = new Map();
+for (const level of LEVELS) {
+  const kanjiList = readJson(path.join(DATA_ROOT, level, "kanji.json"));
+  kanjiLists.set(level, kanjiList);
+  for (const k of kanjiList) {
+    if (kanjiLevel.has(k.char)) errors.push(`${level}/kanji.json: ${k.char} is already a kanji of ${kanjiLevel.get(k.char)}`);
+    else kanjiLevel.set(k.char, level);
+  }
+}
+
+// Shared across levels, in study order.
+const primitiveLevel = new Map(); // primitive -> level that defines it
+const usedParts = new Set();
+const slugs = new Map(); // lesson slug -> level
+const surfaces = new Map(); // word|reading -> where it is taught
+
 for (const level of LEVELS) {
   const levelDir = path.join(DATA_ROOT, level);
   const lessonDir = path.join(levelDir, "lessons");
 
-  const kanjiList = JSON.parse(fs.readFileSync(path.join(levelDir, "kanji.json"), "utf8"));
+  const kanjiList = kanjiLists.get(level);
   const kanjiSet = new Set(kanjiList.map((k) => k.char));
   if (kanjiSet.size !== kanjiList.length) errors.push(`${level}/kanji.json: duplicate characters`);
 
@@ -81,14 +108,25 @@ for (const level of LEVELS) {
   }
 
   // Mnemonics are optional too, but if present every kanji needs one, and
-  // every part and radical must resolve to something the app can explain.
+  // every part and radical must resolve to something the app can explain:
+  // a kanji of any level, or a primitive defined here or by an earlier level.
   const memoFile = path.join(levelDir, "mnemonics.json");
   if (fs.existsSync(memoFile)) {
     const rel = `${level}/mnemonics.json`;
     const memo = JSON.parse(fs.readFileSync(memoFile, "utf8"));
     const primitives = memo.primitives ?? {};
-    const defined = (c) => kanjiSet.has(c) || Object.hasOwn(primitives, c);
-    const used = new Set();
+    for (const [c, def] of Object.entries(primitives)) {
+      if (primitiveLevel.has(c)) {
+        errors.push(`${rel}: primitive ${c} is already defined by ${primitiveLevel.get(c)}/mnemonics.json`);
+        continue;
+      }
+      primitiveLevel.set(c, level);
+      // A kanji takes its meaning from kanji.json; anything else has nowhere
+      // else to get one.
+      if (!def.meaning && !kanjiLevel.has(c)) errors.push(`${rel}: primitive ${c} has no meaning`);
+      if (def.meaning) checkCase(`${rel} primitive ${c}`, def.meaning);
+    }
+    const defined = (c) => kanjiLevel.has(c) || primitiveLevel.has(c);
 
     for (const k of kanjiList) {
       const m = memo.kanji?.[k.char];
@@ -100,7 +138,7 @@ for (const level of LEVELS) {
       if (!m.radical) {
         errors.push(`${rel}: ${k.char} has no radical`);
       } else {
-        used.add(m.radical);
+        usedParts.add(m.radical);
         if (!defined(m.radical)) errors.push(`${rel}: ${k.char} radical ${m.radical} is not defined in primitives`);
       }
       if (!Array.isArray(m.parts)) {
@@ -116,7 +154,7 @@ for (const level of LEVELS) {
           continue;
         }
         if (typeof raw === "object") checkCase(`${rel} ${k.char} part ${p}`, raw.as);
-        used.add(p);
+        usedParts.add(p);
         if (p === k.char) errors.push(`${rel}: ${k.char} lists itself as a part`);
         if (!defined(p)) errors.push(`${rel}: ${k.char} part ${p} is neither a kanji nor in primitives`);
         // The story is what makes a part stick. One it never mentions is a
@@ -133,13 +171,6 @@ for (const level of LEVELS) {
     for (const c of Object.keys(memo.kanji ?? {})) {
       if (!kanjiSet.has(c)) errors.push(`${rel}: entry for ${c}, which is not in kanji.json`);
     }
-    for (const [c, def] of Object.entries(primitives)) {
-      // A kanji of the level takes its meaning from kanji.json; anything else
-      // has nowhere else to get one.
-      if (!def.meaning && !kanjiSet.has(c)) errors.push(`${rel}: primitive ${c} has no meaning`);
-      if (def.meaning) checkCase(`${rel} primitive ${c}`, def.meaning);
-      if (!used.has(c) && !kanjiSet.has(c)) warnings.push(`${rel}: primitive ${c} is never used`);
-    }
 
     notes.push(
       `${level}: mnemonics for ${Object.keys(memo.kanji ?? {}).length} kanji, ` +
@@ -150,9 +181,7 @@ for (const level of LEVELS) {
   }
 
   const files = fs.readdirSync(lessonDir).filter((f) => f.endsWith(".json")).sort();
-  const slugs = new Set();
   const triples = new Map();
-  const surfaces = new Map();
   const taughtBy = new Map(); // kanji -> lesson slug
   const wordsPerKanji = new Map();
   let wordCount = 0;
@@ -177,8 +206,9 @@ for (const level of LEVELS) {
       for (const field of ["slug", "title", "summary"]) {
         if (!lesson[field]) errors.push(`${rel}: lesson missing ${field}`);
       }
-      if (slugs.has(lesson.slug)) errors.push(`${rel}: duplicate lesson slug ${lesson.slug}`);
-      slugs.add(lesson.slug);
+      // A lesson's address is /lessons/<slug>, with no level in it.
+      if (slugs.has(lesson.slug)) errors.push(`${rel}: lesson slug ${lesson.slug} is already used in ${slugs.get(lesson.slug)}`);
+      slugs.set(lesson.slug, level);
 
       if (!Array.isArray(lesson.kanji) || lesson.kanji.length === 0) {
         errors.push(`${rel}: lesson ${lesson.slug} declares no kanji`);
@@ -243,11 +273,12 @@ for (const level of LEVELS) {
 
         // A word taught twice under different kanji is wasted repetition: the
         // learner sees it as two separate items with two separate schedules.
+        // That holds across levels too — N4 must not teach N5's 自転車 again.
         const surface = `${w.word}|${w.reading}`;
         if (surfaces.has(surface)) {
           errors.push(`${where}: also taught in ${surfaces.get(surface)} - assign it to one kanji`);
         }
-        surfaces.set(surface, `${lesson.slug} (${w.teaches})`);
+        surfaces.set(surface, `${level} ${lesson.slug} (${w.teaches})`);
       }
     }
   }
@@ -269,6 +300,11 @@ for (const level of LEVELS) {
       `(${Math.min(...counts)}-${Math.max(...counts)} per kanji, ` +
       `avg ${(counts.reduce((a, b) => a + b, 0) / counts.length).toFixed(1)})`,
   );
+}
+
+// Only now: an N5 primitive may be used by nothing until N4.
+for (const [c, level] of primitiveLevel) {
+  if (!usedParts.has(c) && !kanjiLevel.has(c)) warnings.push(`${level}/mnemonics.json: primitive ${c} is never used`);
 }
 
 for (const n of notes) console.log(n);

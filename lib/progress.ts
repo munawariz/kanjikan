@@ -1,6 +1,16 @@
 import "server-only";
 import { asUser, type Db } from "@/lib/db";
-import { getAllWords, getKanji, getLessons, type Kanji, type Level, type Word } from "@/lib/content";
+import {
+  availableLevels,
+  getAllWords,
+  getKanji,
+  getKanjiChar,
+  getLessons,
+  getWord,
+  type Kanji,
+  type Level,
+  type Word,
+} from "@/lib/content";
 import {
   dueAfter,
   grade,
@@ -121,35 +131,43 @@ export async function getProfile(userId: string): Promise<Profile> {
   });
 }
 
-export async function getWordProgress(userId: string, level: Level = "N5"): Promise<Map<string, WordProgressRow>> {
+/*
+ * Progress is read for every level at once. Word ids carry their level,
+ * characters and lesson slugs are unique across levels, and a learner's rows
+ * number in the hundreds, so filtering by level in the query would save
+ * nothing — and would hide N5 reviews from a learner who has moved on to N4.
+ * Whatever needs one level narrows the content it matches the rows against.
+ */
+
+export async function getWordProgress(userId: string): Promise<Map<string, WordProgressRow>> {
   return read("getWordProgress", userId, new Map(), async (db) => {
     const { rows } = await db.query<WordProgressRow>(
       `select word_id, lesson_slug, srs_stage, correct_count, incorrect_count, streak, due_at, last_reviewed_at,
               marked_at, created_at
-         from public.word_progress where user_id = $1 and level = $2`,
-      [userId, level],
+         from public.word_progress where user_id = $1`,
+      [userId],
     );
     return new Map(rows.map((r) => [r.word_id, r]));
   });
 }
 
-export async function getKanjiProgress(userId: string, level: Level = "N5"): Promise<Map<string, KanjiProgressRow>> {
+export async function getKanjiProgress(userId: string): Promise<Map<string, KanjiProgressRow>> {
   return read("getKanjiProgress", userId, new Map(), async (db) => {
     const { rows } = await db.query<KanjiProgressRow>(
       `select char, writing_stage, writing_due_at, writing_marked_at
-         from public.kanji_progress where user_id = $1 and level = $2`,
-      [userId, level],
+         from public.kanji_progress where user_id = $1`,
+      [userId],
     );
     return new Map(rows.map((r) => [r.char, r]));
   });
 }
 
-export async function getLessonProgress(userId: string, level: Level = "N5"): Promise<Map<string, LessonProgressRow>> {
+export async function getLessonProgress(userId: string): Promise<Map<string, LessonProgressRow>> {
   return read("getLessonProgress", userId, new Map(), async (db) => {
     const { rows } = await db.query<LessonProgressRow>(
       `select lesson_slug, status, cursor, completed_at
-         from public.lesson_progress where user_id = $1 and level = $2`,
-      [userId, level],
+         from public.lesson_progress where user_id = $1`,
+      [userId],
     );
     return new Map(rows.map((r) => [r.lesson_slug, r]));
   });
@@ -167,23 +185,24 @@ export type ProgressMaps = {
  * A guest has no rows by definition, so their queries are skipped rather than
  * sent for row level security to answer with nothing.
  */
-export async function getProgress(user: { id: string } | null, level: Level = "N5"): Promise<ProgressMaps> {
+export async function getProgress(user: { id: string } | null): Promise<ProgressMaps> {
   if (!user) return { words: new Map(), kanji: new Map(), lessons: new Map() };
   const [words, kanji, lessons] = await Promise.all([
-    getWordProgress(user.id, level),
-    getKanjiProgress(user.id, level),
-    getLessonProgress(user.id, level),
+    getWordProgress(user.id),
+    getKanjiProgress(user.id),
+    getLessonProgress(user.id),
   ]);
   return { words, kanji, lessons };
 }
 
 /**
  * Every kanji's reading mastery, worked out from the words that teach it.
- * See kanjiReading in lib/srs.ts for the rule.
+ * See kanjiReading in lib/srs.ts for the rule. Every level's, unless one is
+ * named.
  */
 export function getKanjiReadings(
   words: Map<string, Pick<WordProgressRow, "srs_stage">>,
-  level: Level = "N5",
+  level?: Level,
 ): Map<string, KanjiReading> {
   const stages = new Map<string, number[]>();
   for (const w of getAllWords(level)) {
@@ -222,6 +241,7 @@ export type LessonSummary = {
   slug: string;
   title: string;
   summary: string;
+  level: Level;
   order: number;
   kanji: string[];
   /** Each character's reading band, in the same order as `kanji`. */
@@ -245,8 +265,10 @@ export type LessonSummary = {
  * characters, so "half done" should mean half the characters are known, not
  * half the vocabulary answered. Whether a character is known comes from its
  * words, so the two cannot disagree.
+ *
+ * Every level's lessons in curriculum order, unless one is named.
  */
-export function getLessonSummaries(progress: ProgressMaps, level: Level = "N5"): LessonSummary[] {
+export function getLessonSummaries(progress: ProgressMaps, level?: Level): LessonSummary[] {
   const now = Date.now();
   const readings = getKanjiReadings(progress.words, level);
 
@@ -281,6 +303,7 @@ export function getLessonSummaries(progress: ProgressMaps, level: Level = "N5"):
       slug: lesson.slug,
       title: lesson.title,
       summary: lesson.summary,
+      level: lesson.level,
       order: lesson.order,
       kanji: lesson.kanji.map((k) => k.char),
       bands,
@@ -296,12 +319,28 @@ export function getLessonSummaries(progress: ProgressMaps, level: Level = "N5"):
   });
 }
 
+/** How far through one level a learner is, in kanji. */
+export type LevelProgress = {
+  level: Level;
+  totalKanji: number;
+  kanjiKnown: number;
+};
+
 export type DashboardData = {
   profile: Profile;
   studyWriting: boolean;
   /** The rows everything below is computed from, for pages that need more. */
   progress: ProgressMaps;
+  /** Every level's lessons, in curriculum order. */
   lessons: LessonSummary[];
+  /**
+   * The level being worked through: that of the lesson Home suggests next, or
+   * the last level once every lesson is done.
+   */
+  currentLevel: Level;
+  /** One entry per built level, in study order. */
+  levels: LevelProgress[];
+  /** The figures below cover every level together. */
   totalKanji: number;
   kanjiStarted: number;
   kanjiKnown: number;
@@ -320,13 +359,13 @@ export type DashboardData = {
   resumeLesson: LessonSummary | null;
 };
 
-export async function getDashboard(userId: string, level: Level = "N5"): Promise<DashboardData> {
+export async function getDashboard(userId: string): Promise<DashboardData> {
   const now = Date.now();
   const since = new Date(now - 29 * 86_400_000).toISOString();
 
   const [profile, progress, sessions] = await Promise.all([
     getProfile(userId),
-    getProgress({ id: userId }, level),
+    getProgress({ id: userId }),
     read("getDashboard sessions", userId, [] as { created_at: string; total: number }[], async (db) => {
       const { rows } = await db.query<{ created_at: string; total: number }>(
         `select created_at, total from public.study_sessions
@@ -336,19 +375,26 @@ export async function getDashboard(userId: string, level: Level = "N5"): Promise
       return rows;
     }),
   ]);
-  const lessons = getLessonSummaries(progress, level);
+  const lessons = getLessonSummaries(progress);
   const studyWriting = studiesWriting(profile);
 
-  const allKanji = getKanji(level);
-  const allWords = getAllWords(level);
-  const readings = getKanjiReadings(progress.words, level);
+  const allKanji = getKanji();
+  const allWords = getAllWords();
+  const readings = getKanjiReadings(progress.words);
 
   // Mastery bands describe reading, the headline metric.
   const bands: Record<MasteryBand, number> = { new: 0, learning: 0, known: 0, mastered: 0 };
+  const byLevel = new Map<Level, LevelProgress>(
+    availableLevels().map((level) => [level, { level, totalKanji: 0, kanjiKnown: 0 }]),
+  );
   let kanjiWritten = 0;
   let writingDue = 0;
   for (const k of allKanji) {
-    bands[readings.get(k.char)?.band ?? "new"]++;
+    const band = readings.get(k.char)?.band ?? "new";
+    bands[band]++;
+    const level = byLevel.get(k.level)!;
+    level.totalKanji++;
+    if (band === "known" || band === "mastered") level.kanjiKnown++;
     const p = progress.kanji.get(k.char);
     if ((p?.writing_stage ?? 0) >= KNOWN_STAGE) kanjiWritten++;
     if (p && p.writing_stage > 0 && p.writing_due_at && new Date(p.writing_due_at).getTime() <= now) writingDue++;
@@ -382,12 +428,16 @@ export async function getDashboard(userId: string, level: Level = "N5"): Promise
     lessons.find((l) => l.slug === profile.current_lesson_slug && l.status !== "completed") ??
     lessons.find((l) => l.status === "learning") ??
     null;
+  const nextLesson = lessons.find((l) => l.status === "not_started") ?? null;
+  const levels = [...byLevel.values()];
 
   return {
     profile,
     studyWriting,
     progress,
     lessons,
+    currentLevel: (resumeLesson ?? nextLesson)?.level ?? levels[levels.length - 1].level,
+    levels,
     totalKanji: allKanji.length,
     kanjiStarted: bands.learning + bands.known + bands.mastered,
     kanjiKnown: bands.known + bands.mastered,
@@ -401,43 +451,37 @@ export async function getDashboard(userId: string, level: Level = "N5"): Promise
     reviewedToday: byDay.get(new Date(now).toDateString()) ?? 0,
     bands,
     activity,
-    nextLesson: lessons.find((l) => l.status === "not_started") ?? null,
+    nextLesson,
     resumeLesson,
   };
 }
 
-/** Words due for review, most overdue first. */
-export async function getReviewQueue(userId: string, level: Level = "N5", limit = 30): Promise<Word[]> {
+/** Words due for review, most overdue first, from every level. */
+export async function getReviewQueue(userId: string, limit = 30): Promise<Word[]> {
   const due = await read("getReviewQueue", userId, [] as { word_id: string }[], async (db) => {
     const { rows } = await db.query<{ word_id: string }>(
       `select word_id from public.word_progress
-        where user_id = $1 and level = $2 and due_at <= now()
-        order by due_at limit $3`,
-      [userId, level, limit],
+        where user_id = $1 and due_at <= now()
+        order by due_at limit $2`,
+      [userId, limit],
     );
     return rows;
   });
-  const order = new Map(due.map((r, i) => [r.word_id, i]));
-  return getAllWords(level)
-    .filter((w) => order.has(w.id))
-    .sort((a, b) => order.get(a.id)! - order.get(b.id)!);
+  return due.map((r) => getWord(r.word_id)).filter((w): w is Word => w !== undefined);
 }
 
-/** Characters whose writing is due, most overdue first. */
-export async function getWritingReviewQueue(userId: string, level: Level = "N5", limit = 10): Promise<Kanji[]> {
+/** Characters whose writing is due, most overdue first, from every level. */
+export async function getWritingReviewQueue(userId: string, limit = 10): Promise<Kanji[]> {
   const due = await read("getWritingReviewQueue", userId, [] as { char: string }[], async (db) => {
     const { rows } = await db.query<{ char: string }>(
       `select char from public.kanji_progress
-        where user_id = $1 and level = $2 and writing_stage > 0 and writing_due_at <= now()
-        order by writing_due_at limit $3`,
-      [userId, level, limit],
+        where user_id = $1 and writing_stage > 0 and writing_due_at <= now()
+        order by writing_due_at limit $2`,
+      [userId, limit],
     );
     return rows;
   });
-  const order = new Map(due.map((r, i) => [r.char, i]));
-  return getKanji(level)
-    .filter((k) => order.has(k.char))
-    .sort((a, b) => order.get(a.char)! - order.get(b.char)!);
+  return due.map((r) => getKanjiChar(r.char)).filter((k): k is Kanji => k !== undefined);
 }
 
 /**
@@ -740,27 +784,26 @@ export type DailyQuiz = {
  * change under the learner, and it keeps the quiz from asking about something
  * taught ten minutes ago — which would measure short-term recall rather than
  * whether it stuck.
+ *
+ * It draws on every level. Distractors come from the levels the learner has
+ * learned something in, so an N5 learner is never offered N4 meanings they
+ * could rule out just for being unfamiliar.
  */
-export async function getDailyQuiz(
-  userId: string,
-  date: string,
-  timeZone: string,
-  level: Level = "N5",
-): Promise<DailyQuiz> {
+export async function getDailyQuiz(userId: string, date: string, timeZone: string): Promise<DailyQuiz> {
   type Studied = { word_id: string; srs_stage: number; created_at: string };
   const [progress, answers] = await Promise.all([
     read("getDailyQuiz progress", userId, [] as Studied[], async (db) => {
       const { rows } = await db.query<Studied>(
-        `select word_id, srs_stage, created_at from public.word_progress where user_id = $1 and level = $2`,
-        [userId, level],
+        `select word_id, srs_stage, created_at from public.word_progress where user_id = $1`,
+        [userId],
       );
       return rows;
     }),
     read("getDailyQuiz answers", userId, [] as DailyAnswerRow[], async (db) => {
       const { rows } = await db.query<DailyAnswerRow>(
         `select position, char, answer, chosen, correct from public.daily_quiz_answers
-          where user_id = $1 and level = $2 and quiz_date = $3 order by position`,
-        [userId, level, date],
+          where user_id = $1 and quiz_date = $2 order by position`,
+        [userId, date],
       );
       return rows;
     }),
@@ -768,22 +811,23 @@ export async function getDailyQuiz(
 
   const rows = new Map(progress.map((r) => [r.word_id, r]));
   const learnedChars = new Set<string>();
-  for (const w of getAllWords(level)) {
+  for (const w of getAllWords()) {
     const r = rows.get(w.id);
     // YYYY-MM-DD compares correctly as a string.
     if (r && localDate(timeZone, new Date(r.created_at)) < date) learnedChars.add(w.teaches);
   }
 
-  const readings = getKanjiReadings(rows, level);
+  const readings = getKanjiReadings(rows);
   const stages = new Map<string, number>();
   for (const c of learnedChars) stages.set(c, readings.get(c)?.stage ?? 0);
 
   // Curriculum order, so the shuffle has the same input on every rebuild.
-  const all = getKanji(level);
-  const learned = all.filter((k) => learnedChars.has(k.char));
+  const learned = getKanji().filter((k) => learnedChars.has(k.char));
+  const levels = new Set(learned.map((k) => k.level));
+  const pool = getKanji().filter((k) => levels.has(k.level));
   const questions =
     learned.length >= DAILY_QUIZ_SIZE
-      ? buildDailyQuiz(learned, all, DAILY_QUIZ_SIZE, dailySeed(userId, date))
+      ? buildDailyQuiz(learned, pool, DAILY_QUIZ_SIZE, dailySeed(userId, date))
       : [];
 
   return { date, learned: learned.length, questions, answers, stages };
@@ -808,9 +852,8 @@ export async function recordDailyAnswer(
   timeZone: string,
   position: number,
   choiceId: string,
-  level: Level = "N5",
 ): Promise<DailyAnswerResult> {
-  const quiz = await getDailyQuiz(userId, date, timeZone, level);
+  const quiz = await getDailyQuiz(userId, date, timeZone);
   const card = quiz.questions[position - 1];
   if (!card) return { status: "invalid", reason: "No such question" };
 
@@ -830,7 +873,8 @@ export async function recordDailyAnswer(
          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [
           userId,
-          level,
+          // A quiz can mix levels; each answer records its own character's.
+          card.kanji.level,
           date,
           position,
           card.kind,
@@ -855,13 +899,12 @@ export async function recordDailyAnswer(
 export async function getDailyHistory(
   userId: string,
   since: string,
-  level: Level = "N5",
 ): Promise<Map<string, { answered: number; correct: number }>> {
   const rows = await read("getDailyHistory", userId, [] as { quiz_date: string; correct: boolean }[], async (db) => {
     const { rows } = await db.query<{ quiz_date: string; correct: boolean }>(
       `select quiz_date, correct from public.daily_quiz_answers
-        where user_id = $1 and level = $2 and quiz_date >= $3`,
-      [userId, level, since],
+        where user_id = $1 and quiz_date >= $2`,
+      [userId, since],
     );
     return rows;
   });
@@ -881,15 +924,15 @@ export async function getDailyHistory(
  * warning. Writing is counted whether or not the learner studies it; the
  * caller decides with {@link reviewsDue}.
  */
-export async function getDueCounts(userId: string, level: Level = "N5"): Promise<{ words: number; writing: number }> {
+export async function getDueCounts(userId: string): Promise<{ words: number; writing: number }> {
   return read("getDueCounts", userId, { words: 0, writing: 0 }, async (db) => {
     const { rows } = await db.query<{ words: number; writing: number }>(
       `select
          (select count(*)::int from public.word_progress
-           where user_id = $1 and level = $2 and due_at <= now()) as words,
+           where user_id = $1 and due_at <= now()) as words,
          (select count(*)::int from public.kanji_progress
-           where user_id = $1 and level = $2 and writing_stage > 0 and writing_due_at <= now()) as writing`,
-      [userId, level],
+           where user_id = $1 and writing_stage > 0 and writing_due_at <= now()) as writing`,
+      [userId],
     );
     return rows[0] ?? { words: 0, writing: 0 };
   });

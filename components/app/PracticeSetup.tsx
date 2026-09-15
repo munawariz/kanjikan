@@ -324,8 +324,8 @@ export function PracticeSetup({
       </section>
 
       {/* Pinned to the bottom of the screen, above the tab bar on a phone, so
-          the run can be started from anywhere on a page with eighty tiles on
-          it. */}
+          the run can be started from anywhere on a page with hundreds of
+          tiles on it. */}
       <div
         className="row"
         style={{

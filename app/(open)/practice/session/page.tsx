@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { availableLevels, getAllWords, getKanji, getWordsTeaching, type Level } from "@/lib/content";
+import { getAllWords, getKanji, getWordsTeaching, type Level } from "@/lib/content";
 import { getUser } from "@/lib/auth";
 import { getWordProgress } from "@/lib/progress";
 import { PRACTICE_TYPES } from "@/lib/study";
@@ -22,9 +22,7 @@ export default async function PracticeSessionPage({
 }) {
   const wholeLevels = new Set((searchParams.levels ?? "").split(","));
   const singles = new Set(searchParams.kanji ?? "");
-  const kanji = availableLevels()
-    .flatMap((l) => getKanji(l))
-    .filter((k) => wholeLevels.has(k.level) || singles.has(k.char));
+  const kanji = getKanji().filter((k) => wholeLevels.has(k.level) || singles.has(k.char));
   const requested = (searchParams.types ?? "").split(",");
   const types = PRACTICE_TYPES.filter((t) => requested.includes(t));
 
@@ -38,7 +36,7 @@ export default async function PracticeSessionPage({
   }
 
   const user = await getUser();
-  const words = types.includes("reading") ? kanji.flatMap((k) => getWordsTeaching(k.char, k.level)) : [];
+  const words = types.includes("reading") ? kanji.flatMap((k) => getWordsTeaching(k.char)) : [];
 
   // Read only to choose how each word is asked, as a review would: a word
   // already well known is asked for its reading or recalled from English

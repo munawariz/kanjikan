@@ -1,5 +1,12 @@
 import { redirect } from "next/navigation";
-import { getKanji, getLessons, getWordsTeaching, getWordsUsingKanji, strokeViewBox } from "@/lib/content";
+import {
+  availableLevels,
+  getKanji,
+  getLessons,
+  getWordsTeaching,
+  getWordsUsingKanji,
+  strokeViewBox,
+} from "@/lib/content";
 import { getUser } from "@/lib/auth";
 import {
   getKanjiReadings,
@@ -39,7 +46,8 @@ export default async function KanjiPage() {
       mnemonic: k.mnemonic,
       usedIn: k.usedIn,
       strokePaths: k.strokePaths,
-      order: k.order,
+      level: k.level,
+      lessonOrder: k.lessonOrder,
       lessonSlug: k.lessonSlug,
       lessonTitle: lessonTitles.get(k.lessonSlug) ?? k.lessonSlug,
       reading,
@@ -60,7 +68,9 @@ export default async function KanjiPage() {
   return (
     <div className="stack" style={{ gap: 32 }}>
       <header className="stack" style={{ gap: 16 }}>
-        <p className="eyebrow">All {kanji.length} N5 kanji</p>
+        <p className="eyebrow">
+          All {kanji.length} kanji, {availableLevels().join(" and ")}
+        </p>
         <h1
           style={{
             margin: 0,

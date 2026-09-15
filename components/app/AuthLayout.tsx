@@ -53,7 +53,7 @@ export function AuthLayout({
                 color: "var(--white)",
               }}
             >
-              Five kanji a lesson, until all eighty stick.
+              A handful of kanji a lesson, until every one sticks.
             </h1>
             <p
               style={{
