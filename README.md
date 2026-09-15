@@ -55,15 +55,19 @@ Any region; the free tier is enough. Kanjikan uses only its Postgres database â€
 and not the REST API.
 
 From the **Connect** button at the top of the dashboard, under *ORMs* or *Connection string*, copy the
-URI. Prefer the **Session pooler** one: the direct `db.<ref>.supabase.co` host is IPv6-only on newer
-projects and will not connect from most networks.
+URI. Use the **Transaction pooler** one (port `6543`). On Vercel every function instance opens its own
+connections, and the Session pooler (port `5432`) ties up one of the project's pooled Postgres
+connections for each, even while idle, so a few instances exhaust the pool and requests start failing.
+The Transaction pooler holds one only while a transaction runs, and the app does all its work in
+transactions. The direct `db.<ref>.supabase.co` host is IPv6-only on newer projects and will not
+connect from most networks.
 
 ```bash
 cp .env.example .env
 ```
 
 ```
-SUPABASE_DB_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
+SUPABASE_DB_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
 ```
 
 This is the only setting, and it is a **secret**: it is used on the server, never sent to the

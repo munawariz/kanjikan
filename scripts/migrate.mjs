@@ -62,10 +62,10 @@ if (!connectionString) {
   console.error("SUPABASE_DB_URL is not set.\n");
   console.error("It is the Postgres connection string, not the project URL. Get it from:");
   console.error("  Supabase dashboard > Connect > ORMs / Connection string > URI");
-  console.error("Prefer the Session pooler URI: it is reachable over IPv4, whereas the");
-  console.error("direct db.<ref>.supabase.co host is IPv6-only on newer projects.\n");
+  console.error("Use the Transaction pooler URI (port 6543): it is reachable over IPv4, whereas");
+  console.error("the direct db.<ref>.supabase.co host is IPv6-only on newer projects.\n");
   console.error("Then add it to .env (already gitignored):");
-  console.error("  SUPABASE_DB_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres");
+  console.error("  SUPABASE_DB_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres");
   process.exit(1);
 }
 
@@ -98,7 +98,7 @@ try {
     console.error("The host did not resolve. Check the URI was copied whole.");
   } else if (/ENETUNREACH|EHOSTUNREACH/.test(e.message)) {
     console.error("Unreachable - usually the IPv6-only direct connection. Use the");
-    console.error("Session pooler URI from the same dialog instead.");
+    console.error("Transaction pooler URI from the same dialog instead.");
   } else if (/password|SASL|authentication/i.test(e.message)) {
     console.error("Authentication failed. Reset the database password in");
     console.error("Project Settings > Database and paste the new URI.");

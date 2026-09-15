@@ -21,6 +21,13 @@ pg.types.setTypeParser(1082, (v) => v); // date
 /**
  * One pool per server process. Kept on globalThis so that hot reloading in
  * development does not open a new pool on every edit.
+ *
+ * On Vercel every function instance is its own process with its own pool, so
+ * the pool is kept small and quick to let go. Pair it with the Transaction
+ * pooler (port 6543): there a connection only holds one of Supabase's pooled
+ * Postgres connections while a transaction runs, which is all asUser and
+ * asSystem ever do. The Session pooler (5432) holds one for as long as the
+ * connection stays open, idle or not, and a few instances use them all up.
  */
 const globalForPool = globalThis as unknown as { kanjikanPool?: pg.Pool };
 
@@ -28,16 +35,28 @@ function pool(): pg.Pool {
   if (!isDatabaseConfigured) {
     throw new Error("SUPABASE_DB_URL is not set. See .env.example.");
   }
-  globalForPool.kanjikanPool ??= new pg.Pool({
-    connectionString: DATABASE_URL,
-    // Supabase terminates TLS with a certificate chain Node does not ship a
-    // root for. The connection is still encrypted; only chain verification is
-    // relaxed — the same as scripts/migrate.mjs.
-    ssl: { rejectUnauthorized: false },
-    max: 5,
-    idleTimeoutMillis: 30_000,
-    application_name: "kanjikan",
-  });
+  if (!globalForPool.kanjikanPool) {
+    const created = new pg.Pool({
+      connectionString: DATABASE_URL,
+      // Supabase terminates TLS with a certificate chain Node does not ship a
+      // root for. The connection is still encrypted; only chain verification is
+      // relaxed — the same as scripts/migrate.mjs.
+      ssl: { rejectUnauthorized: false },
+      max: 3,
+      idleTimeoutMillis: 10_000,
+      // Fail a request that cannot get a connection rather than hang it.
+      connectionTimeoutMillis: 10_000,
+      application_name: "kanjikan",
+    });
+    // The server may close an idle connection at any time (a pooler restart,
+    // maintenance, a timeout). Without a listener that error is uncaught and
+    // takes the whole process down; with one, the pool drops the connection
+    // and opens a new one on the next request.
+    created.on("error", (err) => {
+      console.error("Postgres pool: idle connection closed", err.message);
+    });
+    globalForPool.kanjikanPool = created;
+  }
   return globalForPool.kanjikanPool;
 }
 

@@ -14,7 +14,7 @@ const STEPS = [
   },
   {
     title: "Add the database URL to .env.",
-    body: "From the Connect button at the top of the dashboard, copy the Session pooler connection string and set it as SUPABASE_DB_URL in .env. Then restart the dev server so Next.js picks it up.",
+    body: "From the Connect button at the top of the dashboard, copy the Transaction pooler connection string (port 6543) and set it as SUPABASE_DB_URL in .env. Then restart the dev server so Next.js picks it up.",
   },
   {
     title: "Run the migration.",
