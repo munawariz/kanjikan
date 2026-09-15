@@ -25,6 +25,13 @@ import { WritingPad } from "./WritingPad";
 
 type Mode = "lesson" | "review" | "practice";
 
+/**
+ * The writing score below which practice will not take "I Got It". Well under
+ * the check's own pass mark, since the check can be wrong: this only stops a
+ * scribble, or a blank pad, being counted as written.
+ */
+const PRACTICE_MIN_WRITING_SCORE = 35;
+
 type Props = {
   /**
    * Practice runs over characters picked on the practice page, signed in or
@@ -597,6 +604,7 @@ export function StudySession({
             hints={hints}
             onGrade={gradeWriting}
             onKnown={canMark ? () => knowWriting(card.kanji) : undefined}
+            minScore={practice ? PRACTICE_MIN_WRITING_SCORE : undefined}
           />
         </Card>
       )}
@@ -1120,29 +1128,32 @@ function Summary({
           {lessonTitle}
         </h2>
 
-        <div className="row" style={{ gap: 48, flexWrap: "wrap" }}>
-          {[
-            [`${percent}%`, "Accuracy", "var(--lime-500)"],
-            [`${correct}/${total}`, "Answered", "var(--white)"],
-          ].map(([value, label, colour]) => (
-            <div key={label}>
-              <div
-                style={{
-                  fontSize: "var(--text-stat-lg)",
-                  fontWeight: "var(--weight-extrabold)",
-                  letterSpacing: "var(--tracking-stat)",
-                  color: colour,
-                  lineHeight: 1,
-                }}
-              >
-                {value}
+        {/* Practice is for drilling, not for a mark. */}
+        {practiceHref === null && (
+          <div className="row" style={{ gap: 48, flexWrap: "wrap" }}>
+            {[
+              [`${percent}%`, "Accuracy", "var(--lime-500)"],
+              [`${correct}/${total}`, "Answered", "var(--white)"],
+            ].map(([value, label, colour]) => (
+              <div key={label}>
+                <div
+                  style={{
+                    fontSize: "var(--text-stat-lg)",
+                    fontWeight: "var(--weight-extrabold)",
+                    letterSpacing: "var(--tracking-stat)",
+                    color: colour,
+                    lineHeight: 1,
+                  }}
+                >
+                  {value}
+                </div>
+                <div className="eyebrow" style={{ color: "var(--forest-200)", marginTop: 8 }}>
+                  {label}
+                </div>
               </div>
-              <div className="eyebrow" style={{ color: "var(--forest-200)", marginTop: 8 }}>
-                {label}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {practiceHref !== null ? (
           <>

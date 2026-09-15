@@ -56,11 +56,6 @@ export default async function PracticeSessionPage({
 
   return (
     <div className="stack" style={{ gap: 16, maxWidth: 620, margin: "0 auto" }}>
-      <p className="body-sm muted" style={{ margin: 0 }}>
-        Practising{" "}
-        {kanji.length <= 12 ? <span className="jp">{kanji.map((k) => k.char).join(" ")}</span> : `${kanji.length} kanji`}.
-        Nothing you answer here is saved.
-      </p>
       <StudySession
         mode="practice"
         practiceTypes={types}

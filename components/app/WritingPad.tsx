@@ -36,6 +36,7 @@ export function WritingPad({
   hints,
   onGrade,
   onKnown,
+  minScore,
 }: {
   char: string;
   paths: string[];
@@ -46,6 +47,12 @@ export function WritingPad({
   onGrade: (correct: boolean) => void;
   /** Where offered: marks the writing known instead of grading an attempt. */
   onKnown?: () => void;
+  /**
+   * Where given, "I Got It" stays disabled until the check scores the drawing
+   * at least this. A blank pad scores nothing. A kanji with no model to check
+   * against is left to the learner.
+   */
+  minScore?: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rowRef = useRef<HTMLDivElement | null>(null);
@@ -234,6 +241,11 @@ export function WritingPad({
       ? [liveHint.guide]
       : [];
   const suggestion = assessment ? assessment.pass : null;
+  // Held off while the check is still running, too, so it cannot be beaten to.
+  const belowMin =
+    minScore !== undefined &&
+    paths.length > 0 &&
+    (assessment === undefined || (assessment?.score ?? 0) < minScore);
   const issues = assessment?.issues ?? [];
   const shownIssues = allIssues ? issues : issues.slice(0, ISSUES_SHOWN);
 
@@ -510,13 +522,15 @@ export function WritingPad({
           )}
 
           <p className="body-sm muted" style={{ margin: 0, textAlign: "center" }}>
-            Compare the shape and the order. Did you get it right?
+            {belowMin && assessment !== undefined
+              ? `Your writing needs to score at least ${minScore} to count as got. Compare it with the model and try again.`
+              : "Compare the shape and the order. Did you get it right?"}
           </p>
           {/* The suggested grade is the filled button; with no check to go
               on, "I Got It" keeps the accent it always had. */}
           <div className="row" style={{ gap: 12 }}>
             <Button
-              variant={suggestion === false ? "primary" : "outline"}
+              variant={suggestion === false || belowMin ? "primary" : "outline"}
               size="lg"
               fullWidth
               onClick={() => onGrade(false)}
@@ -524,9 +538,10 @@ export function WritingPad({
               Not Yet
             </Button>
             <Button
-              variant={suggestion === false ? "outline" : "accent"}
+              variant={suggestion === false || belowMin ? "outline" : "accent"}
               size="lg"
               fullWidth
+              disabled={belowMin}
               onClick={() => onGrade(true)}
             >
               I Got It
