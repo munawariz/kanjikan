@@ -39,8 +39,7 @@ export default function PracticePage({
           Drill the kanji you choose.
         </h1>
         <p style={{ margin: 0, maxWidth: 560 }}>
-          Pick a whole level or single characters, choose what to practise, and start. Practice is
-          never saved: it does not change your progress or your reviews, and it needs no account.
+          Pick a whole level or single characters, choose what to practise, and start.
         </p>
       </header>
 

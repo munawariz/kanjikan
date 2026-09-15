@@ -13,7 +13,7 @@ import {
   buildLessonQueue,
   buildPracticeQueue,
   buildReviewQueue,
-  buildWritingQueue,
+  cardChar,
   PROMPT,
   type KanjiGloss,
   type PracticeType,
@@ -23,7 +23,7 @@ import { KanjiAnatomy } from "./KanjiAnatomy";
 import { StrokeDiagram } from "./StrokeDiagram";
 import { WritingPad } from "./WritingPad";
 
-type Mode = "lesson" | "review" | "writing" | "practice";
+type Mode = "lesson" | "review" | "practice";
 
 type Props = {
   /**
@@ -43,14 +43,29 @@ type Props = {
   guest?: boolean;
   lessonSlug: string | null;
   lessonTitle: string;
+  /** The characters in play. In a review, those whose writing is due. */
   kanji: Kanji[];
   words: Word[];
   /** Wider candidate set for review distractors. */
   pool?: Word[];
   /** Every character of the level, for practice distractors. */
   kanjiPool?: KanjiGloss[];
-  kanjiStages: Record<string, number>;
   wordStages: Record<string, number>;
+  /** Lesson only: characters met before, which skip their introduction. */
+  seenKanji?: string[];
+  /** Lesson only: words marked as already known, left out of the run. */
+  markedWords?: string[];
+  /** Lesson only: characters whose writing is marked as already known. */
+  markedWriting?: string[];
+  /** Lesson only: whether each character ends by being written. */
+  writing?: boolean;
+  /**
+   * Lesson only: reviews waiting, when there are enough to suggest clearing
+   * them first. Shown before the first card, never after: it is state here
+   * rather than a page of its own so the refresh at the end of the lesson,
+   * when more may have come due, cannot swap the summary for the warning.
+   */
+  reviewsWaiting?: number;
   seed: number;
   /** Characters of this lesson already completed before this run. */
   cursorOffset?: number;
@@ -89,6 +104,29 @@ export function post(url: string, body: unknown, onFail?: (detail: string) => vo
 const FURIGANA_KEY = "kanjikan-furigana";
 const HINTS_KEY = "kanjikan-writing-hints";
 
+/** Words, and characters' reading, that the learner marked known mid-run. */
+type Skipped = { words: ReadonlySet<string>; chars: ReadonlySet<string> };
+const NOTHING_SKIPPED: Skipped = { words: new Set(), chars: new Set() };
+
+/**
+ * The queue less what has been marked known mid-run.
+ *
+ * A mark is only ever made on a teaching card, and everything it removes comes
+ * after that card: a word's quizzes follow its introduction, and a character's
+ * word cards and meaning quiz follow its own. So the card on screen and those
+ * before it keep their positions, and the current index stays valid. Writing
+ * cards are never removed here — reading and writing are marked separately.
+ */
+function withoutSkipped(queue: StudyCard[], skipped: Skipped): StudyCard[] {
+  if (skipped.words.size === 0 && skipped.chars.size === 0) return queue;
+  return queue.filter((c) => {
+    if (c.kind === "kanji-teach" || c.kind === "kanji-write") return true;
+    if (c.kind === "kanji-meaning") return !skipped.chars.has(c.kanji.char);
+    if (skipped.chars.has(c.word.teaches)) return false;
+    return c.kind === "word-teach" || !skipped.words.has(c.word.id);
+  });
+}
+
 export function StudySession({
   mode,
   practiceTypes,
@@ -99,14 +137,21 @@ export function StudySession({
   words,
   pool,
   kanjiPool,
-  kanjiStages,
   wordStages,
+  seenKanji,
+  markedWords,
+  markedWriting,
+  writing = true,
+  reviewsWaiting,
   seed,
   cursorOffset = 0,
   lessonLength,
 }: Props) {
   const router = useRouter();
   const practice = mode === "practice";
+  const [started, setStarted] = useState(!reviewsWaiting);
+  /** Only a signed-in lesson offers "I already know this": it is where things are taught. */
+  const canMark = mode === "lesson" && !guest;
 
   /**
    * Which pass through a practice run this is. Going again reshuffles by
@@ -115,9 +160,21 @@ export function StudySession({
    */
   const [round, setRound] = useState(0);
 
-  const queue = useMemo<StudyCard[]>(() => {
-    if (mode === "lesson") return buildLessonQueue(kanji, words, kanjiStages, wordStages, seed);
-    if (mode === "writing") return buildWritingQueue(kanji);
+  const baseQueue = useMemo<StudyCard[]>(() => {
+    if (mode === "lesson") {
+      return buildLessonQueue(
+        kanji,
+        words,
+        {
+          seen: new Set(seenKanji),
+          wordStages,
+          skipWords: new Set(markedWords),
+          writing,
+          skipWriting: new Set(markedWriting),
+        },
+        seed,
+      );
+    }
     if (mode === "practice") {
       return buildPracticeQueue(
         practiceTypes ?? ["reading"],
@@ -129,10 +186,31 @@ export function StudySession({
         seed + round,
       );
     }
-    return buildReviewQueue(words, wordStages, pool ?? words, seed);
-  }, [mode, practiceTypes, kanji, words, pool, kanjiPool, kanjiStages, wordStages, seed, round]);
+    return buildReviewQueue(words, wordStages, pool ?? words, seed, kanji);
+  }, [
+    mode,
+    practiceTypes,
+    kanji,
+    words,
+    pool,
+    kanjiPool,
+    wordStages,
+    seenKanji,
+    markedWords,
+    markedWriting,
+    writing,
+    seed,
+    round,
+  ]);
 
-  /** A review has no writing card, and so no use for the hint toggle. */
+  /**
+   * What the learner has said they already know, during this run. Their cards
+   * still to come are dropped; the mark itself is saved as it is made.
+   */
+  const [skipped, setSkipped] = useState<Skipped>(NOTHING_SKIPPED);
+  const queue = useMemo(() => withoutSkipped(baseQueue, skipped), [baseQueue, skipped]);
+
+  /** A session with no writing card has no use for the hint toggle. */
   const hasWriting = useMemo(() => queue.some((c) => c.kind === "kanji-write"), [queue]);
 
   const [index, setIndex] = useState(0);
@@ -238,27 +316,46 @@ export function StudySession({
     setAnswered(0);
     setCorrectCount(0);
     setDone(false);
+    setSkipped(NOTHING_SKIPPED);
   }, []);
 
-  const advance = useCallback(() => {
-    if (isLast) {
-      finish(correctCount, answered);
-      return;
-    }
-    setPicked(null);
-    setIndex((i) => {
-      const next = i + 1;
-      // A character's cycle ends on its writing card, which is the only safe
-      // place to resume from — mid-cycle would re-teach words already seen.
-      if (lessonSlug && queue[i]?.kind === "kanji-write") {
-        const doneChars = queue.slice(0, next).filter((c) => c.kind === "kanji-write").length;
-        save("/api/checkpoint", { lessonSlug, cursor: cursorOffset + doneChars, completed: false });
+  /**
+   * Moves to the next card of `q`, or finishes after the last.
+   *
+   * Takes the queue and the tally rather than reading them from this render,
+   * because both can change in the same click that moves on: a mark shortens
+   * the queue, and a graded writing card adds to the tally. Reading them here
+   * would finish one card late, or leave the last answer out of the summary.
+   */
+  const advanceIn = useCallback(
+    (q: StudyCard[], tally = { right: correctCount, asked: answered }) => {
+      if (index >= q.length - 1) {
+        finish(tally.right, tally.asked);
+        return;
       }
-      return next;
-    });
-  }, [isLast, finish, correctCount, answered, lessonSlug, queue, cursorOffset, save]);
+      setPicked(null);
+      const next = index + 1;
+      // The end of a character's cycle is the only safe place to resume from —
+      // mid-cycle would re-teach words already seen. The cursor counts the
+      // lesson's characters up to and including this one, so a character with
+      // nothing left to do, and so no cards, is counted as passed too.
+      if (lessonSlug && cardChar(q[index]) !== cardChar(q[next])) {
+        const at = kanji.findIndex((k) => k.char === cardChar(q[index]));
+        save("/api/checkpoint", { lessonSlug, cursor: cursorOffset + at + 1, completed: false });
+      }
+      setIndex(next);
+    },
+    [index, finish, correctCount, answered, lessonSlug, kanji, cursorOffset, save],
+  );
 
-  /** Records one graded answer against a word or a character. */
+  const advance = useCallback(() => advanceIn(queue), [advanceIn, queue]);
+
+  /**
+   * Records one graded answer against a word or a character's writing.
+   *
+   * The meaning card is not recorded: a character's reading comes from its
+   * words, which are asked straight after it. It still counts in the summary.
+   */
   const grade = useCallback(
     (right: boolean) => {
       if (!card) return;
@@ -266,14 +363,43 @@ export function StudySession({
       if (right) setCorrectCount((n) => n + 1);
 
       if (card.kind === "kanji-write") {
-        save("/api/kanji", { char: card.kanji.char, correct: right, skill: "writing" });
-      } else if (card.kind === "kanji-meaning") {
-        save("/api/kanji", { char: card.kanji.char, correct: right, skill: "recognition" });
+        save("/api/kanji", { char: card.kanji.char, correct: right });
       } else if ("word" in card) {
         save("/api/answer", { wordId: card.word.id, correct: right });
       }
     },
     [card, save],
+  );
+
+  /** "I already know this" on a word being introduced: no quiz on it follows. */
+  const knowWord = useCallback(
+    (word: Word) => {
+      save("/api/mark", { scope: "word", id: word.id, skill: "reading" });
+      const next = { ...skipped, words: new Set(skipped.words).add(word.id) };
+      setSkipped(next);
+      advanceIn(withoutSkipped(baseQueue, next));
+    },
+    [save, skipped, baseQueue, advanceIn],
+  );
+
+  /** On a character being introduced: marks its words, and skips to its writing, if any. */
+  const knowKanji = useCallback(
+    (k: Kanji) => {
+      save("/api/mark", { scope: "kanji", id: k.char, skill: "reading" });
+      const next = { ...skipped, chars: new Set(skipped.chars).add(k.char) };
+      setSkipped(next);
+      advanceIn(withoutSkipped(baseQueue, next));
+    },
+    [save, skipped, baseQueue, advanceIn],
+  );
+
+  /** On a writing card: marks the writing known instead of grading an attempt. */
+  const knowWriting = useCallback(
+    (k: Kanji) => {
+      save("/api/mark", { scope: "kanji", id: k.char, skill: "writing" });
+      advance();
+    },
+    [save, advance],
   );
 
   const choose = useCallback(
@@ -288,16 +414,16 @@ export function StudySession({
   const gradeWriting = useCallback(
     (right: boolean) => {
       grade(right);
-      advance();
+      advanceIn(queue, { right: correctCount + (right ? 1 : 0), asked: answered + 1 });
     },
-    [grade, advance],
+    [grade, advanceIn, queue, correctCount, answered],
   );
 
   // Number keys pick an option, Enter or Space moves on. Study screens live or
   // die on not needing the mouse. The writing pad is exempt: it wants the
   // pointer, and Space there would skip past the character being drawn.
   useEffect(() => {
-    if (done || !card) return;
+    if (done || !card || !started) return;
     function onKey(e: KeyboardEvent) {
       if (!card) return;
 
@@ -337,7 +463,11 @@ export function StudySession({
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [card, picked, done, advance, choose, toggleFurigana, toggleHints, hasWriting]);
+  }, [card, picked, done, started, advance, choose, toggleFurigana, toggleHints, hasWriting]);
+
+  if (!started && reviewsWaiting) {
+    return <ReviewFirst waiting={reviewsWaiting} title={lessonTitle} onStart={() => setStarted(true)} />;
+  }
 
   if (done) {
     return (
@@ -364,7 +494,11 @@ export function StudySession({
   if (!card) {
     return (
       <Card tone="cream" pad="lg">
-        <p style={{ margin: 0 }}>Nothing to study here right now.</p>
+        <p style={{ margin: 0 }}>
+          {mode === "lesson"
+            ? "Everything in this lesson is marked as known, so there is nothing left to study here."
+            : "Nothing to study here right now."}
+        </p>
       </Card>
     );
   }
@@ -437,8 +571,20 @@ export function StudySession({
         </div>
       </div>
 
-      {card.kind === "kanji-teach" && <KanjiTeachCard kanji={card.kanji} onNext={advance} />}
-      {card.kind === "word-teach" && <WordTeachCard word={card.word} onNext={advance} />}
+      {card.kind === "kanji-teach" && (
+        <KanjiTeachCard
+          kanji={card.kanji}
+          onNext={advance}
+          onKnown={canMark ? () => knowKanji(card.kanji) : undefined}
+        />
+      )}
+      {card.kind === "word-teach" && (
+        <WordTeachCard
+          word={card.word}
+          onNext={advance}
+          onKnown={canMark ? () => knowWord(card.word) : undefined}
+        />
+      )}
       {card.kind === "kanji-write" && (
         <Card tone="white" pad="lg" elevation="md" radius="lg">
           <WritingPad
@@ -450,6 +596,7 @@ export function StudySession({
             level={card.kanji.level}
             hints={hints}
             onGrade={gradeWriting}
+            onKnown={canMark ? () => knowWriting(card.kanji) : undefined}
           />
         </Card>
       )}
@@ -543,7 +690,86 @@ export function SaveWarning({ detail }: { detail: string }) {
   );
 }
 
-function KanjiTeachCard({ kanji, onNext }: { kanji: Kanji; onNext: () => void }) {
+/**
+ * Shown before a lesson when reviews have piled up past the learner's own
+ * threshold. New characters build on the ones already met, so clearing what is
+ * due first is the better order — but it is the learner's call, and starting
+ * anyway is one click.
+ */
+function ReviewFirst({ waiting, title, onStart }: { waiting: number; title: string; onStart: () => void }) {
+  return (
+    <Card tone="cream" pad="lg" radius="lg">
+      <div className="stack" style={{ gap: 20 }}>
+        <div className="row" style={{ gap: 10 }}>
+          <Sparkle size={16} color="var(--on-tint-heading)" />
+          <span className="eyebrow" style={{ color: "var(--on-tint-heading)" }}>
+            Before you start {title}
+          </span>
+        </div>
+        <h1
+          style={{
+            margin: 0,
+            fontSize: "var(--text-display-4)",
+            letterSpacing: "var(--tracking-display)",
+            lineHeight: "var(--leading-display)",
+          }}
+        >
+          You have {waiting} {waiting === 1 ? "review" : "reviews"} waiting.
+        </h1>
+        <p style={{ margin: 0, color: "var(--on-tint-body)", maxWidth: 460 }}>
+          Reviewing first helps the new lesson stick: new kanji build on the ones you have already
+          met. Nothing is locked, so you can start the lesson anyway.
+        </p>
+        <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
+          <Link href="/review" className="reset-link">
+            <Button variant="primary" size="lg" icon="zap" iconPosition="left">
+              Review First
+            </Button>
+          </Link>
+          <Button variant="outline" size="lg" icon="chevron-right" onClick={onStart}>
+            Start Anyway
+          </Button>
+        </div>
+        <p className="body-sm" style={{ margin: 0, color: "var(--on-tint-body)" }}>
+          You can change when this appears, or turn it off, in{" "}
+          <Link href="/settings" style={{ color: "var(--on-tint-heading)" }}>
+            Settings
+          </Link>
+          .
+        </p>
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * "Got It", and beside it "Already Know It" where marking is offered.
+ *
+ * The mark sits on the teaching card because that is where time would be
+ * wasted: someone who already reads 日本語 should not sit through its quizzes.
+ * It is the quieter of the two, so the lesson's own path stays the default.
+ */
+function TeachActions({ onNext, onKnown, knownTitle }: { onNext: () => void; onKnown?: () => void; knownTitle: string }) {
+  if (!onKnown) {
+    return (
+      <Button variant="primary" size="lg" fullWidth onClick={onNext} icon="chevron-right">
+        Got It
+      </Button>
+    );
+  }
+  return (
+    <div className="row" style={{ gap: 12 }}>
+      <Button variant="outline" size="lg" fullWidth onClick={onKnown} title={knownTitle}>
+        Already Know It
+      </Button>
+      <Button variant="primary" size="lg" fullWidth onClick={onNext} icon="chevron-right">
+        Got It
+      </Button>
+    </div>
+  );
+}
+
+function KanjiTeachCard({ kanji, onNext, onKnown }: { kanji: Kanji; onNext: () => void; onKnown?: () => void }) {
   return (
     <Card tone="white" pad="lg" elevation="md" radius="lg">
       <div className="stack" style={{ gap: 24 }}>
@@ -593,15 +819,17 @@ function KanjiTeachCard({ kanji, onNext }: { kanji: Kanji; onNext: () => void })
             radical, says what it means, and shows it among the parts. */}
         <KanjiAnatomy kanji={kanji} variant="teach" />
 
-        <Button variant="primary" size="lg" fullWidth onClick={onNext} icon="chevron-right">
-          Got It
-        </Button>
+        <TeachActions
+          onNext={onNext}
+          onKnown={onKnown}
+          knownTitle={`Mark the words for ${kanji.char} as known and skip them`}
+        />
       </div>
     </Card>
   );
 }
 
-function WordTeachCard({ word, onNext }: { word: Word; onNext: () => void }) {
+function WordTeachCard({ word, onNext, onKnown }: { word: Word; onNext: () => void; onKnown?: () => void }) {
   return (
     <Card tone="white" pad="lg" elevation="md" radius="lg">
       <div className="stack" style={{ gap: 22 }}>
@@ -631,9 +859,11 @@ function WordTeachCard({ word, onNext }: { word: Word; onNext: () => void }) {
           </div>
         </div>
 
-        <Button variant="primary" size="lg" fullWidth onClick={onNext} icon="chevron-right">
-          Got It
-        </Button>
+        <TeachActions
+          onNext={onNext}
+          onKnown={onKnown}
+          knownTitle={`Mark ${word.word} as known and skip its questions`}
+        />
       </div>
     </Card>
   );

@@ -92,7 +92,7 @@ export default async function LandingPage() {
               {[
                 [
                   "A few at a time.",
-                  "Each lesson has five kanji, and each one is finished — seen, used in words, quizzed, then written — before the next one starts.",
+                  "Each lesson has five kanji, and each one is finished — seen, used in words, quizzed and, if you like, written — before the next one starts.",
                 ],
                 [
                   "Built from parts.",
@@ -103,12 +103,16 @@ export default async function LandingPage() {
                   "Each kanji comes with a handful of real words that use it. Readings are much easier to keep when they belong to words you know.",
                 ],
                 [
-                  "Writing by hand.",
-                  "You watch the stroke order, then draw the kanji yourself from memory. Each stroke is checked against the model for its order, direction, length and shape.",
+                  "Writing by hand, if you want it.",
+                  "Reading is enough for travel and most everyday Japanese, so writing is your choice. Choose it and you watch the stroke order, then draw the kanji yourself from memory. Each stroke is checked against the model for its order, direction, length and shape.",
                 ],
                 [
                   "Reviews before you forget.",
                   "If you sign in, what you get wrong comes back within minutes and what you know moves further out. A five-question daily quiz checks what has stuck.",
+                ],
+                [
+                  "Skip what you already know.",
+                  "Learned some kanji somewhere else? Mark a word, a kanji or a whole lesson as known and the lessons skip it. It comes back once, about a week later, to check.",
                 ],
               ].map(([title, body]) => (
                 <li key={title} style={{ paddingLeft: 6 }}>

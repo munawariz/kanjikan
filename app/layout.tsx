@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   // a title here is the one the whole app wears.
   title: "Kanjikan",
   description:
-    "Learn the JLPT N5 kanji five at a time, with stroke order, the words that fix their readings, and writing practice from memory.",
+    "Learn the JLPT N5 kanji five at a time, with stroke order, the words that fix their readings, and optional writing practice from memory.",
   applicationName: "Kanjikan",
   manifest: "/manifest.webmanifest",
   icons: {

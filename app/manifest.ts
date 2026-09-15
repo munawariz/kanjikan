@@ -13,7 +13,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Kanjikan — Remember every JLPT kanji",
     short_name: "Kanjikan",
     description:
-      "Learn the JLPT N5 kanji five at a time, with stroke order, the words that fix their readings, and writing practice from memory.",
+      "Learn the JLPT N5 kanji five at a time, with stroke order, the words that fix their readings, and optional writing practice from memory.",
     id: "/dashboard",
     start_url: "/dashboard",
     scope: "/",
@@ -32,7 +32,6 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       { name: "Review", short_name: "Review", url: "/review" },
-      { name: "Writing practice", short_name: "Writing", url: "/writing" },
       { name: "Lessons", short_name: "Lessons", url: "/lessons" },
     ],
   };

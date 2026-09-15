@@ -2,13 +2,21 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLesson, strokeViewBox } from "@/lib/content";
 import { getUser } from "@/lib/auth";
-import { getProgress } from "@/lib/progress";
+import {
+  getKanjiReadings,
+  getProfile,
+  getProgress,
+  studiesWriting,
+  wordMarkState,
+  writingMarkState,
+} from "@/lib/progress";
 import { bandFor, BAND_LABEL, KNOWN_STAGE, type MasteryBand } from "@/lib/srs";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { StrokeDiagram } from "@/components/app/StrokeDiagram";
 import { KanjiAnatomy } from "@/components/app/KanjiAnatomy";
+import { MarkControl } from "@/components/app/MarkControl";
 
 export const dynamic = "force-dynamic";
 
@@ -23,18 +31,25 @@ export default async function LessonPage({ params }: { params: { slug: string } 
   const lesson = getLesson(params.slug);
   if (!lesson) notFound();
 
-  const {
-    words: wordRows,
-    kanji: kanjiRows,
-    lessons: lessonRows,
-  } = await getProgress(await getUser());
+  const user = await getUser();
+  const [{ words: wordRows, kanji: kanjiRows, lessons: lessonRows }, profile] = await Promise.all([
+    getProgress(user),
+    user ? getProfile(user.id) : null,
+  ]);
   const row = lessonRows.get(lesson.slug);
+  // Marking needs somewhere to save the mark, and the writing figures only
+  // mean something to a learner who studies writing.
+  const canMark = Boolean(user);
+  const writing = Boolean(user) && studiesWriting(profile);
 
-  const known = lesson.kanji.filter(
-    (k) => (kanjiRows.get(k.char)?.recognition_stage ?? 0) >= KNOWN_STAGE,
-  ).length;
+  const readings = getKanjiReadings(wordRows);
+  const known = lesson.kanji.filter((k) => {
+    const band = readings.get(k.char)?.band;
+    return band === "known" || band === "mastered";
+  }).length;
   const percent = Math.round((known / lesson.kanji.length) * 100);
   const started = row ? row.cursor > 0 : false;
+  const chars = lesson.kanji.map((k) => k.char);
 
   return (
     <div className="stack" style={{ gap: 40 }}>
@@ -73,6 +88,35 @@ export default async function LessonPage({ params }: { params: { slug: string } 
             </Button>
           </Link>
         </div>
+
+        {canMark && (
+          <div className="stack" style={{ gap: 8 }}>
+            <p className="body-sm muted" style={{ margin: 0, maxWidth: 560 }}>
+              Learned these somewhere else? Mark them as known and the lesson skips them. They come
+              back once, in about a week, to check.
+            </p>
+            <MarkControl
+              scope="lesson"
+              id={lesson.slug}
+              skill="reading"
+              state={wordMarkState(lesson.words, wordRows)}
+              markLabel="I Know This Lesson"
+              markedLabel="Words marked as known"
+              title="Mark every word in this lesson as known"
+            />
+            {writing && (
+              <MarkControl
+                scope="lesson"
+                id={lesson.slug}
+                skill="writing"
+                state={writingMarkState(chars, kanjiRows)}
+                markLabel="I Can Write These Kanji"
+                markedLabel="Writing marked as known"
+                title="Mark all five kanji as ones you can write"
+              />
+            )}
+          </div>
+        )}
       </header>
 
       <Card tone="cream" pad="md" radius="lg">
@@ -110,6 +154,8 @@ export default async function LessonPage({ params }: { params: { slug: string } 
           {lesson.kanji.map((k) => {
             const p = kanjiRows.get(k.char);
             const words = lesson.words.filter((w) => w.teaches === k.char);
+            const reading = readings.get(k.char);
+            const band = reading?.band ?? "new";
             return (
               <Card key={k.char} tone="white" pad="md" radius="lg" bordered>
                 <div className="row" style={{ gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
@@ -125,13 +171,16 @@ export default async function LessonPage({ params }: { params: { slug: string } 
                       <span style={{ fontSize: "var(--text-heading-3)", color: "var(--text-heading)" }}>
                         {k.meanings.join(", ")}
                       </span>
-                      <Badge tone={BAND_TONE[bandFor(p?.recognition_stage)]}>
-                        {BAND_LABEL[bandFor(p?.recognition_stage)]}
-                      </Badge>
-                      {(p?.writing_stage ?? 0) >= KNOWN_STAGE && <Badge tone="accent">Can write</Badge>}
+                      <Badge tone={BAND_TONE[band]}>{BAND_LABEL[band]}</Badge>
+                      {writing && (p?.writing_stage ?? 0) >= KNOWN_STAGE && <Badge tone="accent">Can write</Badge>}
                     </div>
 
                     <div className="row body-sm" style={{ gap: 18, flexWrap: "wrap" }}>
+                      {user && reading && (
+                        <span style={{ color: "var(--text-heading)" }}>
+                          {reading.known} of {reading.total} words known
+                        </span>
+                      )}
                       <span className="muted">{k.strokes} strokes</span>
                       {k.radicalPart && (
                         <span className="muted">
@@ -166,6 +215,30 @@ export default async function LessonPage({ params }: { params: { slug: string } 
                         </span>
                       ))}
                     </div>
+
+                    {canMark && (
+                      <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                        <MarkControl
+                          scope="kanji"
+                          id={k.char}
+                          skill="reading"
+                          state={wordMarkState(words, wordRows)}
+                          markLabel={`I Know ${k.char}`}
+                          markedLabel="Marked as known"
+                          title={`Mark the words for ${k.char} as known`}
+                        />
+                        {writing && (
+                          <MarkControl
+                            scope="kanji"
+                            id={k.char}
+                            skill="writing"
+                            state={writingMarkState([k.char], kanjiRows)}
+                            markLabel={`I Can Write ${k.char}`}
+                            markedLabel="Writing marked as known"
+                          />
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>
@@ -186,6 +259,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
         <Card tone="white" pad="none" radius="lg" bordered>
           {lesson.words.map((word, i) => {
             const band = bandFor(wordRows.get(word.id)?.srs_stage);
+            const marked = Boolean(wordRows.get(word.id)?.marked_at);
             return (
               <div
                 key={word.id}
@@ -228,7 +302,18 @@ export default async function LessonPage({ params }: { params: { slug: string } 
                   </div>
                 </div>
 
-                <Badge tone={BAND_TONE[band]}>{BAND_LABEL[band]}</Badge>
+                <div className="row" style={{ gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  {canMark && (
+                    <MarkControl
+                      scope="word"
+                      id={word.id}
+                      skill="reading"
+                      state={wordMarkState([word], wordRows)}
+                      markLabel="I Know It"
+                    />
+                  )}
+                  <Badge tone={BAND_TONE[band]}>{marked ? "Marked known" : BAND_LABEL[band]}</Badge>
+                </div>
               </div>
             );
           })}

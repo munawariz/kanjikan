@@ -1,7 +1,17 @@
 import "server-only";
 import { asUser, type Db } from "@/lib/db";
 import { getAllWords, getKanji, getLessons, type Kanji, type Level, type Word } from "@/lib/content";
-import { bandFor, grade, KNOWN_STAGE, streakFromDates, type MasteryBand, type Progress } from "@/lib/srs";
+import {
+  dueAfter,
+  grade,
+  kanjiReading,
+  KNOWN_STAGE,
+  streakFromDates,
+  type KanjiReading,
+  type MarkState,
+  type MasteryBand,
+  type Progress,
+} from "@/lib/srs";
 import { buildDailyQuiz, type KanjiQuizCard } from "@/lib/study";
 import { DAILY_QUIZ_SIZE, dailySeed, localDate } from "@/lib/daily";
 
@@ -14,16 +24,25 @@ export type WordProgressRow = {
   streak: number;
   due_at: string;
   last_reviewed_at: string | null;
+  /**
+   * Set while the word stands at known because the learner said they knew it,
+   * until its first check settles the mark one way or the other.
+   */
+  marked_at: string | null;
+  created_at: string;
 };
 
+/**
+ * A character's writing. Its reading is not stored: it comes from its words
+ * (see getKanjiReadings). The table's recognition_stage and due_at columns are
+ * from before that, and nothing reads them.
+ */
 export type KanjiProgressRow = {
   char: string;
-  recognition_stage: number;
   writing_stage: number;
-  correct_count: number;
-  incorrect_count: number;
-  due_at: string;
-  last_reviewed_at: string | null;
+  /** Null for a character that has never been written. */
+  writing_due_at: string | null;
+  writing_marked_at: string | null;
 };
 
 export type LessonProgressRow = {
@@ -39,7 +58,19 @@ export type Profile = {
   current_level: Level;
   current_lesson_slug: string | null;
   daily_goal: number;
+  /** Null until the learner has chosen. Read it through {@link studiesWriting}. */
+  study_writing: boolean | null;
+  /** Due reviews at which starting a lesson warns first. Null never warns. */
+  review_warning: number | null;
 };
+
+/**
+ * Whether writing is part of this learner's study. Until they choose it is,
+ * which is how the app worked before there was a choice.
+ */
+export function studiesWriting(profile: Pick<Profile, "study_writing"> | null): boolean {
+  return profile?.study_writing !== false;
+}
 
 /**
  * Every query runs through asUser, as the account it belongs to, so row level
@@ -51,8 +82,8 @@ export type Profile = {
 function report(where: string, e: unknown) {
   const err = e as { message?: string; code?: string };
   console.error(`[kanjikan] ${where} failed: ${err.message}${err.code ? ` (${err.code})` : ""}`);
-  if (err.code === "42P01") {
-    console.error("[kanjikan] A table is missing. Run `npm run migrate`, or `npm run doctor` to check.");
+  if (err.code === "42P01" || err.code === "42703") {
+    console.error("[kanjikan] A table or column is missing. Run `npm run migrate`, or `npm run doctor` to check.");
   }
 }
 
@@ -77,10 +108,12 @@ export async function getProfile(userId: string): Promise<Profile> {
     current_level: "N5",
     current_lesson_slug: null,
     daily_goal: 20,
+    study_writing: null,
+    review_warning: 20,
   };
   return read("getProfile", userId, fallback, async (db) => {
     const { rows } = await db.query<Profile>(
-      `select id, display_name, current_level, current_lesson_slug, daily_goal
+      `select id, display_name, current_level, current_lesson_slug, daily_goal, study_writing, review_warning
          from public.profiles where id = $1`,
       [userId],
     );
@@ -91,7 +124,8 @@ export async function getProfile(userId: string): Promise<Profile> {
 export async function getWordProgress(userId: string, level: Level = "N5"): Promise<Map<string, WordProgressRow>> {
   return read("getWordProgress", userId, new Map(), async (db) => {
     const { rows } = await db.query<WordProgressRow>(
-      `select word_id, lesson_slug, srs_stage, correct_count, incorrect_count, streak, due_at, last_reviewed_at
+      `select word_id, lesson_slug, srs_stage, correct_count, incorrect_count, streak, due_at, last_reviewed_at,
+              marked_at, created_at
          from public.word_progress where user_id = $1 and level = $2`,
       [userId, level],
     );
@@ -102,7 +136,7 @@ export async function getWordProgress(userId: string, level: Level = "N5"): Prom
 export async function getKanjiProgress(userId: string, level: Level = "N5"): Promise<Map<string, KanjiProgressRow>> {
   return read("getKanjiProgress", userId, new Map(), async (db) => {
     const { rows } = await db.query<KanjiProgressRow>(
-      `select char, recognition_stage, writing_stage, correct_count, incorrect_count, due_at, last_reviewed_at
+      `select char, writing_stage, writing_due_at, writing_marked_at
          from public.kanji_progress where user_id = $1 and level = $2`,
       [userId, level],
     );
@@ -143,13 +177,56 @@ export async function getProgress(user: { id: string } | null, level: Level = "N
   return { words, kanji, lessons };
 }
 
+/**
+ * Every kanji's reading mastery, worked out from the words that teach it.
+ * See kanjiReading in lib/srs.ts for the rule.
+ */
+export function getKanjiReadings(
+  words: Map<string, Pick<WordProgressRow, "srs_stage">>,
+  level: Level = "N5",
+): Map<string, KanjiReading> {
+  const stages = new Map<string, number[]>();
+  for (const w of getAllWords(level)) {
+    const list = stages.get(w.teaches) ?? [];
+    list.push(words.get(w.id)?.srs_stage ?? 0);
+    stages.set(w.teaches, list);
+  }
+  return new Map(getKanji(level).map((k) => [k.char, kanjiReading(stages.get(k.char) ?? [])]));
+}
+
+/** What "I already know this" can do for a set of words. */
+export function wordMarkState(words: Word[], rows: Map<string, WordProgressRow>): MarkState {
+  let markable = 0;
+  let marked = 0;
+  for (const w of words) {
+    const r = rows.get(w.id);
+    if (r?.marked_at) marked++;
+    else if ((r?.srs_stage ?? 0) < KNOWN_STAGE) markable++;
+  }
+  return { markable, marked };
+}
+
+/** The same for the writing of a set of characters. */
+export function writingMarkState(chars: string[], rows: Map<string, KanjiProgressRow>): MarkState {
+  let markable = 0;
+  let marked = 0;
+  for (const c of chars) {
+    const r = rows.get(c);
+    if (r?.writing_marked_at) marked++;
+    else if ((r?.writing_stage ?? 0) < KNOWN_STAGE) markable++;
+  }
+  return { markable, marked };
+}
+
 export type LessonSummary = {
   slug: string;
   title: string;
   summary: string;
   order: number;
   kanji: string[];
-  /** Characters whose recognition has reached the known stage. */
+  /** Each character's reading band, in the same order as `kanji`. */
+  bands: MasteryBand[];
+  /** Characters most of whose words are known. */
   kanjiKnown: number;
   /** Characters that can also be written from memory. */
   kanjiWritten: number;
@@ -166,21 +243,23 @@ export type LessonSummary = {
  *
  * Percentage is measured in kanji, not words: the curriculum is spined on
  * characters, so "half done" should mean half the characters are known, not
- * half the vocabulary answered.
+ * half the vocabulary answered. Whether a character is known comes from its
+ * words, so the two cannot disagree.
  */
 export function getLessonSummaries(progress: ProgressMaps, level: Level = "N5"): LessonSummary[] {
   const now = Date.now();
+  const readings = getKanjiReadings(progress.words, level);
 
   return getLessons(level).map((lesson) => {
-    let kanjiKnown = 0;
+    const bands = lesson.kanji.map((k) => readings.get(k.char)?.band ?? "new");
+    const kanjiKnown = bands.filter((b) => b === "known" || b === "mastered").length;
+
     let kanjiWritten = 0;
     let started = 0;
-
     for (const k of lesson.kanji) {
       const p = progress.kanji.get(k.char);
       if (!p) continue;
       started++;
-      if (p.recognition_stage >= KNOWN_STAGE) kanjiKnown++;
       if (p.writing_stage >= KNOWN_STAGE) kanjiWritten++;
     }
 
@@ -196,7 +275,7 @@ export function getLessonSummaries(progress: ProgressMaps, level: Level = "N5"):
 
     const row = progress.lessons.get(lesson.slug);
     const status: LessonSummary["status"] =
-      row?.status === "completed" ? "completed" : started > 0 ? "learning" : "not_started";
+      row?.status === "completed" ? "completed" : started > 0 || row ? "learning" : "not_started";
 
     return {
       slug: lesson.slug,
@@ -204,6 +283,7 @@ export function getLessonSummaries(progress: ProgressMaps, level: Level = "N5"):
       summary: lesson.summary,
       order: lesson.order,
       kanji: lesson.kanji.map((k) => k.char),
+      bands,
       kanjiKnown,
       kanjiWritten,
       words: lesson.words.length,
@@ -218,6 +298,7 @@ export function getLessonSummaries(progress: ProgressMaps, level: Level = "N5"):
 
 export type DashboardData = {
   profile: Profile;
+  studyWriting: boolean;
   /** The rows everything below is computed from, for pages that need more. */
   progress: ProgressMaps;
   lessons: LessonSummary[];
@@ -227,8 +308,10 @@ export type DashboardData = {
   kanjiWritten: number;
   totalWords: number;
   wordsKnown: number;
-  dueNow: number;
+  wordsDue: number;
   writingDue: number;
+  /** Everything waiting in Review: words, and writing for a learner who studies it. */
+  dueNow: number;
   streak: number;
   reviewedToday: number;
   bands: Record<MasteryBand, number>;
@@ -254,30 +337,30 @@ export async function getDashboard(userId: string, level: Level = "N5"): Promise
     }),
   ]);
   const lessons = getLessonSummaries(progress, level);
+  const studyWriting = studiesWriting(profile);
 
   const allKanji = getKanji(level);
   const allWords = getAllWords(level);
+  const readings = getKanjiReadings(progress.words, level);
 
-  // Mastery bands describe kanji recognition — the headline metric.
+  // Mastery bands describe reading, the headline metric.
   const bands: Record<MasteryBand, number> = { new: 0, learning: 0, known: 0, mastered: 0 };
-  let kanjiKnown = 0;
   let kanjiWritten = 0;
   let writingDue = 0;
   for (const k of allKanji) {
+    bands[readings.get(k.char)?.band ?? "new"]++;
     const p = progress.kanji.get(k.char);
-    bands[bandFor(p?.recognition_stage)]++;
-    if ((p?.recognition_stage ?? 0) >= KNOWN_STAGE) kanjiKnown++;
     if ((p?.writing_stage ?? 0) >= KNOWN_STAGE) kanjiWritten++;
-    if (p && p.writing_stage > 0 && new Date(p.due_at).getTime() <= now) writingDue++;
+    if (p && p.writing_stage > 0 && p.writing_due_at && new Date(p.writing_due_at).getTime() <= now) writingDue++;
   }
 
   let wordsKnown = 0;
-  let dueNow = 0;
+  let wordsDue = 0;
   for (const w of allWords) {
     const p = progress.words.get(w.id);
     if (!p) continue;
     if (p.srs_stage >= KNOWN_STAGE) wordsKnown++;
-    if (new Date(p.due_at).getTime() <= now) dueNow++;
+    if (new Date(p.due_at).getTime() <= now) wordsDue++;
   }
 
   const byDay = new Map<string, number>();
@@ -302,16 +385,18 @@ export async function getDashboard(userId: string, level: Level = "N5"): Promise
 
   return {
     profile,
+    studyWriting,
     progress,
     lessons,
     totalKanji: allKanji.length,
     kanjiStarted: bands.learning + bands.known + bands.mastered,
-    kanjiKnown,
+    kanjiKnown: bands.known + bands.mastered,
     kanjiWritten,
     totalWords: allWords.length,
     wordsKnown,
-    dueNow,
+    wordsDue,
     writingDue,
+    dueNow: wordsDue + (studyWriting ? writingDue : 0),
     streak: streakFromDates(sessions.map((s) => s.created_at)),
     reviewedToday: byDay.get(new Date(now).toDateString()) ?? 0,
     bands,
@@ -338,13 +423,13 @@ export async function getReviewQueue(userId: string, level: Level = "N5", limit 
     .sort((a, b) => order.get(a.id)! - order.get(b.id)!);
 }
 
-/** Characters due for writing practice, most overdue first. */
-export async function getWritingQueue(userId: string, level: Level = "N5", limit = 12): Promise<Kanji[]> {
-  const due = await read("getWritingQueue", userId, [] as { char: string }[], async (db) => {
+/** Characters whose writing is due, most overdue first. */
+export async function getWritingReviewQueue(userId: string, level: Level = "N5", limit = 10): Promise<Kanji[]> {
+  const due = await read("getWritingReviewQueue", userId, [] as { char: string }[], async (db) => {
     const { rows } = await db.query<{ char: string }>(
       `select char from public.kanji_progress
-        where user_id = $1 and level = $2 and writing_stage > 0 and due_at <= now()
-        order by due_at limit $3`,
+        where user_id = $1 and level = $2 and writing_stage > 0 and writing_due_at <= now()
+        order by writing_due_at limit $3`,
       [userId, level, limit],
     );
     return rows;
@@ -359,6 +444,9 @@ export async function getWritingQueue(userId: string, level: Level = "N5", limit
  * Applies one graded answer to a word. Upserts because the first has no row;
  * the row is locked while it is read so two quick answers cannot both grade
  * the same starting state.
+ *
+ * An answer settles a mark: from here on the word is where its answers put it,
+ * and there is nothing left to undo.
  */
 export async function recordAnswer(userId: string, word: Word, correct: boolean) {
   return asUser(userId, async (db) => {
@@ -380,7 +468,10 @@ export async function recordAnswer(userId: string, word: Word, correct: boolean)
          incorrect_count = excluded.incorrect_count,
          streak = excluded.streak,
          due_at = excluded.due_at,
-         last_reviewed_at = excluded.last_reviewed_at`,
+         last_reviewed_at = excluded.last_reviewed_at,
+         marked_at = null,
+         pre_mark_stage = null,
+         pre_mark_due_at = null`,
       [
         userId,
         word.id,
@@ -399,65 +490,178 @@ export async function recordAnswer(userId: string, word: Word, correct: boolean)
 }
 
 /**
- * Applies one graded answer to a character.
+ * Applies one graded answer to a character's writing.
  *
- * Recognition and writing advance independently — being able to read 語 says
- * nothing about being able to write it — but they share one due date, so a
- * character comes back as a single item rather than nagging twice.
+ * Writing keeps its own stage and its own due date, apart from reading: being
+ * able to read 語 says nothing about being able to write it, and a learner who
+ * does not study writing should never have it come due. Like a word's answer,
+ * it settles any mark.
  */
-export async function recordKanjiAnswer(
-  userId: string,
-  kanji: Kanji,
-  correct: boolean,
-  skill: "recognition" | "writing",
-) {
+export async function recordWritingAnswer(userId: string, kanji: Kanji, correct: boolean) {
   return asUser(userId, async (db) => {
-    const { rows } = await db.query<Omit<KanjiProgressRow, "char">>(
-      `select recognition_stage, writing_stage, correct_count, incorrect_count, due_at, last_reviewed_at
+    const { rows } = await db.query<{
+      writing_stage: number;
+      correct_count: number;
+      incorrect_count: number;
+      writing_due_at: string | null;
+      last_reviewed_at: string | null;
+    }>(
+      `select writing_stage, correct_count, incorrect_count, writing_due_at, last_reviewed_at
          from public.kanji_progress where user_id = $1 and char = $2 for update`,
       [userId, kanji.char],
     );
     const existing = rows[0];
 
-    const currentStage = (skill === "writing" ? existing?.writing_stage : existing?.recognition_stage) ?? 0;
     const next = grade(
-      {
-        srs_stage: currentStage,
-        correct_count: existing?.correct_count ?? 0,
-        incorrect_count: existing?.incorrect_count ?? 0,
-        streak: 0,
-        due_at: existing?.due_at ?? new Date().toISOString(),
-        last_reviewed_at: existing?.last_reviewed_at ?? null,
-      },
+      existing
+        ? {
+            srs_stage: existing.writing_stage,
+            correct_count: existing.correct_count,
+            incorrect_count: existing.incorrect_count,
+            streak: 0,
+            due_at: existing.writing_due_at ?? new Date().toISOString(),
+            last_reviewed_at: existing.last_reviewed_at,
+          }
+        : null,
       correct,
     );
 
     await db.query(
       `insert into public.kanji_progress
-         (user_id, char, level, recognition_stage, writing_stage, correct_count, incorrect_count, due_at, last_reviewed_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         (user_id, char, level, writing_stage, correct_count, incorrect_count, writing_due_at, last_reviewed_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8)
        on conflict (user_id, char) do update set
          level = excluded.level,
-         recognition_stage = excluded.recognition_stage,
          writing_stage = excluded.writing_stage,
          correct_count = excluded.correct_count,
          incorrect_count = excluded.incorrect_count,
-         due_at = excluded.due_at,
-         last_reviewed_at = excluded.last_reviewed_at`,
+         writing_due_at = excluded.writing_due_at,
+         last_reviewed_at = excluded.last_reviewed_at,
+         writing_marked_at = null,
+         pre_mark_writing_stage = null,
+         pre_mark_writing_due_at = null`,
       [
         userId,
         kanji.char,
         kanji.level,
-        skill === "recognition" ? next.srs_stage : (existing?.recognition_stage ?? 0),
-        skill === "writing" ? next.srs_stage : (existing?.writing_stage ?? 0),
+        next.srs_stage,
         next.correct_count,
         next.incorrect_count,
-        // The sooner of the two skills decides when the character resurfaces.
-        existing?.due_at && new Date(existing.due_at) < new Date(next.due_at) ? existing.due_at : next.due_at,
+        next.due_at,
         next.last_reviewed_at,
       ],
     );
     return next;
+  });
+}
+
+/**
+ * "I already know these": puts each word at the known stage, due in a week for
+ * one check. Words already at known or past it, and words already marked, are
+ * left as they are.
+ *
+ * What the word was before is kept beside the mark so it can be undone
+ * exactly; a word with no row until now keeps nothing, and undoing deletes it.
+ * In an update's SET list every column reads the row as it was, so the
+ * pre_mark columns take the old values.
+ */
+export async function markWordsKnown(userId: string, words: Word[]) {
+  if (words.length === 0) return;
+  await asUser(userId, (db) =>
+    db.query(
+      `insert into public.word_progress as p (user_id, word_id, level, lesson_slug, srs_stage, due_at, marked_at)
+       select $1, w.id, w.lvl, w.slug, $5, $6, now()
+         from unnest($2::text[], $3::text[], $4::text[]) as w(id, lvl, slug)
+       on conflict (user_id, word_id) do update set
+         pre_mark_stage = p.srs_stage,
+         pre_mark_due_at = p.due_at,
+         srs_stage = excluded.srs_stage,
+         due_at = excluded.due_at,
+         marked_at = excluded.marked_at
+       where p.srs_stage < excluded.srs_stage and p.marked_at is null`,
+      [
+        userId,
+        words.map((w) => w.id),
+        words.map((w) => w.level),
+        words.map((w) => w.lessonSlug),
+        KNOWN_STAGE,
+        dueAfter(KNOWN_STAGE),
+      ],
+    ),
+  );
+}
+
+/** Undoes {@link markWordsKnown} for whichever of these words are still marked. */
+export async function unmarkWords(userId: string, words: Word[]) {
+  if (words.length === 0) return;
+  const ids = words.map((w) => w.id);
+  await asUser(userId, async (db) => {
+    await db.query(
+      `delete from public.word_progress
+        where user_id = $1 and word_id = any($2) and marked_at is not null and pre_mark_stage is null`,
+      [userId, ids],
+    );
+    await db.query(
+      `update public.word_progress
+          set srs_stage = pre_mark_stage, due_at = pre_mark_due_at,
+              marked_at = null, pre_mark_stage = null, pre_mark_due_at = null
+        where user_id = $1 and word_id = any($2) and marked_at is not null`,
+      [userId, ids],
+    );
+  });
+}
+
+/** "I can already write these": the same as {@link markWordsKnown}, for writing. */
+export async function markWritingKnown(userId: string, kanji: Kanji[]) {
+  if (kanji.length === 0) return;
+  await asUser(userId, (db) =>
+    db.query(
+      `insert into public.kanji_progress as p (user_id, char, level, writing_stage, writing_due_at, writing_marked_at)
+       select $1, c.ch, c.lvl, $4, $5, now()
+         from unnest($2::text[], $3::text[]) as c(ch, lvl)
+       on conflict (user_id, char) do update set
+         pre_mark_writing_stage = p.writing_stage,
+         pre_mark_writing_due_at = p.writing_due_at,
+         writing_stage = excluded.writing_stage,
+         writing_due_at = excluded.writing_due_at,
+         writing_marked_at = excluded.writing_marked_at
+       where p.writing_stage < excluded.writing_stage and p.writing_marked_at is null`,
+      [userId, kanji.map((k) => k.char), kanji.map((k) => k.level), KNOWN_STAGE, dueAfter(KNOWN_STAGE)],
+    ),
+  );
+}
+
+/** Undoes {@link markWritingKnown} for whichever of these characters are still marked. */
+export async function unmarkWriting(userId: string, kanji: Kanji[]) {
+  if (kanji.length === 0) return;
+  const chars = kanji.map((k) => k.char);
+  await asUser(userId, async (db) => {
+    await db.query(
+      `delete from public.kanji_progress
+        where user_id = $1 and char = any($2) and writing_marked_at is not null and pre_mark_writing_stage is null`,
+      [userId, chars],
+    );
+    await db.query(
+      `update public.kanji_progress
+          set writing_stage = pre_mark_writing_stage, writing_due_at = pre_mark_writing_due_at,
+              writing_marked_at = null, pre_mark_writing_stage = null, pre_mark_writing_due_at = null
+        where user_id = $1 and char = any($2) and writing_marked_at is not null`,
+      [userId, chars],
+    );
+  });
+}
+
+export async function saveSettings(
+  userId: string,
+  settings: { studyWriting?: boolean; reviewWarning?: number | null },
+) {
+  await asUser(userId, async (db) => {
+    if (settings.studyWriting !== undefined) {
+      await db.query(`update public.profiles set study_writing = $2 where id = $1`, [userId, settings.studyWriting]);
+    }
+    if (settings.reviewWarning !== undefined) {
+      await db.query(`update public.profiles set review_warning = $2 where id = $1`, [userId, settings.reviewWarning]);
+    }
   });
 }
 
@@ -489,7 +693,7 @@ export async function saveCheckpoint(
 export async function recordSession(
   userId: string,
   level: Level,
-  mode: "lesson" | "review" | "writing",
+  mode: "lesson" | "review",
   lessonSlug: string | null,
   total: number,
   correct: number,
@@ -519,7 +723,7 @@ export type DailyQuiz = {
   questions: KanjiQuizCard[];
   /** What has been answered so far, by position. */
   answers: DailyAnswerRow[];
-  /** Recognition stage per learned character, for the record. */
+  /** Reading stage per learned character, for the record. */
   stages: Map<string, number>;
 };
 
@@ -530,7 +734,8 @@ export type DailyQuiz = {
  * characters learned before it, so every reload shows the same five and the
  * answer route can rebuild them to grade an answer itself.
  *
- * "Learned before the date", not "learned": today's characters join tomorrow.
+ * A character is learned from the day the first of its words was studied or
+ * marked known. "Before the date", not "by": today's characters join tomorrow.
  * That holds the pool still for the whole day, so a half-finished quiz cannot
  * change under the learner, and it keeps the quiz from asking about something
  * taught ten minutes ago — which would measure short-term recall rather than
@@ -542,11 +747,11 @@ export async function getDailyQuiz(
   timeZone: string,
   level: Level = "N5",
 ): Promise<DailyQuiz> {
-  type Learned = { char: string; recognition_stage: number; created_at: string };
+  type Studied = { word_id: string; srs_stage: number; created_at: string };
   const [progress, answers] = await Promise.all([
-    read("getDailyQuiz progress", userId, [] as Learned[], async (db) => {
-      const { rows } = await db.query<Learned>(
-        `select char, recognition_stage, created_at from public.kanji_progress where user_id = $1 and level = $2`,
+    read("getDailyQuiz progress", userId, [] as Studied[], async (db) => {
+      const { rows } = await db.query<Studied>(
+        `select word_id, srs_stage, created_at from public.word_progress where user_id = $1 and level = $2`,
         [userId, level],
       );
       return rows;
@@ -561,17 +766,21 @@ export async function getDailyQuiz(
     }),
   ]);
 
-  const stages = new Map<string, number>();
-  for (const r of progress) {
+  const rows = new Map(progress.map((r) => [r.word_id, r]));
+  const learnedChars = new Set<string>();
+  for (const w of getAllWords(level)) {
+    const r = rows.get(w.id);
     // YYYY-MM-DD compares correctly as a string.
-    if (localDate(timeZone, new Date(r.created_at)) < date) {
-      stages.set(r.char, Number(r.recognition_stage ?? 0));
-    }
+    if (r && localDate(timeZone, new Date(r.created_at)) < date) learnedChars.add(w.teaches);
   }
+
+  const readings = getKanjiReadings(rows, level);
+  const stages = new Map<string, number>();
+  for (const c of learnedChars) stages.set(c, readings.get(c)?.stage ?? 0);
 
   // Curriculum order, so the shuffle has the same input on every rebuild.
   const all = getKanji(level);
-  const learned = all.filter((k) => stages.has(k.char));
+  const learned = all.filter((k) => learnedChars.has(k.char));
   const questions =
     learned.length >= DAILY_QUIZ_SIZE
       ? buildDailyQuiz(learned, all, DAILY_QUIZ_SIZE, dailySeed(userId, date))
@@ -667,14 +876,26 @@ export async function getDailyHistory(
   return out;
 }
 
-/** Number of words currently due, for the nav badge. */
-export async function getDueCount(userId: string, level: Level = "N5"): Promise<number> {
-  return read("getDueCount", userId, 0, async (db) => {
-    const { rows } = await db.query<{ n: number }>(
-      `select count(*)::int as n from public.word_progress
-        where user_id = $1 and level = $2 and due_at <= now()`,
+/**
+ * What is waiting in Review right now, for the nav badge and the lesson
+ * warning. Writing is counted whether or not the learner studies it; the
+ * caller decides with {@link reviewsDue}.
+ */
+export async function getDueCounts(userId: string, level: Level = "N5"): Promise<{ words: number; writing: number }> {
+  return read("getDueCounts", userId, { words: 0, writing: 0 }, async (db) => {
+    const { rows } = await db.query<{ words: number; writing: number }>(
+      `select
+         (select count(*)::int from public.word_progress
+           where user_id = $1 and level = $2 and due_at <= now()) as words,
+         (select count(*)::int from public.kanji_progress
+           where user_id = $1 and level = $2 and writing_stage > 0 and writing_due_at <= now()) as writing`,
       [userId, level],
     );
-    return rows[0]?.n ?? 0;
+    return rows[0] ?? { words: 0, writing: 0 };
   });
+}
+
+/** The reviews that count for this learner: writing only if they study it. */
+export function reviewsDue(counts: { words: number; writing: number }, profile: Pick<Profile, "study_writing">) {
+  return counts.words + (studiesWriting(profile) ? counts.writing : 0);
 }

@@ -1,5 +1,5 @@
 import type { SessionUser } from "@/lib/auth";
-import { getDueCount, getProfile } from "@/lib/progress";
+import { getDueCounts, getProfile, reviewsDue } from "@/lib/progress";
 import { signOut } from "@/app/auth/actions";
 import { AppShell } from "./AppShell";
 
@@ -11,14 +11,14 @@ import { AppShell } from "./AppShell";
 export async function AppFrame({ user, children }: { user: SessionUser | null; children: React.ReactNode }) {
   if (!user) return <AppShell account={null}>{children}</AppShell>;
 
-  const [profile, dueCount] = await Promise.all([getProfile(user.id), getDueCount(user.id)]);
+  const [profile, due] = await Promise.all([getProfile(user.id), getDueCounts(user.id)]);
   const name = profile.display_name || user.username;
 
   return (
     <AppShell
       account={{
         name,
-        dueCount,
+        dueCount: reviewsDue(due, profile),
         signOut: (
           <form action={signOut}>
             <button

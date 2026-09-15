@@ -200,57 +200,89 @@ function wordKind(word: Word, stage: number, rand: () => number): (typeof WORD_Q
   return roll < 0.75 ? "word-recall" : "word-meaning";
 }
 
+/** The character a card is about: its own, or the one its word teaches. */
+export function cardChar(card: StudyCard): string {
+  return "kanji" in card ? card.kanji.char : card.word.teaches;
+}
+
+export type LessonOptions = {
+  /** Characters met before, which skip their introduction. */
+  seen: ReadonlySet<string>;
+  wordStages: Record<string, number>;
+  /** Words marked as already known: nothing about them is taught or asked. */
+  skipWords: ReadonlySet<string>;
+  /** Whether each character ends by being written from memory. */
+  writing: boolean;
+  /** Characters whose writing is marked as already known. */
+  skipWriting: ReadonlySet<string>;
+};
+
 /**
  * A lesson run, one character at a time.
  *
  * Each character gets a complete cycle — meet it, meet its words, be tested on
- * those words, then write it from memory — before the next one starts.
- * Teaching all five up front and quizzing at the end means the first character
- * is long gone by the time it comes back.
+ * those words, then, for a learner who studies writing, write it from memory —
+ * before the next one starts. Teaching all five up front and quizzing at the
+ * end means the first character is long gone by the time it comes back.
+ *
+ * What the learner has marked as known is left out: its words entirely, and
+ * its writing card. A character with every word marked has nothing left to
+ * read, so it is not introduced either; if its writing is still to learn, the
+ * cycle is just that card.
  */
 export function buildLessonQueue(
   kanji: Kanji[],
   words: Word[],
-  kanjiStages: Record<string, number>,
-  wordStages: Record<string, number>,
+  { seen, wordStages, skipWords, writing, skipWriting }: LessonOptions,
   seed: number,
 ): StudyCard[] {
   const rand = rng(seed);
   const queue: StudyCard[] = [];
 
   for (const k of kanji) {
-    const isNew = !kanjiStages[k.char];
-    if (isNew) queue.push({ kind: "kanji-teach", kanji: k });
+    const its = words.filter((w) => w.teaches === k.char && !skipWords.has(w.id));
 
-    const its = words.filter((w) => w.teaches === k.char);
+    if (its.length > 0) {
+      if (!seen.has(k.char)) queue.push({ kind: "kanji-teach", kanji: k });
 
-    for (const w of its) {
-      if (!wordStages[w.id]) queue.push({ kind: "word-teach", word: w });
+      for (const w of its) {
+        if (!wordStages[w.id]) queue.push({ kind: "word-teach", word: w });
+      }
+
+      queue.push(kanjiQuiz(k, kanji, rand));
+
+      for (const w of shuffle(its, rand)) {
+        queue.push(wordQuiz(w, words, wordKind(w, wordStages[w.id] ?? 0, rand), rand));
+      }
     }
 
-    queue.push(kanjiQuiz(k, kanji, rand));
-
-    for (const w of shuffle(its, rand)) {
-      queue.push(wordQuiz(w, words, wordKind(w, wordStages[w.id] ?? 0, rand), rand));
-    }
-
-    queue.push({ kind: "kanji-write", kanji: k });
+    if (writing && !skipWriting.has(k.char)) queue.push({ kind: "kanji-write", kanji: k });
   }
 
   return queue;
 }
 
-/** A review run: no teaching, one question per due word, hardest first. */
+/**
+ * A review run: no teaching, one question per due word.
+ *
+ * Due writing comes first, for the same reason as in practice: every word card
+ * shows the characters it is written with, so writing one afterwards would be
+ * copying what was just on screen rather than recalling it.
+ */
 export function buildReviewQueue(
   words: Word[],
   wordStages: Record<string, number>,
   pool: Word[],
   seed: number,
+  writing: Kanji[] = [],
 ): StudyCard[] {
   const rand = rng(seed);
-  return words.map((w) =>
-    wordQuiz(w, pool.length >= 8 ? pool : words, wordKind(w, wordStages[w.id] ?? 0, rand), rand),
-  );
+  return [
+    ...writing.map((k): StudyCard => ({ kind: "kanji-write", kanji: k })),
+    ...words.map((w) =>
+      wordQuiz(w, pool.length >= 8 ? pool : words, wordKind(w, wordStages[w.id] ?? 0, rand), rand),
+    ),
+  ];
 }
 
 /**
@@ -272,11 +304,6 @@ export function buildDailyQuiz(
   return shuffle(learned, rand)
     .slice(0, size)
     .map((k) => kanjiQuiz(k, pool, rand));
-}
-
-/** A writing run: reproduce each due character from memory. */
-export function buildWritingQueue(kanji: Kanji[]): StudyCard[] {
-  return kanji.map((k) => ({ kind: "kanji-write", kanji: k }));
 }
 
 /**
@@ -314,7 +341,9 @@ export function buildPracticeQueue(
   seed: number,
 ): StudyCard[] {
   const rand = rng(seed);
-  const writing = types.includes("writing") ? buildWritingQueue(shuffle(kanji, rand)) : [];
+  const writing: StudyCard[] = types.includes("writing")
+    ? shuffle(kanji, rand).map((k) => ({ kind: "kanji-write", kanji: k }))
+    : [];
 
   const reading: StudyCard[] = [];
   if (types.includes("reading")) {

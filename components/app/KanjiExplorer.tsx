@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import type { Kanji } from "@/lib/content";
+import { BAND_LABEL, type KanjiReading, type MarkState } from "@/lib/srs";
 import { KanjiAnatomy } from "./KanjiAnatomy";
+import { MarkControl } from "./MarkControl";
 import { StrokeDiagram } from "./StrokeDiagram";
 
 export type KanjiEntry = Pick<Kanji, "parts" | "radicalPart" | "mnemonic" | "usedIn"> & {
@@ -19,9 +21,13 @@ export type KanjiEntry = Pick<Kanji, "parts" | "radicalPart" | "mnemonic" | "use
   order: number;
   lessonSlug: string;
   lessonTitle: string;
-  /** Recognition band, for the tile tint. */
-  known: boolean;
+  /** How well it can be read, from its words. Known or past it tints the tile. */
+  reading: KanjiReading;
+  readingMarks: MarkState;
+  /** False whenever the learner does not study writing. */
   canWrite: boolean;
+  /** Null when the learner does not study writing. */
+  writingMarks: MarkState | null;
   words: { id: string; word: string; reading: string; meanings: string[] }[];
 };
 
@@ -64,6 +70,7 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
       >
         {entries.map((entry) => {
           const isActive = entry.char === selected;
+          const known = entry.reading.band === "known" || entry.reading.band === "mastered";
           return (
             <button
               key={entry.char}
@@ -82,7 +89,7 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
                 borderRadius: "var(--radius-sm)",
                 background: isActive
                   ? "var(--surface-inverse)"
-                  : entry.known
+                  : known
                     ? "var(--surface-card-sage)"
                     : "var(--surface-card)",
                 color: isActive ? "var(--text-inverse)" : "var(--text-heading)",
@@ -133,8 +140,38 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
                   </div>
                   <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
                     <Badge tone="sage">{active.strokes} strokes</Badge>
+                    <Badge tone="soft">{BAND_LABEL[active.reading.band]}</Badge>
+                    {active.canWrite && <Badge tone="accent">Can write</Badge>}
+                  </div>
+                  <div className="body-sm" style={{ color: "var(--on-tint-body)" }}>
+                    {active.reading.known} of {active.reading.total} of its words known
                   </div>
                 </div>
+              </div>
+
+              {/* Keyed by character so a pending mark on one cannot show on the next. */}
+              <div key={active.char} className="stack" style={{ gap: 8 }}>
+                <MarkControl
+                  scope="kanji"
+                  id={active.char}
+                  skill="reading"
+                  state={active.readingMarks}
+                  markLabel={`I Know ${active.char}`}
+                  markedLabel="Marked as known"
+                  title={`Mark the words that teach ${active.char} as known`}
+                  onTint
+                />
+                {active.writingMarks && (
+                  <MarkControl
+                    scope="kanji"
+                    id={active.char}
+                    skill="writing"
+                    state={active.writingMarks}
+                    markLabel={`I Can Write ${active.char}`}
+                    markedLabel="Writing marked as known"
+                    onTint
+                  />
+                )}
               </div>
 
               <div className="stack" style={{ gap: 10 }}>

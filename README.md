@@ -177,9 +177,37 @@ learner's queries in a transaction as the `authenticated` role, with the claims 
 
 ---
 
+## How mastery works
+
+**Words are the unit of reading.** Every word has a stage from 0 to 8 (below), and it is the only
+reading score stored. A kanji has none of its own: it is as readable as the words that teach it.
+`kanjiReading` in `lib/srs.ts` gives it the stage *most* of those words have reached, so **a kanji
+counts as known once most of its words are known**, and reviewing 日本語 strengthens 語. Every figure
+that says how many kanji are known — Home, the lesson pages, the Kanji page — comes from that rule.
+
+A lesson still asks what each kanji means, as a warm-up straight after it is introduced, but that
+answer is not recorded: the word questions that follow are what count.
+
+**Writing is a separate, optional track.** Each learner chooses *reading only* or *reading and
+writing* (Home asks once; Settings changes it). With writing on, each lesson character ends on the
+writing pad, and its writing has its own stage and its own due date in `kanji_progress`, reviewed
+through Review alongside words. With it off, nothing about writing is asked or shown. Switching
+keeps what is stored either way.
+
+**"I already know this."** A word, a kanji (its words) or a whole lesson can be marked known, from
+the lesson page, the Kanji page, or the teaching cards during a lesson; writing likewise, by kanji
+or by lesson. A mark puts the item at stage 5, due in a week for one check. The state before the
+mark is kept beside it, so it can be undone exactly until that first check, which settles it like
+any other answer. Lessons leave marked words, and marked writing, out entirely.
+
+**Suggested order, never enforced.** Home's Continue button goes to Review when anything is due,
+then to the lesson in hand, then the next. Starting a lesson with at least the learner's threshold
+of reviews due (20 by default, adjustable or off in Settings) shows a "review first?" screen with a
+Start Anyway button. Nothing is ever locked.
+
 ## How the scheduling works
 
-`lib/srs.ts` — one integer of state per word.
+`lib/srs.ts` — one integer of state per word, and per character's writing.
 
 | Stage | Next review |
 |---|---|
@@ -193,7 +221,7 @@ learner's queries in a transaction as the `authenticated` role, with the claims 
 | 8 | 3 months — **mastered** |
 
 Correct promotes one stage; wrong demotes two, never below 1. A word counts as *known* once it has
-survived a week-long gap, which is the bar the dashboard measures against.
+survived a week-long gap, which is the bar Home measures against.
 
 Question type is chosen by stage: meaning first, readings once a word has kanji and a stage above
 1, and English-to-Japanese production only at higher stages.
@@ -205,9 +233,9 @@ Question type is chosen by stage: meaning first, readings once a word has kanji 
 `/daily-quiz`, reached from a card on the dashboard. Five questions a day — the meaning of a
 character — one attempt each.
 
-- **Which kanji.** Only characters first studied *before* today, so the pool holds still all day and
-  nothing is asked minutes after it was taught. It unlocks at five, i.e. the day after the first
-  lesson.
+- **Which kanji.** Only characters first studied *before* today — the day the first of a
+  character's words was answered or marked known — so the pool holds still all day and nothing is
+  asked minutes after it was taught. It unlocks at five, i.e. the day after the first lesson.
 - **Which five.** A uniform sample, seeded by user and date: the same five on every reload, and not
   biased towards weak characters, since the results are meant to measure retention.
 - **Which day.** The learner's own. `TimeZoneScript` writes the browser's zone to a cookie, and the
@@ -216,8 +244,10 @@ character — one attempt each.
   it, and stores the character, all four options, the answer, the choice, the verdict and the
   character's SRS stage at that moment in `daily_quiz_answers`. RLS allows select and insert but no
   update, so an answer cannot be changed.
-- **Not scheduling.** The quiz does not touch `kanji_progress` or `study_sessions`. It records how
-  much has stuck without moving the review schedule it is measuring.
+- **Not scheduling.** The quiz does not touch any progress table or `study_sessions`. It records how
+  much has stuck without moving the review schedule it is measuring. The `srs_stage` it stores is the
+  character's reading stage worked out from its words; answers from before migration
+  `0006_word_mastery.sql` hold the old, separately stored recognition stage.
 
 Every answer is kept for analysis. To pull them:
 

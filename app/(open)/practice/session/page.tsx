@@ -73,7 +73,6 @@ export default async function PracticeSessionPage({
         words={words}
         pool={touched.flatMap((l) => getAllWords(l))}
         kanjiPool={touched.flatMap((l) => getKanji(l)).map(({ char, meanings }) => ({ char, meanings }))}
-        kanjiStages={{}}
         wordStages={wordStages}
         seed={Date.now() % 2147483647}
       />

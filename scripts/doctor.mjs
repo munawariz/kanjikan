@@ -23,6 +23,17 @@ const TABLES = [
   "daily_quiz_answers",
 ];
 
+/**
+ * Columns added after their table, which the table check alone cannot see. A
+ * missing one makes every read of its table fail, and the app then shows a
+ * learner as having no progress at all.
+ */
+const COLUMNS = {
+  profiles: ["study_writing", "review_warning"],
+  word_progress: ["marked_at", "pre_mark_stage", "pre_mark_due_at"],
+  kanji_progress: ["writing_due_at", "writing_marked_at", "pre_mark_writing_stage", "pre_mark_writing_due_at"],
+};
+
 /** Readable only by the server. Nothing may be granted on them to the API roles. */
 const PRIVATE_TABLES = ["accounts", "sessions"];
 
@@ -92,6 +103,19 @@ try {
     if (!r) fail(`  ${t.padEnd(20)} MISSING`, "Run npm run migrate.");
     else if (!r.relrowsecurity) fail(`  ${t.padEnd(20)} row level security OFF`, "Run npm run migrate.");
     else console.log(`  ${t.padEnd(20)} OK (row level security on)`);
+  }
+
+  console.log("\nColumns");
+  const { rows: columns } = await client.query(
+    `select table_name, column_name from information_schema.columns
+      where table_schema = 'public' and table_name = any($1)`,
+    [Object.keys(COLUMNS)],
+  );
+  const have = new Set(columns.map((c) => `${c.table_name}.${c.column_name}`));
+  for (const [table, names] of Object.entries(COLUMNS)) {
+    const missing = names.filter((n) => !have.has(`${table}.${n}`));
+    if (missing.length) fail(`  ${table.padEnd(20)} MISSING ${missing.join(", ")}`, "Run npm run migrate.");
+    else console.log(`  ${table.padEnd(20)} OK`);
   }
 
   console.log("\nAccess");

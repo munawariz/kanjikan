@@ -29,8 +29,9 @@ export default async function LessonsPage() {
           {stats.kanji} kanji, five at a time.
         </h1>
         <p style={{ margin: 0, maxWidth: 560 }}>
-          Lessons run in order, but nothing is locked. Each introduces five characters, teaches the
-          words that fix their readings, and ends with you writing each one from memory.
+          Lessons run in order, but nothing is locked. Each introduces five characters and teaches
+          the words that fix their readings. If you are learning to write, it ends with you writing
+          each one from memory.
         </p>
       </header>
 

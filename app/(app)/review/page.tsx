@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAllWords } from "@/lib/content";
 import { getUser } from "@/lib/auth";
-import { getReviewQueue, getWordProgress } from "@/lib/progress";
+import { getProfile, getReviewQueue, getWordProgress, getWritingReviewQueue, studiesWriting } from "@/lib/progress";
 import { StudySession } from "@/components/app/StudySession";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
@@ -11,14 +11,21 @@ import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 export const dynamic = "force-dynamic";
 
 const BATCH = 30;
+/** Writing takes far longer per card than a multiple-choice question. */
+const WRITING_BATCH = 10;
 
 export default async function ReviewPage() {
   const user = await getUser();
   if (!user) redirect("/login");
 
-  const queue = await getReviewQueue(user.id, "N5", BATCH);
+  const profile = await getProfile(user.id);
+  const writing = studiesWriting(profile);
+  const [queue, writingQueue] = await Promise.all([
+    getReviewQueue(user.id, "N5", BATCH),
+    writing ? getWritingReviewQueue(user.id, "N5", WRITING_BATCH) : [],
+  ]);
 
-  if (queue.length === 0) {
+  if (queue.length === 0 && writingQueue.length === 0) {
     return (
       <div style={{ maxWidth: 620, margin: "0 auto" }}>
         <Card tone="cream" pad="lg" radius="lg">
@@ -40,8 +47,9 @@ export default async function ReviewPage() {
               Your review queue is empty.
             </h1>
             <p style={{ margin: 0, color: "var(--on-tint-body)", maxWidth: 440 }}>
-              Words come back on a schedule that stretches as you get them right. Start a lesson to
-              put new kanji and their vocabulary into the queue.
+              {writing
+                ? "Words, and the kanji you have written, come back on a schedule that stretches as you get them right. Start a lesson to put new ones into the queue."
+                : "Words come back on a schedule that stretches as you get them right. Start a lesson to put new kanji and their vocabulary into the queue."}
             </p>
             <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
               <Link href="/lessons" className="reset-link">
@@ -69,12 +77,11 @@ export default async function ReviewPage() {
         mode="review"
         lessonSlug={null}
         lessonTitle="Review"
-        kanji={[]}
+        kanji={writingQueue}
         words={queue}
         // Distractors are drawn from the whole level so a review question is
         // not answerable by elimination within one lesson.
         pool={getAllWords()}
-        kanjiStages={{}}
         wordStages={wordStages}
         seed={Date.now() % 2147483647}
       />

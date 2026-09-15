@@ -35,6 +35,7 @@ export function WritingPad({
   level,
   hints,
   onGrade,
+  onKnown,
 }: {
   char: string;
   paths: string[];
@@ -43,6 +44,8 @@ export function WritingPad({
   level: Level;
   hints: boolean;
   onGrade: (correct: boolean) => void;
+  /** Where offered: marks the writing known instead of grading an attempt. */
+  onKnown?: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rowRef = useRef<HTMLDivElement | null>(null);
@@ -413,9 +416,22 @@ export function WritingPad({
       </div>
 
       {!revealed ? (
-        <Button variant="primary" size="lg" fullWidth onClick={() => setRevealed(true)}>
-          Show the Answer
-        </Button>
+        <div className="stack" style={{ gap: 8 }}>
+          <Button variant="primary" size="lg" fullWidth onClick={() => setRevealed(true)}>
+            Show the Answer
+          </Button>
+          {onKnown && (
+            <Button
+              variant="ghost"
+              size="md"
+              fullWidth
+              onClick={onKnown}
+              title={`Mark ${char} as one you can write, and skip it`}
+            >
+              I Can Already Write It
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="stack" style={{ gap: 16 }}>
           {assessment === undefined && strokeCount > 0 && paths.length > 0 && (

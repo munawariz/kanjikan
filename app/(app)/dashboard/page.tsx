@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
-import { getDailyQuiz, getDashboard, type DailyQuiz } from "@/lib/progress";
-import { getAllWords, levelStats } from "@/lib/content";
+import { getDailyQuiz, getDashboard, type DailyQuiz, type LessonSummary } from "@/lib/progress";
+import { getAllWords, getLevelPath } from "@/lib/content";
 import { DAILY_QUIZ_SIZE, localDate, requestTimeZone } from "@/lib/daily";
 import { BAND_LABEL, type MasteryBand } from "@/lib/srs";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
@@ -11,7 +11,7 @@ import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Icon } from "@/components/atlas/core/Icon.jsx";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import { BarChart } from "@/components/atlas/data/BarChart.jsx";
-import { LessonCard } from "@/components/app/LessonCard";
+import { WritingSetting } from "@/components/app/StudySettings";
 
 export const dynamic = "force-dynamic";
 
@@ -24,8 +24,8 @@ const BAND_COLOUR: Record<MasteryBand, string> = {
 
 /**
  * Today's quiz in one line: locked, waiting, half done, or done with a score.
- * The dashboard is where a day starts, so this is where the quiz is found — it
- * has no tab of its own, since seven already only just fit on a phone.
+ * Home is where a day starts, so this is where the quiz is found — it has no
+ * tab of its own, since five already only just fit on a phone.
  */
 function DailyQuizCard({ quiz }: { quiz: DailyQuiz }) {
   const locked = quiz.questions.length === 0;
@@ -84,7 +84,208 @@ function DailyQuizCard({ quiz }: { quiz: DailyQuiz }) {
   );
 }
 
-export default async function DashboardPage() {
+/**
+ * The one step Home recommends: due reviews first, then the lesson in hand,
+ * then the next one. The other buttons stay beside it, because the learner
+ * decides — this only says what order works best. A lesson started with too
+ * much due warns first (see the study page), but is never refused.
+ */
+function ContinueCard({
+  dueNow,
+  resume,
+  percent,
+  known,
+  total,
+}: {
+  dueNow: number;
+  resume: LessonSummary | null;
+  percent: number;
+  known: number;
+  total: number;
+}) {
+  const lessonLabel = resume?.status === "learning" ? "Continue Lesson" : "Start Lesson";
+
+  return (
+    <Card tone="forest" pad="lg" radius="lg">
+      <div
+        className="row"
+        style={{ gap: 40, justifyContent: "space-between", flexWrap: "wrap", alignItems: "flex-end" }}
+      >
+        <div className="stack" style={{ gap: 16, maxWidth: 480 }}>
+          <div className="row" style={{ gap: 10 }}>
+            <Sparkle size={16} color="var(--lime-500)" />
+            <span className="eyebrow" style={{ color: "var(--lime-500)" }}>
+              {dueNow > 0 ? "Next: reviews" : resume ? `Next: lesson ${resume.order}` : "All caught up"}
+            </span>
+          </div>
+
+          <h2
+            style={{
+              margin: 0,
+              fontSize: "var(--text-display-4)",
+              letterSpacing: "var(--tracking-display)",
+              lineHeight: "var(--leading-display)",
+              color: "var(--white)",
+            }}
+          >
+            {dueNow > 0
+              ? `${dueNow} ${dueNow === 1 ? "review is" : "reviews are"} ready.`
+              : resume
+                ? resume.title
+                : "Every N5 lesson is done."}
+          </h2>
+
+          <p style={{ margin: 0, color: "var(--forest-200)" }}>
+            {dueNow > 0
+              ? `Clear these first, then ${resume ? `carry on with ${resume.title}` : "you are done for now"}. Reviews are what turn a word you have met into one you know.`
+              : resume
+                ? resume.summary
+                : "Nothing is due right now. Come back later for reviews, or practise any kanji you like."}
+          </p>
+
+          <div className="row" style={{ gap: 12, flexWrap: "wrap", marginTop: 8 }}>
+            {dueNow > 0 && (
+              <Link href="/review" className="reset-link">
+                <Button variant="accent" size="lg" icon="zap" iconPosition="left">
+                  Continue: Review
+                </Button>
+              </Link>
+            )}
+            {resume && (
+              <Link href={`/lessons/${resume.slug}/study`} className="reset-link">
+                <Button variant={dueNow > 0 ? "outline-inverse" : "accent"} size="lg" icon="chevron-right">
+                  {dueNow > 0 ? lessonLabel : `Continue: ${lessonLabel}`}
+                </Button>
+              </Link>
+            )}
+            {dueNow === 0 && !resume && (
+              <Link href="/practice" className="reset-link">
+                <Button variant="accent" size="lg" icon="chevron-right">
+                  Practise
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+
+        <div className="stack" style={{ gap: 6, minWidth: 200 }}>
+          <div
+            style={{
+              fontSize: "var(--text-stat-lg)",
+              fontWeight: "var(--weight-extrabold)",
+              letterSpacing: "var(--tracking-stat)",
+              color: "var(--lime-500)",
+              lineHeight: 1,
+            }}
+          >
+            {percent}%
+          </div>
+          <div className="eyebrow" style={{ color: "var(--forest-200)" }}>
+            N5 kanji known
+          </div>
+          <div className="meter" style={{ background: "rgba(255,255,255,.16)", marginTop: 10, width: 200 }}>
+            <span style={{ width: `${percent}%`, background: "var(--lime-500)" }} />
+          </div>
+          <div className="body-sm" style={{ color: "var(--forest-200)", marginTop: 6 }}>
+            {known} of {total} kanji
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * The learning path: every lesson in order, each showing how its five kanji
+ * stand. A kanji's mark fills in as most of its words become known and falls
+ * back if they slip, so the path shows where the work is, not just what has
+ * been started.
+ */
+function LessonPath({ lessons, next }: { lessons: LessonSummary[]; next: string | null }) {
+  return (
+    <Card tone="white" pad="none" radius="lg" bordered>
+      <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        {lessons.map((lesson, i) => {
+          const isNext = lesson.slug === next;
+          return (
+            <li key={lesson.slug} style={{ borderTop: i === 0 ? "none" : "1px solid var(--border-subtle)" }}>
+              <Link
+                href={`/lessons/${lesson.slug}`}
+                className="reset-link row"
+                style={{
+                  gap: 20,
+                  padding: "14px 24px",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  background: isNext ? "var(--surface-card-sage)" : undefined,
+                }}
+              >
+                <div className="row" style={{ gap: 16, minWidth: 0, flex: "1 1 280px" }}>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "var(--text-body-xs)",
+                      color: "var(--text-muted)",
+                      width: 22,
+                      flex: "0 0 auto",
+                    }}
+                  >
+                    {String(lesson.order).padStart(2, "0")}
+                  </span>
+                  <span className="row jp" style={{ gap: 4, flex: "0 0 auto" }}>
+                    {lesson.kanji.map((char, k) => (
+                      <span
+                        key={char}
+                        title={`${char}: ${BAND_LABEL[lesson.bands[k]]}`}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 30,
+                          height: 30,
+                          fontSize: 17,
+                          lineHeight: 1,
+                          color: "var(--text-heading)",
+                          borderRadius: "var(--radius-sm)",
+                          background: "var(--surface-sunken)",
+                          boxShadow: `inset 0 -3px 0 0 ${BAND_COLOUR[lesson.bands[k]]}`,
+                        }}
+                      >
+                        {char}
+                      </span>
+                    ))}
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: "var(--weight-semibold)",
+                      color: "var(--text-heading)",
+                      minWidth: 0,
+                    }}
+                  >
+                    {lesson.title}
+                  </span>
+                </div>
+
+                <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
+                  {isNext && <Badge tone="accent">Next</Badge>}
+                  {lesson.due > 0 && <Badge tone="warning">{lesson.due} due</Badge>}
+                  <span
+                    className="body-sm"
+                    style={{ fontFamily: "var(--font-mono)", color: "var(--text-body)", minWidth: 96, textAlign: "right" }}
+                  >
+                    {lesson.wordsKnown}/{lesson.words} words
+                  </span>
+                </div>
+              </Link>
+            </li>
+          );
+        })}
+      </ol>
+    </Card>
+  );
+}
+
+export default async function HomePage() {
   const user = await getUser();
   if (!user) redirect("/login");
 
@@ -94,11 +295,10 @@ export default async function DashboardPage() {
     getDailyQuiz(user.id, localDate(timeZone), timeZone),
   ]);
   const lessons = data.lessons;
-  const stats = levelStats("N5");
+  const levels = getLevelPath();
 
   const name = data.profile.display_name || user.username;
   const resume = data.resumeLesson ?? data.nextLesson;
-  const upNext = lessons.filter((l) => l.status !== "completed").slice(0, 3);
   const percent = Math.round((data.kanjiKnown / Math.max(data.totalKanji, 1)) * 100);
 
   // Accuracy across every answer ever recorded, not just this session.
@@ -119,6 +319,17 @@ export default async function DashboardPage() {
     .slice(0, 8)
     .map((p) => ({ row: p, word: words.find((w) => w.id === p.word_id) }))
     .filter((x) => x.word);
+
+  const stats = [
+    { label: "Words known", value: data.wordsKnown, sub: `of ${data.totalWords}`, icon: "file-text" },
+    data.studyWriting
+      ? { label: "Can write", value: data.kanjiWritten, sub: "from memory", icon: "pen-line" }
+      : { label: "Kanji started", value: data.kanjiStarted, sub: `of ${data.totalKanji}`, icon: "grid-2x2" },
+    { label: "Answered today", value: data.reviewedToday, sub: `goal ${data.profile.daily_goal}`, icon: "check" },
+    { label: "Day streak", value: data.streak, sub: "consecutive days", icon: "star" },
+    { label: "Accuracy", value: `${accuracy}%`, sub: `${attempts} answers, all time`, icon: "chart-line" },
+    { label: "Due now", value: data.dueNow, sub: "waiting for review", icon: "zap" },
+  ];
 
   return (
     <div className="stack" style={{ gap: 48 }}>
@@ -145,105 +356,63 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        <Card tone="forest" pad="lg" radius="lg">
-          <div
-            className="row"
-            style={{ gap: 40, justifyContent: "space-between", flexWrap: "wrap", alignItems: "flex-end" }}
-          >
-            <div className="stack" style={{ gap: 16, maxWidth: 480 }}>
-              <div className="row" style={{ gap: 10 }}>
-                <Sparkle size={16} color="var(--lime-500)" />
-                <span className="eyebrow" style={{ color: "var(--lime-500)" }}>
-                  {data.dueNow > 0 ? "Reviews waiting" : resume ? "Pick up where you left off" : "All caught up"}
-                </span>
+        {/* Asked once, before it matters: it decides whether lessons end in
+            writing. Existing accounts are asked too; until they answer they
+            carry on with writing, as before. */}
+        {data.profile.study_writing === null && (
+          <Card tone="cream" pad="md" radius="lg">
+            <div className="stack" style={{ gap: 16 }}>
+              <div className="stack" style={{ gap: 6 }}>
+                <h2 style={{ margin: 0, fontSize: "var(--text-heading-3)" }}>What are you learning for?</h2>
+                <p className="body-sm" style={{ margin: 0, color: "var(--on-tint-body)", maxWidth: 560 }}>
+                  Reading is enough for travel and for most everyday Japanese. Choose writing too if you
+                  want to draw each kanji from memory. You can change this at any time in Settings.
+                </p>
               </div>
-
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: "var(--text-display-4)",
-                  letterSpacing: "var(--tracking-display)",
-                  lineHeight: "var(--leading-display)",
-                  color: "var(--white)",
-                }}
-              >
-                {data.dueNow > 0
-                  ? `${data.dueNow} ${data.dueNow === 1 ? "word is" : "words are"} ready for review.`
-                  : resume
-                    ? resume.title
-                    : "Every N5 kanji is scheduled."}
-              </h2>
-
-              <p style={{ margin: 0, color: "var(--forest-200)" }}>
-                {data.dueNow > 0
-                  ? "Clear these first. Reviews are what move a word from recognised to known."
-                  : resume
-                    ? resume.summary
-                    : "Nothing is due right now. Come back later, or start a new lesson early."}
-              </p>
-
-              <div className="row" style={{ gap: 12, flexWrap: "wrap", marginTop: 8 }}>
-                {data.dueNow > 0 && (
-                  <Link href="/review" className="reset-link">
-                    <Button variant="accent" size="lg" icon="zap" iconPosition="left">
-                      Start Review
-                    </Button>
-                  </Link>
-                )}
-                {resume && (
-                  <Link href={`/lessons/${resume.slug}/study`} className="reset-link">
-                    <Button
-                      variant={data.dueNow > 0 ? "outline-inverse" : "accent"}
-                      size="lg"
-                      icon="chevron-right"
-                    >
-                      {resume.status === "learning" ? "Continue Lesson" : "Start Lesson"}
-                    </Button>
-                  </Link>
-                )}
-              </div>
+              <WritingSetting initial={null} />
             </div>
+          </Card>
+        )}
 
-            <div className="stack" style={{ gap: 6, minWidth: 200 }}>
-              <div
-                style={{
-                  fontSize: "var(--text-stat-lg)",
-                  fontWeight: "var(--weight-extrabold)",
-                  letterSpacing: "var(--tracking-stat)",
-                  color: "var(--lime-500)",
-                  lineHeight: 1,
-                }}
-              >
-                {percent}%
-              </div>
-              <div className="eyebrow" style={{ color: "var(--forest-200)" }}>
-                N5 kanji known
-              </div>
-              <div
-                className="meter"
-                style={{ background: "rgba(255,255,255,.16)", marginTop: 10, width: 200 }}
-              >
-                <span style={{ width: `${percent}%`, background: "var(--lime-500)" }} />
-              </div>
-              <div className="body-sm" style={{ color: "var(--forest-200)", marginTop: 6 }}>
-                {data.kanjiKnown} of {data.totalKanji} kanji
-              </div>
-            </div>
-          </div>
-        </Card>
+        <ContinueCard
+          dueNow={data.dueNow}
+          resume={resume}
+          percent={percent}
+          known={data.kanjiKnown}
+          total={data.totalKanji}
+        />
         <DailyQuizCard quiz={daily} />
+      </section>
+
+      {/* ---- The path ---------------------------------------------------- */}
+      <section className="stack" style={{ gap: 20 }}>
+        <div className="row" style={{ justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div>
+            <p className="eyebrow">Your path</p>
+            <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-1)" }}>
+              {lessons.length} lessons, five kanji each
+            </h2>
+            <p className="body-sm muted" style={{ margin: "8px 0 0", maxWidth: 560 }}>
+              The line under each kanji shows how well you know it. Take them in order, or open any
+              lesson: nothing is locked.
+            </p>
+          </div>
+          <div className="row" style={{ gap: 14, flexWrap: "wrap" }}>
+            {(Object.keys(BAND_LABEL) as MasteryBand[]).map((band) => (
+              <span key={band} className="row body-sm" style={{ gap: 6 }}>
+                <span style={{ width: 10, height: 10, borderRadius: "var(--radius-full)", background: BAND_COLOUR[band] }} />
+                {BAND_LABEL[band]}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <LessonPath lessons={lessons} next={resume?.slug ?? null} />
       </section>
 
       {/* ---- Numbers ----------------------------------------------------- */}
       <section className="grid grid-3">
-        {[
-          { label: "Kanji started", value: data.kanjiStarted, sub: `of ${stats.kanji}`, icon: "grid-2x2" },
-          { label: "Can write", value: data.kanjiWritten, sub: "from memory", icon: "file-text" },
-          { label: "Answered today", value: data.reviewedToday, sub: `goal ${data.profile.daily_goal}`, icon: "check" },
-          { label: "Day streak", value: data.streak, sub: "consecutive days", icon: "star" },
-          { label: "Accuracy", value: `${accuracy}%`, sub: `${attempts} answers, all time`, icon: "chart-line" },
-          { label: "Due now", value: data.dueNow, sub: "waiting for review", icon: "zap" },
-        ].map((stat) => (
+        {stats.map((stat) => (
           <Card key={stat.label} tone="white" pad="md" radius="lg" bordered>
             <div className="stack" style={{ gap: 14 }}>
               <div
@@ -300,8 +469,8 @@ export default async function DashboardPage() {
               <p className="eyebrow">Where your kanji sit</p>
               <h3 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-3)" }}>Kanji mastery</h3>
               <p className="body-sm muted" style={{ margin: "8px 0 0" }}>
-                A kanji counts as known once its meaning has survived a week-long gap, not once you
-                have seen it.
+                A kanji counts as known once most of its words are known — each has survived a
+                week-long gap, or you marked it as one you already knew.
               </p>
             </div>
 
@@ -344,31 +513,6 @@ export default async function DashboardPage() {
         </Card>
       </section>
 
-      {/* ---- Up next ----------------------------------------------------- */}
-      {upNext.length > 0 && (
-        <section className="stack" style={{ gap: 24 }}>
-          <div className="row" style={{ justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-            <div>
-              <p className="eyebrow">Up next</p>
-              <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-1)" }}>
-                Keep working through N5
-              </h2>
-            </div>
-            <Link href="/lessons" className="reset-link">
-              <Button variant="outline" size="md" icon="chevron-right">
-                All Lessons
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-3">
-            {upNext.map((lesson, i) => (
-              <LessonCard key={lesson.slug} lesson={lesson} index={i} />
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* ---- Trouble words ----------------------------------------------- */}
       {trouble.length > 0 && (
         <section className="stack" style={{ gap: 20 }}>
@@ -402,71 +546,41 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      {/* ---- Every lesson ------------------------------------------------ */}
-      <section className="stack" style={{ gap: 20 }}>
+      {/* ---- Beyond N5 --------------------------------------------------- */}
+      <section className="stack" style={{ gap: 16 }}>
         <div>
-          <p className="eyebrow">By lesson</p>
-          <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-1)" }}>
-            All {lessons.length} lessons
-          </h2>
+          <p className="eyebrow">Beyond N5</p>
+          <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-2)" }}>The road ahead</h2>
+          <p className="body-sm muted" style={{ margin: "8px 0 0", maxWidth: 620 }}>
+            N5 is built. The other levels are mapped but not written yet. Their counts are community
+            estimates, because the JLPT has published no official kanji list since 2010.
+          </p>
         </div>
-
-        <Card tone="white" pad="none" radius="lg" bordered>
-          {lessons.map((lesson, i) => (
-            <Link
-              key={lesson.slug}
-              href={`/lessons/${lesson.slug}`}
-              className="reset-link row"
-              style={{
-                gap: 20,
-                padding: "16px 24px",
-                borderTop: i === 0 ? "none" : "1px solid var(--border-subtle)",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-              }}
-            >
-              <div className="row" style={{ gap: 18, minWidth: 0, flex: 1 }}>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "var(--text-body-xs)",
-                    color: "var(--text-muted)",
-                    width: 24,
-                    flex: "0 0 auto",
-                  }}
-                >
-                  {String(lesson.order).padStart(2, "0")}
-                </span>
-                <span
-                  style={{
-                    fontWeight: "var(--weight-semibold)",
-                    color: "var(--text-heading)",
-                    minWidth: 0,
-                  }}
-                >
-                  {lesson.title}
-                </span>
-              </div>
-
-              <div className="row lesson-row-meter" style={{ gap: 16 }}>
-                <div className="meter" style={{ width: "100%", minWidth: 80 }}>
-                  <span style={{ width: `${lesson.percent}%` }} />
+        <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
+          {levels.map((entry) => (
+            <Card key={entry.level} tone={entry.available ? "cream" : "white"} pad="sm" radius="md" bordered={!entry.available}>
+              <div className="stack" style={{ gap: 6 }} title={entry.canDo}>
+                <div className="row" style={{ gap: 8, justifyContent: "space-between" }}>
+                  <strong style={{ color: entry.available ? "var(--on-tint-heading)" : "var(--text-heading)" }}>
+                    {entry.level}
+                  </strong>
+                  <span
+                    className="body-sm"
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      color: entry.available ? "var(--on-tint-body)" : "var(--text-muted)",
+                    }}
+                  >
+                    {entry.available ? `${entry.kanji} kanji` : `~${entry.kanjiTarget} kanji`}
+                  </span>
                 </div>
-                <span
-                  className="body-sm"
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--text-heading)",
-                    width: 68,
-                    textAlign: "right",
-                  }}
-                >
-                  {lesson.kanjiKnown}/{lesson.kanji.length}
+                <span className="body-sm" style={{ color: entry.available ? "var(--on-tint-body)" : "var(--text-muted)" }}>
+                  {entry.available ? "Available now" : "Not written yet"}
                 </span>
               </div>
-            </Link>
+            </Card>
           ))}
-        </Card>
+        </div>
       </section>
     </div>
   );

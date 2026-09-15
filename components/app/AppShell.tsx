@@ -16,24 +16,23 @@ export type ShellAccount = {
 };
 
 /**
- * Seven destinations, seven distinct glyphs.
+ * Five destinations, five distinct glyphs.
  *
  * They have to be distinguishable on their own: on a narrow phone the labels
- * are dropped so all seven tabs fit, and two items sharing an icon there would
+ * are dropped so all five tabs fit, and two items sharing an icon there would
  * be indistinguishable. See the label breakpoint in the style block below.
  *
- * Progress has no tab: its figures live on the dashboard, and /progress
- * redirects there (next.config.mjs).
+ * Home is the dashboard, which took in the learning path; /path and /progress
+ * redirect there (next.config.mjs). Settings has no tab: it is reached from
+ * the learner's name and avatar.
  *
  * `guest` marks the pages that work without an account — the ones under
  * app/(open), which the middleware lets through.
  */
 const NAV = [
-  { href: "/dashboard", label: "Dashboard", icon: "house" },
-  { href: "/path", label: "Path", icon: "route" },
+  { href: "/dashboard", label: "Home", icon: "house" },
   { href: "/lessons", label: "Lessons", icon: "file-text", guest: true },
   { href: "/review", label: "Review", icon: "zap" },
-  { href: "/writing", label: "Writing", icon: "pen-line" },
   { href: "/kanji", label: "Kanji", icon: "grid-2x2" },
   { href: "/practice", label: "Practice", icon: "target", guest: true },
 ];
@@ -118,13 +117,22 @@ export function AppShell({
             <ThemeToggle />
             {account ? (
               <>
-                <span
-                  className="body-sm app-username"
-                  style={{ fontWeight: "var(--weight-semibold)", color: "var(--text-heading)" }}
+                <Link
+                  href="/settings"
+                  className="reset-link row"
+                  title="Settings"
+                  aria-label={`Settings for ${account.name || "your account"}`}
+                  aria-current={pathname === "/settings" ? "page" : undefined}
+                  style={{ gap: 12 }}
                 >
-                  {account.name}
-                </span>
-                <Avatar name={account.name || "Learner"} size={38} />
+                  <span
+                    className="body-sm app-username"
+                    style={{ fontWeight: "var(--weight-semibold)", color: "var(--text-heading)" }}
+                  >
+                    {account.name}
+                  </span>
+                  <Avatar name={account.name || "Learner"} size={38} />
+                </Link>
                 {account.signOut}
               </>
             ) : (
@@ -176,7 +184,7 @@ export function AppShell({
 
           The first moves the nav out of the header and pins it to the bottom,
           within thumb reach. The second, further down, drops the tab labels
-          once all seven stop fitting across the width — and shortens the
+          once all five stop fitting across the width — and shortens the
           bar to match, since an icon needs less height than an icon over a
           label. Both heights come from --nav-tab-h so the page's bottom
           padding tracks them automatically.
@@ -278,8 +286,9 @@ export function AppShell({
           .app-username { display: none; }
         }
 
-        /* Seven labels stop fitting well before 480px: at 560px each tab is
-           80px, and "Dashboard" at 10px is already most of that.
+        /* Five short labels still crowd a small phone: at 560px each tab is
+           about 110px, but at 360px it is under 70px, with "Lessons" and
+           "Practice" at 10px taking most of that.
 
            Dropping the label leaves only the icon, so the bar shortens to
            match. 44px is the floor: it is the minimum comfortable tap target,

@@ -44,6 +44,11 @@ function addHours(from: Date, hours: number): Date {
   return new Date(from.getTime() + hours * 3600_000);
 }
 
+/** When something that has just reached `stage` next comes up for review. */
+export function dueAfter(stage: number, now = new Date()): string {
+  return addHours(now, INTERVALS_HOURS[stage]).toISOString();
+}
+
 /**
  * Applies one answer to a word's record and returns the new state.
  *
@@ -60,7 +65,7 @@ export function grade(prev: Progress | null, correct: boolean, now = new Date())
     correct_count: (prev?.correct_count ?? 0) + (correct ? 1 : 0),
     incorrect_count: (prev?.incorrect_count ?? 0) + (correct ? 0 : 1),
     streak: correct ? (prev?.streak ?? 0) + 1 : 0,
-    due_at: addHours(now, INTERVALS_HOURS[next]).toISOString(),
+    due_at: dueAfter(next, now),
     last_reviewed_at: now.toISOString(),
   };
 }
@@ -80,6 +85,47 @@ export const BAND_LABEL: Record<MasteryBand, string> = {
   known: "Known",
   mastered: "Mastered",
 };
+
+export type KanjiReading = {
+  /** The stage most of its words have reached. */
+  stage: number;
+  band: MasteryBand;
+  /** Its words at the known stage or past it. */
+  known: number;
+  /** The words that teach it. */
+  total: number;
+};
+
+/**
+ * How well a kanji can be read, worked out from the words that teach it.
+ *
+ * A kanji has no reading score of its own: words are what get reviewed, so a
+ * character is as readable as the words it lives in. It takes the stage that
+ * most of them have reached — the majority-th highest — so it counts as known
+ * once most of its words are known, and one weak word cannot hold back the
+ * rest.
+ *
+ * Started but short of a majority is still learning, not new: the learner has
+ * met it, and saying otherwise would read as progress lost.
+ */
+export function kanjiReading(wordStages: number[]): KanjiReading {
+  const sorted = [...wordStages].sort((a, b) => b - a);
+  const majority = Math.floor(sorted.length / 2) + 1;
+  const stage = sorted[majority - 1] ?? 0;
+  const started = sorted.some((s) => s > 0);
+  return {
+    stage,
+    band: stage > 0 ? bandFor(stage) : started ? "learning" : "new",
+    known: sorted.filter((s) => s >= KNOWN_STAGE).length,
+    total: sorted.length,
+  };
+}
+
+/**
+ * What "I already know this" can do for a set of words or characters: how many
+ * it would mark, and how many are marked now and could be unmarked.
+ */
+export type MarkState = { markable: number; marked: number };
 
 /** Percentage of a set of words that has reached at least the known stage. */
 export function masteryPercent(stages: number[], total: number): number {
