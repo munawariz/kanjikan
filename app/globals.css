@@ -193,11 +193,17 @@
 
 /* A single stray wide child — a long unbroken reading, a fixed-width meter —
    otherwise scrolls the whole document sideways, which on a phone reads as the
-   layout being broken rather than as one element overflowing. */
+   layout being broken rather than as one element overflowing.
+
+   clip, not hidden: hidden on both html and body makes body a scroll
+   container that never scrolls, and position: sticky inside it then never
+   sticks — the kanji detail panel and the picking bar both relied on it.
+   hidden stays first as the fallback for a browser without clip. */
 html,
 body {
   max-width: 100%;
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Japanese has no spaces, so a long compound cannot wrap without help. */
