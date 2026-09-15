@@ -256,8 +256,12 @@ function LessonPath({ lessons, next }: { lessons: LessonSummary[]; next: string 
                           fontSize: 17,
                           lineHeight: 1,
                           color: "var(--text-heading)",
-                          borderRadius: "var(--radius-sm)",
-                          background: "var(--surface-sunken)",
+                          // Squared like the Kanji page's tiles. Their radius
+                          // on a tile this small rounds it into a pill, so it
+                          // is scaled down with the tile.
+                          border: "1px solid var(--border-subtle)",
+                          borderRadius: "calc(var(--radius-sm) / 2)",
+                          background: "var(--surface-card)",
                           boxShadow: `inset 0 -3px 0 0 ${BAND_COLOUR[lesson.bands[k]]}`,
                         }}
                       >
