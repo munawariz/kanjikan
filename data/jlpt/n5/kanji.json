@@ -78,5 +78,6 @@
   { "char": "左", "strokes": 5, "onyomi": ["サ"], "kunyomi": ["ひだり"] },
   { "char": "休", "strokes": 6, "onyomi": ["キュウ"], "kunyomi": ["やす-む"] },
   { "char": "父", "strokes": 4, "onyomi": ["フ"], "kunyomi": ["ちち"] },
-  { "char": "雨", "strokes": 8, "onyomi": ["ウ"], "kunyomi": ["あめ"] }
+  { "char": "雨", "strokes": 8, "onyomi": ["ウ"], "kunyomi": ["あめ"] },
+  { "char": "曜", "strokes": 18, "onyomi": ["ヨウ"], "kunyomi": [] }
 ]

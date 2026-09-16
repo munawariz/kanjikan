@@ -101,8 +101,8 @@
     }
   },
   "five-elements": {
-    "title": "Fire, water, wood, metal, earth",
-    "summary": "The five elements, which are also five of the seven weekdays. Learn 火水木金土 here and 火曜日 through 土曜日 come free.",
+    "title": "The elements and the days of the week",
+    "summary": "The five elements are also five of the seven weekdays. Add 曜, day of the week, and with 日 and 月 from earlier you can read all seven, 日曜日 through 土曜日.",
     "words": {
       "火|ひ": ["Fire"],
       "火曜日|かようび": ["Tuesday"],
@@ -129,7 +129,13 @@
       "土|つち": ["Earth", "Soil"],
       "土曜日|どようび": ["Saturday"],
       "土地|とち": ["Land", "Plot"],
-      "国土|こくど": ["National Territory"]
+      "国土|こくど": ["National Territory"],
+
+      "曜日|ようび": ["Day of the Week"],
+      "日曜|にちよう": ["Sunday"],
+      "月曜|げつよう": ["Monday"],
+      "金曜|きんよう": ["Friday"],
+      "土曜|どよう": ["Saturday"]
     }
   }
 }

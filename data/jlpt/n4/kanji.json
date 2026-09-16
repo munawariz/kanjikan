@@ -25,7 +25,6 @@
   { "char": "夕", "strokes": 3, "onyomi": ["セキ"], "kunyomi": ["ゆう"] },
   { "char": "夜", "strokes": 8, "onyomi": ["ヤ"], "kunyomi": ["よる", "よ"] },
   { "char": "早", "strokes": 6, "onyomi": ["ソウ", "サッ"], "kunyomi": ["はや-い", "はや-める"] },
-  { "char": "曜", "strokes": 18, "onyomi": ["ヨウ"], "kunyomi": [] },
   { "char": "週", "strokes": 11, "onyomi": ["シュウ"], "kunyomi": [] },
   { "char": "度", "strokes": 9, "onyomi": ["ド", "タク"], "kunyomi": ["たび"] },
   { "char": "代", "strokes": 5, "onyomi": ["ダイ", "タイ"], "kunyomi": ["か-わる", "か-える"] },

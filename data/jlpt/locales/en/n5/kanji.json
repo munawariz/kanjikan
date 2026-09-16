@@ -78,5 +78,6 @@
   "左": ["Left"],
   "休": ["Rest"],
   "父": ["Father"],
-  "雨": ["Rain"]
+  "雨": ["Rain"],
+  "曜": ["Day of the Week"]
 }

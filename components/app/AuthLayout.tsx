@@ -72,9 +72,9 @@ export async function AuthLayout({
 
           <div style={{ position: "relative", zIndex: 1, display: "flex", gap: 40 }}>
             {[
-              ["80", t.statKanji],
+              ["81", t.statKanji],
               ["16", t.statLessons],
-              ["380", t.statWords],
+              ["386", t.statWords],
             ].map(([value, label]) => (
               <div key={label}>
                 <div

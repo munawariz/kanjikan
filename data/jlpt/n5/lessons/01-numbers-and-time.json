@@ -113,6 +113,7 @@
       { "word": "今日", "reading": "きょう", "pos": "noun", "teaches": "日" },
       { "word": "日曜日", "reading": "にちようび", "pos": "noun", "teaches": "日" },
       { "word": "明日", "reading": "あした", "pos": "noun", "teaches": "日" },
+      { "word": "一日", "reading": "いちにち", "pos": "noun", "teaches": "日" },
 
       { "word": "月", "reading": "つき", "pos": "noun", "teaches": "月" },
       { "word": "月曜日", "reading": "げつようび", "pos": "noun", "teaches": "月" },

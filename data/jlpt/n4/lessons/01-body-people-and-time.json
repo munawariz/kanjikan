@@ -179,14 +179,8 @@
   },
   {
     "slug": "weeks-and-clocks",
-    "kanji": ["曜", "週", "度", "代", "計"],
+    "kanji": ["週", "度", "代", "計"],
     "words": [
-      { "word": "曜日", "reading": "ようび", "pos": "noun", "teaches": "曜" },
-      { "word": "日曜", "reading": "にちよう", "pos": "noun", "teaches": "曜" },
-      { "word": "月曜", "reading": "げつよう", "pos": "noun", "teaches": "曜" },
-      { "word": "金曜", "reading": "きんよう", "pos": "noun", "teaches": "曜" },
-      { "word": "土曜", "reading": "どよう", "pos": "noun", "teaches": "曜" },
-
       { "word": "週", "reading": "しゅう", "pos": "noun", "teaches": "週" },
       { "word": "週末", "reading": "しゅうまつ", "pos": "noun", "teaches": "週" },
       { "word": "先々週", "reading": "せんせんしゅう", "pos": "noun", "teaches": "週" },

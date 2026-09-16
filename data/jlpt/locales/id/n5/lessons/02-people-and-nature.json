@@ -101,8 +101,8 @@
     }
   },
   "five-elements": {
-    "title": "Api, air, kayu, logam, tanah",
-    "summary": "Lima unsur, yang juga menjadi nama lima dari tujuh hari dalam seminggu. Pelajari 火水木金土 di sini, dan 火曜日 sampai 土曜日 akan kamu dapatkan dengan sendirinya.",
+    "title": "Lima unsur dan nama hari",
+    "summary": "Lima unsur ini juga menjadi nama lima dari tujuh hari dalam seminggu. Tambahkan 曜, hari dalam seminggu, dan bersama 日 serta 月 dari pelajaran sebelumnya kamu bisa membaca ketujuhnya, 日曜日 sampai 土曜日.",
     "words": {
       "火|ひ": ["Api"],
       "火曜日|かようび": ["Hari Selasa"],
@@ -129,7 +129,13 @@
       "土|つち": ["Tanah", "Bumi"],
       "土曜日|どようび": ["Hari Sabtu"],
       "土地|とち": ["Lahan", "Sebidang Tanah"],
-      "国土|こくど": ["Wilayah Negara"]
+      "国土|こくど": ["Wilayah Negara"],
+
+      "曜日|ようび": ["Hari dalam Seminggu"],
+      "日曜|にちよう": ["Hari Minggu"],
+      "月曜|げつよう": ["Hari Senin"],
+      "金曜|きんよう": ["Hari Jumat"],
+      "土曜|どよう": ["Hari Sabtu"]
     }
   }
 }

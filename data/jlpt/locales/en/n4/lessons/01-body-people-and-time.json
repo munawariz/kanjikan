@@ -181,12 +181,6 @@
     "title": "Weeks, clocks and times",
     "summary": "度 counts both times and degrees: 一度 is once, and in a weather forecast 三十度 is thirty degrees. 代 is a stand-in, an era, or a bill — 時代 is a period of history, 電気代 is what you pay for electricity.",
     "words": {
-      "曜日|ようび": ["Day of the Week"],
-      "日曜|にちよう": ["Sunday"],
-      "月曜|げつよう": ["Monday"],
-      "金曜|きんよう": ["Friday"],
-      "土曜|どよう": ["Saturday"],
-
       "週|しゅう": ["Week"],
       "週末|しゅうまつ": ["Weekend"],
       "先々週|せんせんしゅう": ["The Week Before Last"],

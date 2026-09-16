@@ -7,8 +7,8 @@ The premise is that **words, not characters, are the unit of learning**. You mee
 something you can say, and the three kanji come along inside it. The kanji screen is a reference
 for looking a character up, not a drill.
 
-- **N5**: all 80 kanji in 16 lessons, with 380 words
-- **N4**: all 166 kanji in 33 lessons, with 873 words
+- **N5**: all 81 kanji in 16 lessons, with 386 words
+- **N4**: all 165 kanji in 33 lessons, with 868 words
 - Every kanji taught by at least four words that fix its readings
 - Spaced repetition with 8 scheduling stages, from ten minutes to three months
 - Multi-user accounts with per-lesson resume checkpoints, and lessons open to guests without one
@@ -409,7 +409,8 @@ face at the same `-0.045em` the system specifies for its own.
 
 The vocabulary was compiled for this project rather than imported from a licensed source. The JLPT
 has published no official kanji or vocabulary list since 2010, so every level here is an informed
-reconstruction. The kanji are the widely used community lists — 80 for N5, 166 for N4 — and the
+reconstruction. The kanji are the widely used community lists — 80 for N5, 166 for N4 — with one
+change: 曜 is taught in N5, because the day names that need it (月曜日, 金曜日) are N5 words. The
 words are ones consistently taught at each level, chosen so that every kanji has at least four.
 An N4 word uses only N5 kanji and N4 kanji already taught, apart from a few standard words that
 are always written with a character from a later level (部屋, 田舎).

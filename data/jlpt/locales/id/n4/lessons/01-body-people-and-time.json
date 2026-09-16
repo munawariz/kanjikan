@@ -181,12 +181,6 @@
     "title": "Minggu, jam, dan waktu",
     "summary": "度 menghitung kali sekaligus derajat: 一度 berarti sekali, dan dalam prakiraan cuaca 三十度 berarti tiga puluh derajat. 代 bisa berarti pengganti, zaman, atau tagihan — 時代 adalah suatu masa dalam sejarah, 電気代 adalah biaya yang kamu bayar untuk listrik.",
     "words": {
-      "曜日|ようび": ["Hari dalam Seminggu"],
-      "日曜|にちよう": ["Hari Minggu"],
-      "月曜|げつよう": ["Hari Senin"],
-      "金曜|きんよう": ["Hari Jumat"],
-      "土曜|どよう": ["Hari Sabtu"],
-
       "週|しゅう": ["Minggu (pekan)"],
       "週末|しゅうまつ": ["Akhir Pekan"],
       "先々週|せんせんしゅう": ["Dua Minggu yang Lalu"],

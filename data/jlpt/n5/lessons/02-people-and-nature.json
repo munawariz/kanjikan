@@ -102,7 +102,7 @@
   },
   {
     "slug": "five-elements",
-    "kanji": ["火", "水", "木", "金", "土"],
+    "kanji": ["火", "水", "木", "金", "土", "曜"],
     "words": [
       { "word": "火", "reading": "ひ", "pos": "noun", "teaches": "火" },
       { "word": "火曜日", "reading": "かようび", "pos": "noun", "teaches": "火" },
@@ -129,7 +129,13 @@
       { "word": "土", "reading": "つち", "pos": "noun", "teaches": "土" },
       { "word": "土曜日", "reading": "どようび", "pos": "noun", "teaches": "土" },
       { "word": "土地", "reading": "とち", "pos": "noun", "teaches": "土" },
-      { "word": "国土", "reading": "こくど", "pos": "noun", "teaches": "土" }
+      { "word": "国土", "reading": "こくど", "pos": "noun", "teaches": "土" },
+
+      { "word": "曜日", "reading": "ようび", "pos": "noun", "teaches": "曜" },
+      { "word": "日曜", "reading": "にちよう", "pos": "noun", "teaches": "曜" },
+      { "word": "月曜", "reading": "げつよう", "pos": "noun", "teaches": "曜" },
+      { "word": "金曜", "reading": "きんよう", "pos": "noun", "teaches": "曜" },
+      { "word": "土曜", "reading": "どよう", "pos": "noun", "teaches": "曜" }
     ]
   }
 ]
