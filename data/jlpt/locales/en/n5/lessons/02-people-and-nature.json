@@ -1,0 +1,135 @@
+{
+  "people": {
+    "title": "People",
+    "summary": "人 is the most common kanji in Japanese and the least predictable: ひと alone, にん when counting, じん for nationalities.",
+    "words": {
+      "人|ひと": ["Person"],
+      "日本人|にほんじん": ["Japanese Person"],
+      "外国人|がいこくじん": ["Foreigner"],
+      "大人|おとな": ["Adult"],
+      "何人|なんにん": ["How Many People"],
+
+      "男|おとこ": ["Man", "Male"],
+      "男の子|おとこのこ": ["Boy"],
+      "男の人|おとこのひと": ["Man"],
+      "男子|だんし": ["Boy", "Male Student"],
+      "長男|ちょうなん": ["Eldest Son"],
+
+      "女|おんな": ["Woman", "Female"],
+      "女の子|おんなのこ": ["Girl"],
+      "女の人|おんなのひと": ["Woman"],
+      "女子|じょし": ["Girl", "Female Student"],
+      "少女|しょうじょ": ["Young Girl"],
+
+      "子|こ": ["Child"],
+      "子ども|こども": ["Child"],
+      "帽子|ぼうし": ["Hat", "Cap"],
+      "椅子|いす": ["Chair"],
+      "息子|むすこ": ["Son"],
+
+      "名前|なまえ": ["Name"],
+      "有名|ゆうめい": ["Famous"],
+      "名字|みょうじ": ["Surname"],
+      "名人|めいじん": ["Expert", "Master"],
+      "地名|ちめい": ["Place Name"]
+    }
+  },
+  "family-and-teachers": {
+    "title": "Family and teachers",
+    "summary": "生 is the widest-ranging kanji at this level — life, birth, raw, and student. Meet it in four compounds and the range stops feeling random.",
+    "words": {
+      "父|ちち": ["My Father"],
+      "お父さん|おとうさん": ["Father (polite)"],
+      "父親|ちちおや": ["Father"],
+      "父母|ふぼ": ["Father and Mother", "Parents"],
+
+      "母|はは": ["My Mother"],
+      "お母さん|おかあさん": ["Mother (polite)"],
+      "母親|ははおや": ["Mother"],
+      "母国|ぼこく": ["Home Country"],
+      "母の日|ははのひ": ["Mother's Day"],
+
+      "友だち|ともだち": ["Friend"],
+      "友|とも": ["Friend"],
+      "友人|ゆうじん": ["Friend"],
+      "親友|しんゆう": ["Close Friend"],
+
+      "先生|せんせい": ["Teacher", "Doctor"],
+      "先|さき": ["Ahead", "The Tip", "Earlier"],
+      "先週|せんしゅう": ["Last Week"],
+      "先日|せんじつ": ["The Other Day"],
+      "先に|さきに": ["Beforehand", "First"],
+
+      "学生|がくせい": ["Student"],
+      "生まれる|うまれる": ["To Be Born"],
+      "生きる|いきる": ["To Live"],
+      "生|なま": ["Raw", "Fresh"],
+      "生活|せいかつ": ["Daily Life"]
+    }
+  },
+  "weather-and-land": {
+    "title": "Weather and land",
+    "summary": "気 almost never stands alone, but it turns up everywhere — weather, health, mood, electricity. Learn it through its compounds.",
+    "words": {
+      "天気|てんき": ["Weather"],
+      "天|てん": ["Heaven", "Sky"],
+      "天国|てんごく": ["Heaven", "Paradise"],
+      "雨天|うてん": ["Rainy Weather"],
+
+      "元気|げんき": ["Healthy", "Energetic"],
+      "病気|びょうき": ["Illness"],
+      "気持ち|きもち": ["Feeling", "Mood"],
+      "空気|くうき": ["Air", "Atmosphere"],
+      "人気|にんき": ["Popularity"],
+
+      "雨|あめ": ["Rain"],
+      "大雨|おおあめ": ["Heavy Rain"],
+      "小雨|こさめ": ["Light Rain", "Drizzle"],
+      "雨水|あまみず": ["Rainwater"],
+
+      "山|やま": ["Mountain"],
+      "火山|かざん": ["Volcano"],
+      "富士山|ふじさん": ["Mount Fuji"],
+      "山道|やまみち": ["Mountain Path"],
+      "登山|とざん": ["Mountain Climbing"],
+
+      "川|かわ": ["River"],
+      "小川|おがわ": ["Stream", "Brook"],
+      "川上|かわかみ": ["Upstream"],
+      "川下|かわしも": ["Downstream"],
+      "河川|かせん": ["Rivers"]
+    }
+  },
+  "five-elements": {
+    "title": "Fire, water, wood, metal, earth",
+    "summary": "The five elements, which are also five of the seven weekdays. Learn 火水木金土 here and 火曜日 through 土曜日 come free.",
+    "words": {
+      "火|ひ": ["Fire"],
+      "火曜日|かようび": ["Tuesday"],
+      "花火|はなび": ["Fireworks"],
+      "火事|かじ": ["A Fire", "Blaze"],
+
+      "水|みず": ["Water"],
+      "水曜日|すいようび": ["Wednesday"],
+      "水泳|すいえい": ["Swimming"],
+      "お水|おみず": ["Water (polite)"],
+      "水道|すいどう": ["Water Supply", "Tap Water"],
+
+      "木|き": ["Tree", "Wood"],
+      "木曜日|もくようび": ["Thursday"],
+      "大木|たいぼく": ["Large Tree"],
+      "木々|きぎ": ["Trees"],
+
+      "金|かね": ["Money", "Metal"],
+      "金曜日|きんようび": ["Friday"],
+      "お金|おかね": ["Money"],
+      "料金|りょうきん": ["Fee", "Charge"],
+      "金魚|きんぎょ": ["Goldfish"],
+
+      "土|つち": ["Earth", "Soil"],
+      "土曜日|どようび": ["Saturday"],
+      "土地|とち": ["Land", "Plot"],
+      "国土|こくど": ["National Territory"]
+    }
+  }
+}

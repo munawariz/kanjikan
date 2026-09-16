@@ -1,0 +1,300 @@
+{
+  "buying-and-lending": {
+    "title": "Membeli, menjual, meminjamkan",
+    "summary": "貸す dan 借りる sama-sama diawali か dan mudah tertukar: 貸す berarti meminjamkan sesuatu kepada orang lain, 借りる berarti meminjam sesuatu dari orang lain. 売 dan 買 punya cara baca on yang sama, ばい, sehingga 売買, jual beli, dibaca ばいばい.",
+    "words": {
+      "売る|うる": ["Menjual"],
+      "売れる|うれる": ["Laku", "Terjual"],
+      "売り場|うりば": ["Tempat Penjualan", "Konter"],
+      "売店|ばいてん": ["Kios", "Lapak"],
+      "売り手|うりて": ["Penjual"],
+      "商売|しょうばい": ["Bisnis", "Perdagangan"],
+
+      "買う|かう": ["Membeli"],
+      "買い手|かいて": ["Pembeli"],
+      "売買|ばいばい": ["Jual Beli"],
+      "買い出し|かいだし": ["Belanja Kebutuhan"],
+      "お買い上げ|おかいあげ": ["Pembelian (sopan)"],
+
+      "貸す|かす": ["Meminjamkan", "Menyewakan"],
+      "貸し出し|かしだし": ["Peminjaman", "Pinjaman"],
+      "貸し借り|かしかり": ["Pinjam-Meminjam"],
+      "貸家|かしや": ["Rumah yang Disewakan"],
+      "賃貸|ちんたい": ["Sewa", "Penyewaan"],
+
+      "借りる|かりる": ["Meminjam", "Menyewa"],
+      "借金|しゃっきん": ["Utang", "Pinjaman"],
+      "借家|しゃくや": ["Rumah Sewaan"],
+      "借り手|かりて": ["Peminjam", "Penyewa"],
+      "前借り|まえがり": ["Kasbon (uang muka gaji)"],
+
+      "銀|ぎん": ["Perak"],
+      "銀色|ぎんいろ": ["Warna Perak"],
+      "銀行員|ぎんこういん": ["Pegawai Bank", "Petugas Bank"],
+      "銀メダル|ぎんメダル": ["Medali Perak"],
+      "水銀|すいぎん": ["Air Raksa"]
+    }
+  },
+  "clothes-and-things": {
+    "title": "Pakaian dan barang",
+    "summary": "物 punya tiga cara baca: もの jika berdiri sendiri dan dalam kata asli Jepang seperti 食べ物, ぶつ dalam kata gabungan seperti 名物, dan もつ dalam beberapa kata, terutama 荷物, barang bawaan. 着 berarti memakai sekaligus tiba — 着る dan 着く.",
+    "words": {
+      "服|ふく": ["Pakaian"],
+      "制服|せいふく": ["Seragam"],
+      "私服|しふく": ["Pakaian Biasa", "Pakaian Sendiri (bukan seragam)"],
+      "夏服|なつふく": ["Pakaian Musim Panas"],
+      "一服|いっぷく": ["Istirahat Sejenak", "Satu Dosis"],
+
+      "着る|きる": ["Memakai", "Mengenakan (pakaian)"],
+      "着く|つく": ["Tiba"],
+      "着物|きもの": ["Kimono"],
+      "下着|したぎ": ["Pakaian Dalam"],
+      "水着|みずぎ": ["Baju Renang"],
+      "到着|とうちゃく": ["Kedatangan"],
+
+      "洋服|ようふく": ["Pakaian Barat", "Pakaian"],
+      "洋食|ようしょく": ["Makanan Barat"],
+      "洋室|ようしつ": ["Kamar Bergaya Barat"],
+      "洋風|ようふう": ["Gaya Barat"],
+      "東洋|とうよう": ["Dunia Timur", "Kawasan Timur"],
+      "太平洋|たいへいよう": ["Samudra Pasifik"],
+
+      "物|もの": ["Benda", "Barang"],
+      "買い物|かいもの": ["Belanja"],
+      "食べ物|たべもの": ["Makanan"],
+      "飲み物|のみもの": ["Minuman"],
+      "建物|たてもの": ["Bangunan"],
+      "荷物|にもつ": ["Barang Bawaan", "Bagasi"],
+      "名物|めいぶつ": ["Produk Khas Daerah", "Produk Terkenal"],
+
+      "品物|しなもの": ["Barang-Barang", "Barang"],
+      "食品|しょくひん": ["Produk Makanan", "Bahan Pangan"],
+      "商品|しょうひん": ["Produk", "Barang Dagangan"],
+      "上品|じょうひん": ["Elegan", "Anggun"],
+      "下品|げひん": ["Vulgar", "Kasar"],
+      "手品|てじな": ["Trik Sulap", "Sulap"]
+    }
+  },
+  "using-and-making": {
+    "title": "Memakai dan membuat",
+    "summary": "切る, memotong, dan 着る, memakai, sama-sama dibaca きる, tetapi 切る termasuk godan dan 着る ichidan: 切って, 着て. 方 dibaca ほう untuk arah atau sisi, dan かた untuk orang atau cara melakukan sesuatu (使い方).",
+    "words": {
+      "使う|つかう": ["Menggunakan"],
+      "使い方|つかいかた": ["Cara Menggunakan", "Cara Pakai"],
+      "大使|たいし": ["Duta Besar"],
+      "大使館|たいしかん": ["Kedutaan Besar"],
+      "天使|てんし": ["Malaikat"],
+
+      "用|よう": ["Urusan", "Sesuatu yang Harus Dikerjakan"],
+      "用事|ようじ": ["Keperluan", "Hal yang Harus Dilakukan"],
+      "用意|ようい": ["Persiapan", "Bersiap-Siap"],
+      "使用|しよう": ["Penggunaan", "Pemakaian"],
+      "利用|りよう": ["Pemanfaatan", "Memanfaatkan"],
+      "日用品|にちようひん": ["Kebutuhan Sehari-Hari"],
+
+      "作る|つくる": ["Membuat"],
+      "作り方|つくりかた": ["Cara Membuat", "Resep"],
+      "手作り|てづくり": ["Buatan Tangan", "Buatan Sendiri"],
+      "作品|さくひん": ["Karya (seni)", "Hasil Karya"],
+      "作家|さっか": ["Penulis", "Pengarang"],
+      "作物|さくもつ": ["Hasil Panen"],
+
+      "方|かた": ["Orang (sopan)"],
+      "方|ほう": ["Arah", "Sisi"],
+      "夕方|ゆうがた": ["Petang"],
+      "地方|ちほう": ["Wilayah", "Daerah"],
+      "方法|ほうほう": ["Metode", "Cara"],
+      "仕方がない|しかたがない": ["Apa Boleh Buat"],
+
+      "切る|きる": ["Memotong"],
+      "切れる|きれる": ["Terpotong", "Habis", "Putus"],
+      "切手|きって": ["Perangko"],
+      "切符|きっぷ": ["Tiket"],
+      "親切|しんせつ": ["Baik Hati", "Kebaikan Hati"],
+      "売り切れ|うりきれ": ["Terjual Habis"]
+    }
+  },
+  "health": {
+    "title": "Kesehatan dan rumah sakit",
+    "summary": "元気 dan 病気 sudah menjadi kata N5. 元 dibaca もと jika berdiri sendiri, げん dalam 元気, dan がん dalam 元日; 死ぬ adalah satu-satunya kata kerja sehari-hari yang berakhiran ぬ, jadi hanya kata inilah yang memperlihatkan konjugasi itu — 死んで, 死んだ.",
+    "words": {
+      "元|もと": ["Asal", "Sumber", "Mantan"],
+      "地元|じもと": ["Daerah Setempat", "Kampung Halaman"],
+      "足元|あしもと": ["Di Bawah Kaki", "Pijakan"],
+      "元々|もともと": ["Aslinya", "Sejak Semula"],
+      "元日|がんじつ": ["Hari Tahun Baru (1 Januari)"],
+
+      "医者|いしゃ": ["Dokter"],
+      "歯医者|はいしゃ": ["Dokter Gigi"],
+      "医学|いがく": ["Ilmu Kedokteran", "Kedokteran"],
+      "名医|めいい": ["Dokter Andal"],
+      "医大|いだい": ["Sekolah Kedokteran", "Universitas Kedokteran"],
+
+      "病院|びょういん": ["Rumah Sakit"],
+      "病人|びょうにん": ["Orang Sakit", "Pasien"],
+      "病室|びょうしつ": ["Kamar Rawat", "Bangsal"],
+      "看病|かんびょう": ["Merawat Orang Sakit", "Perawatan"],
+      "病名|びょうめい": ["Nama Penyakit", "Diagnosis"],
+
+      "入院|にゅういん": ["Rawat Inap", "Masuk Rumah Sakit"],
+      "退院|たいいん": ["Keluar dari Rumah Sakit", "Pulang dari Rumah Sakit"],
+      "大学院|だいがくいん": ["Pascasarjana", "Sekolah Pascasarjana"],
+      "院長|いんちょう": ["Direktur Rumah Sakit", "Kepala Lembaga"],
+      "医院|いいん": ["Klinik", "Tempat Praktik Dokter"],
+
+      "死ぬ|しぬ": ["Mati"],
+      "死|し": ["Kematian"],
+      "死者|ししゃ": ["Orang yang Meninggal", "Korban Tewas"],
+      "病死|びょうし": ["Meninggal Karena Sakit"],
+      "必死|ひっし": ["Mati-Matian", "Sekuat Tenaga"]
+    }
+  },
+  "running-and-stopping": {
+    "title": "Berlari dan berhenti",
+    "summary": "走る tampak seperti kata kerja ichidan, tetapi sebenarnya godan: 走って, bukan 走て. 起 menghasilkan tiga kata kerja yang perlu dibedakan — 起きる berarti kamu bangun, 起こす berarti kamu membangunkan seseorang atau menyebabkan sesuatu, 起こる berarti sesuatu terjadi.",
+    "words": {
+      "走る|はしる": ["Berlari"],
+      "走り出す|はしりだす": ["Mulai Berlari", "Tiba-Tiba Berlari"],
+      "小走り|こばしり": ["Berlari Kecil", "Lari-Lari Kecil"],
+      "走者|そうしゃ": ["Pelari"],
+      "競走|きょうそう": ["Lomba Lari", "Balapan"],
+
+      "歩く|あるく": ["Berjalan"],
+      "散歩|さんぽ": ["Jalan-Jalan", "Berjalan Santai"],
+      "歩道|ほどう": ["Trotoar", "Jalur Pejalan Kaki"],
+      "一歩|いっぽ": ["Satu Langkah", "Selangkah"],
+      "歩行者|ほこうしゃ": ["Pejalan Kaki"],
+
+      "止まる|とまる": ["Berhenti", "Terhenti"],
+      "止める|とめる": ["Menghentikan", "Memarkir"],
+      "止む|やむ": ["Reda (hujan)", "Berhenti"],
+      "中止|ちゅうし": ["Pembatalan", "Dibatalkan"],
+      "禁止|きんし": ["Larangan", "Dilarang"],
+      "行き止まり|いきどまり": ["Jalan Buntu"],
+
+      "起きる|おきる": ["Bangun", "Terbangun"],
+      "起こす|おこす": ["Membangunkan (seseorang)", "Menyebabkan"],
+      "起こる|おこる": ["Terjadi", "Timbul"],
+      "早起き|はやおき": ["Bangun Pagi", "Orang yang Bangun Pagi"],
+      "起立|きりつ": ["Berdiri", "Berdiri! (aba-aba)"],
+
+      "急ぐ|いそぐ": ["Bergegas"],
+      "急に|きゅうに": ["Tiba-Tiba"],
+      "急用|きゅうよう": ["Urusan Mendesak"],
+      "救急車|きゅうきゅうしゃ": ["Ambulans"],
+      "大急ぎ|おおいそぎ": ["Sangat Terburu-Buru", "Tergesa-Gesa"]
+    }
+  },
+  "going-back-and-sending": {
+    "title": "Pulang, mengirim, membawa",
+    "summary": "Seperti 走る, 帰る termasuk godan meski bentuknya menipu: 帰って, bukan 帰て. 通る berarti melewati suatu tempat; 通う berarti pergi ke suatu tempat berulang kali — ke sekolah, ke kantor, ke dokter gigi.",
+    "words": {
+      "帰る|かえる": ["Pulang", "Kembali"],
+      "帰り道|かえりみち": ["Jalan Pulang"],
+      "日帰り|ひがえり": ["Perjalanan Sehari"],
+      "帰宅|きたく": ["Pulang ke Rumah", "Tiba di Rumah"],
+      "お帰りなさい|おかえりなさい": ["Selamat Datang di Rumah"],
+      "お持ち帰り|おもちかえり": ["Bungkus (dibawa pulang)", "Dibawa Pulang"],
+
+      "去る|さる": ["Meninggalkan", "Berlalu"],
+      "過去|かこ": ["Masa Lalu"],
+      "立ち去る|たちさる": ["Beranjak Pergi", "Meninggalkan (tempat)"],
+      "走り去る|はしりさる": ["Berlari Menjauh"],
+      "死去|しきょ": ["Wafat", "Kematian (formal)"],
+
+      "送る|おくる": ["Mengirim", "Mengantar"],
+      "見送る|みおくる": ["Mengantar Kepergian", "Melewatkan"],
+      "送料|そうりょう": ["Ongkos Kirim", "Biaya Pengiriman"],
+      "送金|そうきん": ["Pengiriman Uang", "Transfer Uang"],
+      "放送|ほうそう": ["Siaran", "Penyiaran"],
+
+      "通る|とおる": ["Melewati", "Menyusuri"],
+      "通う|かよう": ["Pulang-Pergi (rutin)", "Rutin Mendatangi"],
+      "大通り|おおどおり": ["Jalan Utama", "Jalan Raya"],
+      "普通|ふつう": ["Biasa", "Umum", "Kereta Lokal"],
+      "通学|つうがく": ["Pergi ke Sekolah", "Pulang-Pergi Sekolah"],
+      "通行止め|つうこうどめ": ["Jalan Ditutup", "Dilarang Melintas"],
+
+      "持つ|もつ": ["Memegang", "Memiliki", "Membawa"],
+      "持って行く|もっていく": ["Membawa Pergi", "Membawa Serta"],
+      "持って来る|もってくる": ["Membawa ke Sini"],
+      "金持ち|かねもち": ["Orang Kaya"],
+      "持ち物|もちもの": ["Barang Milik", "Barang Pribadi"],
+      "持参|じさん": ["Membawa Sendiri", "Dibawa Serta"]
+    }
+  },
+  "power-and-motion": {
+    "title": "Tenaga dan gerak",
+    "summary": "発 dibaca はつ, tetapi menyusut menjadi はっ sebelum bunyi k, s, atau h — 発見 はっけん, 発車 はっしゃ, 発表 はっぴょう — dan setelah 出 berubah menjadi ぱつ: 出発, しゅっぱつ. 力 dibaca ちから jika berdiri sendiri, りょく dalam kebanyakan kata gabungan, dan りき dalam beberapa kata, seperti 人力車.",
+    "words": {
+      "力|ちから": ["Tenaga", "Kekuatan"],
+      "努力|どりょく": ["Usaha Keras"],
+      "体力|たいりょく": ["Stamina", "Kekuatan Fisik"],
+      "電力|でんりょく": ["Tenaga Listrik"],
+      "力持ち|ちからもち": ["Orang Kuat"],
+      "人力車|じんりきしゃ": ["Angkong (kereta yang ditarik orang)"],
+
+      "動く|うごく": ["Bergerak"],
+      "動かす|うごかす": ["Menggerakkan", "Mengoperasikan"],
+      "動物|どうぶつ": ["Hewan"],
+      "動物園|どうぶつえん": ["Kebun Binatang"],
+      "自動|じどう": ["Otomatis"],
+      "行動|こうどう": ["Tindakan", "Perilaku"],
+
+      "運ぶ|はこぶ": ["Mengangkut", "Memindahkan"],
+      "運|うん": ["Keberuntungan", "Nasib"],
+      "運動|うんどう": ["Olahraga", "Aktivitas Fisik"],
+      "運動会|うんどうかい": ["Hari Olahraga", "Pekan Olahraga Sekolah"],
+      "運転|うんてん": ["Mengemudi", "Mengoperasikan (mesin)"],
+
+      "転ぶ|ころぶ": ["Jatuh", "Terguling"],
+      "転がる|ころがる": ["Menggelinding", "Berguling-Guling"],
+      "運転手|うんてんしゅ": ["Sopir", "Pengemudi"],
+      "転校|てんこう": ["Pindah Sekolah"],
+      "回転|かいてん": ["Putaran", "Perputaran"],
+
+      "出発|しゅっぱつ": ["Keberangkatan"],
+      "発見|はっけん": ["Penemuan"],
+      "発表|はっぴょう": ["Pengumuman", "Presentasi"],
+      "発売|はつばい": ["Peluncuran", "Mulai Dijual"],
+      "発車|はっしゃ": ["Keberangkatan Kereta atau Bus", "Mulai Berangkat"],
+      "発生|はっせい": ["Terjadinya", "Mewabahnya"]
+    }
+  },
+  "starting-and-finishing": {
+    "title": "Memulai, menunggu, menyelesaikan",
+    "summary": "Ada tiga pasang kata kerja dalam satu pelajaran: 始まる dan 始める, 集まる dan 集める, 開く dan 開ける. Pada setiap pasangan, yang pertama terjadi dengan sendirinya dan yang kedua dilakukan oleh seseorang; 始発 dan 終電, kereta pertama dan terakhir, mengapit setiap malam kamu bersenang-senang di luar.",
+    "words": {
+      "始まる|はじまる": ["Dimulai"],
+      "始める|はじめる": ["Memulai (sesuatu)"],
+      "開始|かいし": ["Permulaan", "Pembukaan"],
+      "始発|しはつ": ["Kereta Pertama", "Layanan Pertama Hari Itu"],
+      "年始|ねんし": ["Awal Tahun", "Libur Tahun Baru"],
+
+      "終わる|おわる": ["Berakhir", "Selesai"],
+      "終える|おえる": ["Menyelesaikan (sesuatu)"],
+      "終わり|おわり": ["Akhir"],
+      "終電|しゅうでん": ["Kereta Terakhir"],
+      "終点|しゅうてん": ["Pemberhentian Terakhir", "Terminal"],
+
+      "開ける|あける": ["Membuka (sesuatu)"],
+      "開く|あく": ["Terbuka"],
+      "開く|ひらく": ["Membuka", "Mengadakan (acara)"],
+      "開店|かいてん": ["Pembukaan Toko", "Buka Usaha"],
+      "開発|かいはつ": ["Pengembangan"],
+      "満開|まんかい": ["Mekar Penuh"],
+
+      "待つ|まつ": ["Menunggu"],
+      "お待ちください|おまちください": ["Mohon Tunggu"],
+      "お待たせしました|おまたせしました": ["Maaf Telah Membuat Anda Menunggu"],
+      "待ち時間|まちじかん": ["Waktu Tunggu"],
+      "招待|しょうたい": ["Undangan"],
+
+      "集まる|あつまる": ["Berkumpul", "Berhimpun"],
+      "集める|あつめる": ["Mengumpulkan", "Menghimpun (sesuatu)"],
+      "集まり|あつまり": ["Kumpul-Kumpul", "Pertemuan"],
+      "集中|しゅうちゅう": ["Konsentrasi", "Fokus"],
+      "集合|しゅうごう": ["Kumpul Bersama", "Bertemu di Titik Kumpul"]
+    }
+  }
+}

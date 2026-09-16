@@ -14,7 +14,6 @@ import {
   buildPracticeQueue,
   buildReviewQueue,
   cardChar,
-  PROMPT,
   type KanjiGloss,
   type PracticeType,
   type StudyCard,
@@ -22,11 +21,14 @@ import {
 import { KanjiAnatomy } from "./KanjiAnatomy";
 import { StrokeDiagram } from "./StrokeDiagram";
 import { WritingPad } from "./WritingPad";
+import { useT } from "@/lib/i18n/client";
+import { isLocale } from "@/lib/i18n/config";
+import { messages } from "@/lib/i18n/messages";
 
 type Mode = "lesson" | "review" | "practice";
 
 /**
- * The writing score below which practice will not take "I Got It". Well under
+ * The writing score below which practice will not take Next. Well under
  * the check's own pass mark, since the check can be wrong: this only stops a
  * scribble, or a blank pad, being counted as written.
  */
@@ -88,6 +90,9 @@ type Props = {
  * every write is in. It never rejects.
  */
 export function post(url: string, body: unknown, onFail?: (detail: string) => void): Promise<boolean> {
+  // A plain function, not a hook, so the language comes from <html lang>.
+  const lang = typeof document === "undefined" ? undefined : document.documentElement.lang;
+  const t = messages[isLocale(lang) ? lang : "en"].study.save;
   return fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -98,12 +103,12 @@ export function post(url: string, body: unknown, onFail?: (detail: string) => vo
       if (res.ok) return true;
       const text = await res.text().catch(() => "");
       console.error(`[kanjikan] POST ${url} -> ${res.status} ${text}`);
-      onFail?.(res.status === 401 ? "Your session expired. Sign in again." : "Could not reach the database.");
+      onFail?.(res.status === 401 ? t.sessionExpired : t.database);
       return false;
     })
     .catch((e) => {
       console.error(`[kanjikan] POST ${url} failed`, e);
-      onFail?.("Could not reach the server.");
+      onFail?.(t.network);
       return false;
     });
 }
@@ -155,6 +160,7 @@ export function StudySession({
   lessonLength,
 }: Props) {
   const router = useRouter();
+  const t = useT();
   const practice = mode === "practice";
   const [started, setStarted] = useState(!reviewsWaiting);
   /** Only a signed-in lesson offers "I already know this": it is where things are taught. */
@@ -426,6 +432,12 @@ export function StudySession({
     [grade, advanceIn, queue, correctCount, answered],
   );
 
+  /**
+   * Retry on the writing pad: recorded as a miss straight away, so closing the
+   * tab mid-retry keeps it, and not graded again when the learner moves on.
+   */
+  const missWriting = useCallback(() => grade(false), [grade]);
+
   // Number keys pick an option, Enter or Space moves on. Study screens live or
   // die on not needing the mouse. The writing pad is exempt: it wants the
   // pointer, and Space there would skip past the character being drawn.
@@ -502,9 +514,7 @@ export function StudySession({
     return (
       <Card tone="cream" pad="lg">
         <p style={{ margin: 0 }}>
-          {mode === "lesson"
-            ? "Everything in this lesson is marked as known, so there is nothing left to study here."
-            : "Nothing to study here right now."}
+          {mode === "lesson" ? t.study.nothingLeftLesson : t.study.nothingLeft}
         </p>
       </Card>
     );
@@ -531,7 +541,7 @@ export function StudySession({
         <div className="row" style={{ justifyContent: "space-between", gap: 16 }}>
           <span className="eyebrow">
             {lessonTitle}
-            {cursorOffset > 0 && ` · resumed at kanji ${cursorOffset + 1}`}
+            {cursorOffset > 0 && t.study.resumedAt(cursorOffset + 1)}
           </span>
           <div className="row" style={{ gap: 10 }}>
             {hasWriting && (
@@ -540,15 +550,15 @@ export function StudySession({
                 pressed={hints}
                 applies={card.kind === "kanji-write"}
                 icon={hints ? "lightbulb" : "lightbulb-off"}
-                label={hints ? "Turn off writing hints" : "Turn on writing hints"}
+                label={hints ? t.study.hints.turnOff : t.study.hints.turnOn}
                 title={
                   card.kind === "kanji-write"
                     ? hints
-                      ? "Turn off hints (H)"
-                      : "Hint each stroke as you write it (H)"
+                      ? t.study.hints.offTitle
+                      : t.study.hints.onTitle
                     : hints
-                      ? "No writing on this card. Hints stay on for the next one."
-                      : "No writing on this card. Hints stay off for the next one."
+                      ? t.study.hints.naOn
+                      : t.study.hints.naOff
                 }
               />
             )}
@@ -557,15 +567,15 @@ export function StudySession({
               pressed={!showFurigana}
               applies={cardHasReading}
               icon={showFurigana ? "eye" : "eye-off"}
-              label={showFurigana ? "Hide the reading" : "Show the reading"}
+              label={showFurigana ? t.study.furigana.hide : t.study.furigana.show}
               title={
                 cardHasReading
                   ? showFurigana
-                    ? "Hide the reading (F)"
-                    : "Show the reading (F)"
+                    ? t.study.furigana.hideTitle
+                    : t.study.furigana.showTitle
                   : showFurigana
-                    ? "No reading on this card. Readings stay on for the next word."
-                    : "No reading on this card. Readings stay hidden for the next word."
+                    ? t.study.furigana.naShown
+                    : t.study.furigana.naHidden
               }
             />
             <span className="eyebrow" style={{ color: "var(--text-body)" }}>
@@ -603,6 +613,8 @@ export function StudySession({
             level={card.kanji.level}
             hints={hints}
             onGrade={gradeWriting}
+            onMiss={missWriting}
+            onContinue={advance}
             onKnown={canMark ? () => knowWriting(card.kanji) : undefined}
             minScore={practice ? PRACTICE_MIN_WRITING_SCORE : undefined}
           />
@@ -675,6 +687,7 @@ function SessionToggle({
 }
 
 export function SaveWarning({ detail }: { detail: string }) {
+  const t = useT().study.save;
   return (
     <div
       role="alert"
@@ -691,8 +704,7 @@ export function SaveWarning({ detail }: { detail: string }) {
     >
       <Icon name="circle" size={16} color="var(--negative-600)" />
       <span>
-        <strong>Progress is not being saved.</strong> {detail} You can keep going, but this session
-        will not be recorded.
+        <strong>{t.notSaved}</strong> {detail} {t.after}
       </span>
     </div>
   );
@@ -705,13 +717,14 @@ export function SaveWarning({ detail }: { detail: string }) {
  * anyway is one click.
  */
 function ReviewFirst({ waiting, title, onStart }: { waiting: number; title: string; onStart: () => void }) {
+  const t = useT().study.reviewFirst;
   return (
     <Card tone="cream" pad="lg" radius="lg">
       <div className="stack" style={{ gap: 20 }}>
         <div className="row" style={{ gap: 10 }}>
           <Sparkle size={16} color="var(--on-tint-heading)" />
           <span className="eyebrow" style={{ color: "var(--on-tint-heading)" }}>
-            Before you start {title}
+            {t.eyebrow(title)}
           </span>
         </div>
         <h1
@@ -722,28 +735,27 @@ function ReviewFirst({ waiting, title, onStart }: { waiting: number; title: stri
             lineHeight: "var(--leading-display)",
           }}
         >
-          You have {waiting} {waiting === 1 ? "review" : "reviews"} waiting.
+          {t.heading(waiting)}
         </h1>
         <p style={{ margin: 0, color: "var(--on-tint-body)", maxWidth: 460 }}>
-          Reviewing first helps the new lesson stick: new kanji build on the ones you have already
-          met. Nothing is locked, so you can start the lesson anyway.
+          {t.body}
         </p>
         <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
           <Link href="/review" className="reset-link">
             <Button variant="primary" size="lg" icon="zap" iconPosition="left">
-              Review First
+              {t.reviewFirst}
             </Button>
           </Link>
           <Button variant="outline" size="lg" icon="chevron-right" onClick={onStart}>
-            Start Anyway
+            {t.startAnyway}
           </Button>
         </div>
         <p className="body-sm" style={{ margin: 0, color: "var(--on-tint-body)" }}>
-          You can change when this appears, or turn it off, in{" "}
+          {t.settingsBefore}{" "}
           <Link href="/settings" style={{ color: "var(--on-tint-heading)" }}>
-            Settings
+            {t.settingsLink}
           </Link>
-          .
+          {t.settingsAfter}
         </p>
       </div>
     </Card>
@@ -758,33 +770,35 @@ function ReviewFirst({ waiting, title, onStart }: { waiting: number; title: stri
  * It is the quieter of the two, so the lesson's own path stays the default.
  */
 function TeachActions({ onNext, onKnown, knownTitle }: { onNext: () => void; onKnown?: () => void; knownTitle: string }) {
+  const t = useT().study;
   if (!onKnown) {
     return (
       <Button variant="primary" size="lg" fullWidth onClick={onNext} icon="chevron-right">
-        Got It
+        {t.gotIt}
       </Button>
     );
   }
   return (
     <div className="row" style={{ gap: 12 }}>
       <Button variant="outline" size="lg" fullWidth onClick={onKnown} title={knownTitle}>
-        Already Know It
+        {t.alreadyKnow}
       </Button>
       <Button variant="primary" size="lg" fullWidth onClick={onNext} icon="chevron-right">
-        Got It
+        {t.gotIt}
       </Button>
     </div>
   );
 }
 
 function KanjiTeachCard({ kanji, onNext, onKnown }: { kanji: Kanji; onNext: () => void; onKnown?: () => void }) {
+  const t = useT().study;
   return (
     <Card tone="white" pad="lg" elevation="md" radius="lg">
       <div className="stack" style={{ gap: 24 }}>
         <div className="row" style={{ gap: 10 }}>
           <Sparkle size={16} color="var(--accent)" />
           <span className="eyebrow" style={{ color: "var(--text-brand)" }}>
-            New kanji
+            {t.newKanji}
           </span>
         </div>
 
@@ -803,8 +817,8 @@ function KanjiTeachCard({ kanji, onNext, onKnown }: { kanji: Kanji; onNext: () =
 
             <div className="stack" style={{ gap: 10 }}>
               {[
-                ["On", kanji.onyomi],
-                ["Kun", kanji.kunyomi],
+                [t.on, kanji.onyomi],
+                [t.kun, kanji.kunyomi],
               ].map(([label, readings]) => (
                 <div key={label as string} className="row" style={{ gap: 14, alignItems: "baseline" }}>
                   <span className="eyebrow" style={{ width: 34 }}>
@@ -818,7 +832,7 @@ function KanjiTeachCard({ kanji, onNext, onKnown }: { kanji: Kanji; onNext: () =
             </div>
 
             <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-              <Badge tone="sage">{kanji.strokes} strokes</Badge>
+              <Badge tone="sage">{t.strokes(kanji.strokes)}</Badge>
             </div>
           </div>
         </div>
@@ -830,7 +844,7 @@ function KanjiTeachCard({ kanji, onNext, onKnown }: { kanji: Kanji; onNext: () =
         <TeachActions
           onNext={onNext}
           onKnown={onKnown}
-          knownTitle={`Mark the words for ${kanji.char} as known and skip them`}
+          knownTitle={t.knownKanjiTitle(kanji.char)}
         />
       </div>
     </Card>
@@ -838,11 +852,12 @@ function KanjiTeachCard({ kanji, onNext, onKnown }: { kanji: Kanji; onNext: () =
 }
 
 function WordTeachCard({ word, onNext, onKnown }: { word: Word; onNext: () => void; onKnown?: () => void }) {
+  const { study: t, common: { pos } } = useT();
   return (
     <Card tone="white" pad="lg" elevation="md" radius="lg">
       <div className="stack" style={{ gap: 22 }}>
         <span className="eyebrow">
-          {word.teaches} in a word
+          {t.inAWord(word.teaches)}
         </span>
 
         <div className="stack" style={{ gap: 8 }}>
@@ -863,14 +878,14 @@ function WordTeachCard({ word, onNext, onKnown }: { word: Word; onNext: () => vo
             {word.meanings.join(", ")}
           </div>
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-            <Badge tone="sage">{word.pos}</Badge>
+            <Badge tone="sage">{pos[word.pos] ?? word.pos}</Badge>
           </div>
         </div>
 
         <TeachActions
           onNext={onNext}
           onKnown={onKnown}
-          knownTitle={`Mark ${word.word} as known and skip its questions`}
+          knownTitle={t.knownWordTitle(word.word)}
         />
       </div>
     </Card>
@@ -892,6 +907,7 @@ export function QuizCard({
   isLast: boolean;
   showFurigana: boolean;
 }) {
+  const t = useT().study;
   const wasRight = picked === card.answerId;
   const isKanji = card.kind === "kanji-meaning";
 
@@ -929,7 +945,7 @@ export function QuizCard({
     <div className="stack" style={{ gap: 20 }}>
       <Card tone="cream" pad="lg" radius="lg">
         <div className="stack" style={{ gap: 16, alignItems: "center", textAlign: "center" }}>
-          <span className="eyebrow">{PROMPT[card.kind]}</span>
+          <span className="eyebrow">{t.prompt[card.kind]}</span>
           <div
             className={promptIsJapanese ? "jp-display" : undefined}
             style={{
@@ -1052,7 +1068,7 @@ export function QuizCard({
                     color: wasRight ? "var(--text-on-accent)" : "var(--text-heading)",
                   }}
                 >
-                  {wasRight ? "Correct" : "Not quite"}
+                  {wasRight ? t.correct : t.notQuite}
                 </div>
                 <div className="body-sm" style={{ color: wasRight ? "var(--forest-700)" : "var(--text-body)" }}>
                   {isKanji ? (
@@ -1075,7 +1091,7 @@ export function QuizCard({
               </div>
             </div>
             <Button variant="primary" size="md" onClick={onNext} icon="chevron-right" autoFocus>
-              {isLast ? "Finish" : "Next"}
+              {isLast ? t.finish : t.next}
             </Button>
           </div>
         </Card>
@@ -1104,6 +1120,7 @@ function Summary({
   practiceHref: string | null;
   onRestart: () => void;
 }) {
+  const t = useT().study.summary;
   const percent = total ? Math.round((correct / total) * 100) : 0;
 
   return (
@@ -1112,7 +1129,7 @@ function Summary({
         <div className="row" style={{ gap: 10 }}>
           <Sparkle size={18} color="var(--lime-500)" />
           <span className="eyebrow" style={{ color: "var(--lime-500)" }}>
-            Session complete
+            {t.complete}
           </span>
         </div>
 
@@ -1132,8 +1149,8 @@ function Summary({
         {practiceHref === null && (
           <div className="row" style={{ gap: 48, flexWrap: "wrap" }}>
             {[
-              [`${percent}%`, "Accuracy", "var(--lime-500)"],
-              [`${correct}/${total}`, "Answered", "var(--white)"],
+              [`${percent}%`, t.accuracy, "var(--lime-500)"],
+              [`${correct}/${total}`, t.answered, "var(--white)"],
             ].map(([value, label, colour]) => (
               <div key={label}>
                 <div
@@ -1158,20 +1175,18 @@ function Summary({
         {practiceHref !== null ? (
           <>
             <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
-              {guest
-                ? "This was practice, so none of it was saved."
-                : "This was practice, so none of it was saved. Your progress and your review schedule are exactly as they were."}
+              {guest ? t.practiceGuest : t.practice}
             </p>
 
             <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
               <Button variant="accent" size="lg" icon="chevron-right" onClick={onRestart}>
-                Practise Again
+                {t.practiseAgain}
               </Button>
               {/* Back with the same choices still made, so the set can be
                   adjusted rather than chosen again from nothing. */}
               <Link href={practiceHref} className="reset-link">
                 <Button variant="outline-inverse" size="lg">
-                  Change Practice
+                  {t.changePractice}
                 </Button>
               </Link>
             </div>
@@ -1179,9 +1194,7 @@ function Summary({
         ) : guest ? (
           <>
             <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
-              None of this was saved, because you are not signed in. With an account, every answer
-              is scheduled: what you missed comes back within minutes, and what you knew moves
-              further out.
+              {t.guest}
             </p>
 
             <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
@@ -1191,12 +1204,12 @@ function Summary({
                 className="reset-link"
               >
                 <Button variant="accent" size="lg" icon="chevron-right">
-                  Sign In to Save Progress
+                  {t.signIn}
                 </Button>
               </Link>
               <Link href="/lessons" className="reset-link">
                 <Button variant="outline-inverse" size="lg">
-                  Browse Lessons
+                  {t.browseLessons}
                 </Button>
               </Link>
             </div>
@@ -1204,19 +1217,18 @@ function Summary({
         ) : (
           <>
             <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
-              Everything you answered is scheduled. What you missed comes back within minutes; what
-              you knew moves further out.
+              {t.saved}
             </p>
 
             <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
               <Link href="/dashboard" className="reset-link">
                 <Button variant="accent" size="lg" icon="chevron-right">
-                  Back to Dashboard
+                  {t.dashboard}
                 </Button>
               </Link>
               <Link href={mode === "review" ? "/lessons" : "/review"} className="reset-link">
                 <Button variant="outline-inverse" size="lg">
-                  {mode === "review" ? "Browse Lessons" : "Start a Review"}
+                  {mode === "review" ? t.browseLessons : t.startReview}
                 </Button>
               </Link>
             </div>

@@ -8,6 +8,9 @@ import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Icon } from "@/components/atlas/core/Icon.jsx";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageToggle } from "./LanguageToggle";
+import { useT } from "@/lib/i18n/client";
+import type { Messages } from "@/lib/i18n/messages";
 
 export type ShellAccount = {
   name: string;
@@ -29,12 +32,12 @@ export type ShellAccount = {
  * `guest` marks the pages that work without an account — the ones under
  * app/(open), which the middleware lets through.
  */
-const NAV = [
-  { href: "/dashboard", label: "Home", icon: "house" },
-  { href: "/lessons", label: "Lessons", icon: "file-text", guest: true },
-  { href: "/review", label: "Review", icon: "zap" },
-  { href: "/kanji", label: "Kanji", icon: "grid-2x2" },
-  { href: "/practice", label: "Practice", icon: "target", guest: true },
+const NAV: { href: string; label: keyof Messages["shell"]["nav"]; icon: string; guest?: boolean }[] = [
+  { href: "/dashboard", label: "home", icon: "house" },
+  { href: "/lessons", label: "lessons", icon: "file-text", guest: true },
+  { href: "/review", label: "review", icon: "zap" },
+  { href: "/kanji", label: "kanji", icon: "grid-2x2" },
+  { href: "/practice", label: "practice", icon: "target", guest: true },
 ];
 
 /**
@@ -54,6 +57,7 @@ export function AppShell({
   account: ShellAccount | null;
   children: React.ReactNode;
 }) {
+  const t = useT();
   const pathname = usePathname();
   const signIn = `/login?next=${encodeURIComponent(pathname)}`;
   const nav = account ? NAV : NAV.filter((item) => item.guest);
@@ -80,7 +84,7 @@ export function AppShell({
                     // Carries the accessible name once the label is hidden on
                     // narrow screens, and drives the mobile active style, which
                     // an inline style cannot express per-breakpoint.
-                    aria-label={item.label}
+                    aria-label={t.shell.nav[item.label]}
                     aria-current={active ? "page" : undefined}
                     data-active={active}
                     className="reset-link row"
@@ -97,7 +101,7 @@ export function AppShell({
                     }}
                   >
                     <Icon name={item.icon} size={18} />
-                    <span className="nav-label">{item.label}</span>
+                    <span className="nav-label">{t.shell.nav[item.label]}</span>
                     {item.href === "/review" && account && account.dueCount > 0 && (
                       <Badge
                         tone="accent"
@@ -114,14 +118,16 @@ export function AppShell({
           </div>
 
           <div className="row" style={{ gap: 12 }}>
+            {/* A learner with an account picks a language in Settings. */}
+            {!account && <LanguageToggle />}
             <ThemeToggle />
             {account ? (
               <>
                 <Link
                   href="/settings"
                   className="reset-link row"
-                  title="Settings"
-                  aria-label={`Settings for ${account.name || "your account"}`}
+                  title={t.shell.settings}
+                  aria-label={t.shell.settingsFor(account.name)}
                   aria-current={pathname === "/settings" ? "page" : undefined}
                   style={{ gap: 12 }}
                 >
@@ -131,14 +137,14 @@ export function AppShell({
                   >
                     {account.name}
                   </span>
-                  <Avatar name={account.name || "Learner"} size={38} />
+                  <Avatar name={account.name || t.shell.learner} size={38} />
                 </Link>
                 {account.signOut}
               </>
             ) : (
               <Link href={signIn} className="reset-link">
                 <Button variant="primary" size="sm" shape="pill">
-                  Sign In
+                  {t.shell.signIn}
                 </Button>
               </Link>
             )}
@@ -162,15 +168,15 @@ export function AppShell({
             <span className="row" style={{ gap: 10 }}>
               <Icon name="circle" size={14} color="var(--on-tint-body)" />
               <span>
-                <strong style={{ color: "var(--on-tint-heading)" }}>You are studying as a guest.</strong>{" "}
-                Lessons and practice work in full, but nothing you answer is saved.
+                <strong style={{ color: "var(--on-tint-heading)" }}>{t.shell.guestTitle}</strong>{" "}
+                {t.shell.guestBody}
               </span>
             </span>
             <Link
               href={signIn}
               style={{ color: "var(--on-tint-heading)", fontWeight: "var(--weight-semibold)" }}
             >
-              Sign in to keep your progress
+              {t.shell.guestSignIn}
             </Link>
           </div>
         </div>

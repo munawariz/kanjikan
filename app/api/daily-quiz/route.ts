@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
+import { getLocale } from "@/lib/i18n/server";
+import { messages } from "@/lib/i18n/messages";
 import { localDate, requestTimeZone, shiftDate } from "@/lib/daily";
 import { recordDailyAnswer } from "@/lib/progress";
 
@@ -10,8 +12,9 @@ import { recordDailyAnswer } from "@/lib/progress";
  * recordDailyAnswer for why the verdict is not accepted from the browser.
  */
 export async function POST(request: Request) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const [user, locale] = await Promise.all([getUser(), getLocale()]);
+  const t = messages[locale];
+  if (!user) return NextResponse.json({ error: t.api.notSignedIn }, { status: 401 });
 
   const body = await request.json().catch(() => null);
   const date = body?.date;
@@ -30,13 +33,14 @@ export async function POST(request: Request) {
   const timeZone = requestTimeZone();
   const today = localDate(timeZone);
   if (date !== today && date !== shiftDate(today, -1)) {
-    return NextResponse.json({ error: "That quiz is closed" }, { status: 400 });
+    return NextResponse.json({ error: t.api.quizClosed }, { status: 400 });
   }
 
   try {
-    const result = await recordDailyAnswer(user.id, date, timeZone, position, choiceId);
+    const result = await recordDailyAnswer(user.id, date, timeZone, position, choiceId, locale);
     if (result.status === "invalid") {
-      return NextResponse.json({ error: result.reason }, { status: 400 });
+      const error = result.reason === "no-question" ? t.api.noSuchQuestion : t.api.notAnOption;
+      return NextResponse.json({ error }, { status: 400 });
     }
     // A repeat is not an error: the answer the learner gave is on record.
     return NextResponse.json({ ok: true, ...result });

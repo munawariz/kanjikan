@@ -12,6 +12,9 @@ import {
   normalizeUsername,
   passwordTooLong,
 } from "@/lib/username";
+import { cookies } from "next/headers";
+import { getLocale, getT, rememberLocale } from "@/lib/i18n/server";
+import { isLocale, LOCALE_COOKIE } from "@/lib/i18n/config";
 
 export type AuthState = {
   error?: string;
@@ -27,8 +30,6 @@ function safeNext(next: string): string {
   return next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 }
 
-const UNREACHABLE = { error: "Could not reach the database. Try again in a moment." };
-
 /**
  * One form for everyone. A username that exists is signed in; one that does
  * not comes back as confirmCreate, and the form resubmits with intent=create
@@ -42,28 +43,30 @@ export async function authenticate(_prev: AuthState, formData: FormData): Promis
   const username = normalizeUsername(typed);
   const password = String(formData.get("password") ?? "");
   const next = safeNext(String(formData.get("next") ?? "/dashboard"));
+  const t = (await getT()).auth.errors;
+  const UNREACHABLE = { error: t.unreachable };
 
   if (!username || !password) {
-    return { error: "Enter a username and password." };
+    return { error: t.missing };
   }
   if (!isValidUsername(username)) {
-    return {
-      error: `Usernames are ${USERNAME_MIN} to ${USERNAME_MAX} letters, numbers, underscores or hyphens.`,
-    };
+    return { error: t.badUsername(USERNAME_MIN, USERNAME_MAX) };
   }
   if (passwordTooLong(password)) {
-    return { error: `Passwords can be at most ${PASSWORD_MAX_BYTES} characters.` };
+    return { error: t.passwordTooLong(PASSWORD_MAX_BYTES) };
   }
 
   if (formData.get("intent") === "create") {
     if (password.length < PASSWORD_MIN) {
-      return { error: `Use at least ${PASSWORD_MIN} characters for your password.` };
+      return { error: t.passwordTooShort(PASSWORD_MIN) };
     }
     try {
       // Keeps the capitalisation they typed for greetings; the login itself
       // is case-insensitive.
-      const account = await createAccount(username, typed, password);
-      if (!account) return { error: "That username was taken a moment ago. Choose another." };
+      // A language picked before signing up becomes the account's own.
+      const picked = cookies().get(LOCALE_COOKIE)?.value;
+      const account = await createAccount(username, typed, password, isLocale(picked) ? picked : null);
+      if (!account) return { error: t.taken };
       await startSession(account.id);
     } catch (e) {
       console.error(`[kanjikan] createAccount failed: ${(e as Error).message}`);
@@ -87,20 +90,20 @@ export async function authenticate(_prev: AuthState, formData: FormData): Promis
       revalidatePath("/", "layout");
       redirect(next);
     case "locked":
-      return { error: "Too many wrong passwords for that username. Wait a few minutes and try again." };
+      return { error: t.locked };
     case "wrong-password":
-      return { error: "Wrong password for that username." };
+      return { error: t.wrongPassword };
     case "no-account":
       if (password.length < PASSWORD_MIN) {
-        return {
-          error: `There is no account called ${username} yet. To open it, choose a password of at least ${PASSWORD_MIN} characters.`,
-        };
+        return { error: t.noAccount(username, PASSWORD_MIN) };
       }
       return { confirmCreate: username };
   }
 }
 
 export async function signOut() {
+  // Keeps the sign-in page in the language the learner was using.
+  rememberLocale(await getLocale());
   await endSession();
   revalidatePath("/", "layout");
   redirect("/login");

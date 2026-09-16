@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import type { MarkState } from "@/lib/srs";
 import { post } from "./StudySession";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * "I already know this" for a word, a kanji or a lesson, and its undo.
@@ -35,6 +36,7 @@ export function MarkControl({
   /** On a cream or sage card, where the muted text colour needs the tinted variant. */
   onTint?: boolean;
 }) {
+  const t = useT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [busy, setBusy] = useState(false);
@@ -68,7 +70,7 @@ export function MarkControl({
             </span>
           )}
           <Button variant="ghost" size="sm" onClick={() => send(true)} disabled={working}>
-            Undo
+            {t.shell.undo}
           </Button>
         </>
       )}

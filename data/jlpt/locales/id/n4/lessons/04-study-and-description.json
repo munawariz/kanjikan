@@ -1,0 +1,341 @@
+{
+  "teaching-and-studying": {
+    "title": "Mengajar dan belajar",
+    "summary": "習う adalah belajar dari guru; 勉強 adalah jam-jam yang kamu habiskan sendiri. 強 berarti kuat, dan dalam 勉強 ia adalah usaha memaksa diri — itulah sebabnya penjaga toko yang berkata 勉強します sedang menawarimu potongan harga.",
+    "words": {
+      "教える|おしえる": ["Mengajar", "Memberi Tahu"],
+      "教わる|おそわる": ["Diajari", "Belajar (dari seseorang)"],
+      "教室|きょうしつ": ["Ruang Kelas"],
+      "教会|きょうかい": ["Gereja"],
+      "教育|きょういく": ["Pendidikan"],
+      "教え方|おしえかた": ["Cara Mengajar", "Metode Mengajar"],
+
+      "習う|ならう": ["Belajar (dari guru)", "Mengikuti Kursus"],
+      "練習|れんしゅう": ["Latihan"],
+      "学習|がくしゅう": ["Pembelajaran", "Studi"],
+      "自習|じしゅう": ["Belajar Mandiri", "Belajar Sendiri"],
+      "見習う|みならう": ["Mencontoh", "Belajar dengan Melihat"],
+      "習い事|ならいごと": ["Kursus (sepulang sekolah atau sebagai hobi)"],
+
+      "勉強|べんきょう": ["Belajar", "Potongan Harga (bahasa pedagang)"],
+      "勉強会|べんきょうかい": ["Kelompok Belajar", "Sesi Belajar"],
+      "勉強家|べんきょうか": ["Pekerja Keras", "Pelajar yang Rajin"],
+      "勉学|べんがく": ["Menuntut Ilmu", "Kegiatan Belajar"],
+      "勉強部屋|べんきょうべや": ["Kamar Belajar"],
+
+      "強い|つよい": ["Kuat"],
+      "強さ|つよさ": ["Kekuatan"],
+      "強まる|つよまる": ["Menguat", "Makin Hebat"],
+      "強める|つよめる": ["Memperkuat (sesuatu)", "Membesarkan (api, volume)"],
+      "強力|きょうりょく": ["Berkekuatan Besar"],
+      "強風|きょうふう": ["Angin Kencang", "Badai Angin"],
+
+      "授業|じゅぎょう": ["Kelas", "Jam Pelajaran"],
+      "卒業|そつぎょう": ["Kelulusan"],
+      "工業|こうぎょう": ["Industri", "Manufaktur"],
+      "作業|さぎょう": ["Pekerjaan", "Tugas"],
+      "事業|じぎょう": ["Bisnis", "Usaha"],
+      "休業|きゅうぎょう": ["Tutup (tidak beroperasi)"]
+    }
+  },
+  "questions-and-exams": {
+    "title": "Soal dan ujian",
+    "summary": "問, 聞, dan 間 semuanya gerbang dengan sesuatu di dalamnya: mulut untuk bertanya, telinga untuk mendengar, matahari yang bersinar lewat celah. 入試 hanyalah 入学試験, ujian masuk, yang dipangkas menjadi dua kanji.",
+    "words": {
+      "問題|もんだい": ["Masalah", "Soal (ujian)"],
+      "問い|とい": ["Pertanyaan"],
+      "問う|とう": ["Menanyakan", "Mempertanyakan"],
+      "学問|がくもん": ["Ilmu Pengetahuan", "Keilmuan"],
+      "問い合わせ|といあわせ": ["Permintaan Informasi", "Pertanyaan (kepada pihak terkait)"],
+
+      "題|だい": ["Judul", "Tema"],
+      "宿題|しゅくだい": ["Pekerjaan Rumah", "PR"],
+      "話題|わだい": ["Topik Pembicaraan"],
+      "題名|だいめい": ["Nama Karya", "Judul (buku atau film)"],
+      "出題|しゅつだい": ["Pembuatan Soal (untuk ujian)"],
+
+      "答え|こたえ": ["Jawaban"],
+      "答える|こたえる": ["Menjawab", "Membalas"],
+      "回答|かいとう": ["Balasan", "Tanggapan (atas survei atau pertanyaan)"],
+      "問答|もんどう": ["Tanya Jawab", "Dialog"],
+      "口答え|くちごたえ": ["Membantah", "Balas Omongan"],
+
+      "試す|ためす": ["Mencoba", "Menguji"],
+      "試合|しあい": ["Pertandingan", "Laga"],
+      "入試|にゅうし": ["Ujian Masuk"],
+      "試着|しちゃく": ["Mencoba Pakaian"],
+      "試食|ししょく": ["Mencicipi (sampel gratis)"],
+
+      "試験|しけん": ["Ujian", "Tes"],
+      "経験|けいけん": ["Pengalaman"],
+      "体験|たいけん": ["Pengalaman Pribadi", "Pengalaman Langsung"],
+      "入学試験|にゅうがくしけん": ["Ujian Masuk Sekolah"],
+      "試験勉強|しけんべんきょう": ["Belajar untuk Ujian"]
+    }
+  },
+  "research-and-care": {
+    "title": "Penelitian dan ketepatan",
+    "summary": "正 dibaca セイ di sebagian besar kata majemuk, tetapi ショウ di beberapa kata lama yang dipakai sehari-hari: 正月, 正直. 質 juga punya jebakannya sendiri — しつ di 質問, tetapi しち di 質屋, pegadaian.",
+    "words": {
+      "研究|けんきゅう": ["Penelitian", "Studi"],
+      "研ぐ|とぐ": ["Mengasah (pisau)", "Mencuci (beras)"],
+      "研修|けんしゅう": ["Pelatihan", "Kursus Pelatihan"],
+      "研究生|けんきゅうせい": ["Mahasiswa Riset"],
+      "研究会|けんきゅうかい": ["Perkumpulan Riset", "Pertemuan Riset"],
+
+      "研究者|けんきゅうしゃ": ["Peneliti", "Ilmuwan"],
+      "研究室|けんきゅうしつ": ["Laboratorium", "Ruang Dosen"],
+      "研究家|けんきゅうか": ["Pakar (dalam suatu bidang)", "Cendekiawan"],
+      "究極|きゅうきょく": ["Pamungkas", "Final"],
+      "究める|きわめる": ["Menguasai Sepenuhnya", "Menyelidiki Secara Tuntas"],
+
+      "質問|しつもん": ["Pertanyaan"],
+      "質|しつ": ["Kualitas", "Sifat"],
+      "品質|ひんしつ": ["Mutu (barang)"],
+      "体質|たいしつ": ["Konstitusi Tubuh", "Bawaan Fisik"],
+      "物質|ぶっしつ": ["Zat", "Materi"],
+      "質屋|しちや": ["Pegadaian"],
+
+      "正しい|ただしい": ["Benar", "Tepat"],
+      "正す|ただす": ["Membetulkan", "Meluruskan"],
+      "正月|しょうがつ": ["Tahun Baru", "Libur Tahun Baru"],
+      "正直|しょうじき": ["Jujur", "Sejujurnya"],
+      "正社員|せいしゃいん": ["Karyawan Tetap", "Staf Tetap"],
+
+      "注意|ちゅうい": ["Kehati-Hatian", "Perhatian", "Peringatan"],
+      "注目|ちゅうもく": ["Sorotan", "Perhatian Khusus"],
+      "注射|ちゅうしゃ": ["Suntikan", "Injeksi"],
+      "注ぐ|そそぐ": ["Menuangkan", "Mengalir Masuk"],
+      "注ぐ|つぐ": ["Menuang (minuman)", "Mengisi (cangkir)"]
+    }
+  },
+  "words-and-writing": {
+    "title": "Kata dan tulisan",
+    "summary": "言う ditulis いう tetapi diucapkan ゆう — tulislah dengan cara pertama, ucapkan dengan cara kedua. 文 menyimpan cara baca lama, モン, di 注文, dan mengikisnya menjadi も di 文字.",
+    "words": {
+      "言う|いう": ["Berkata"],
+      "言葉|ことば": ["Kata", "Bahasa"],
+      "一言|ひとこと": ["Sepatah Kata", "Beberapa Patah Kata"],
+      "方言|ほうげん": ["Dialek"],
+      "言い方|いいかた": ["Cara Mengatakan", "Ungkapan"],
+      "言語|げんご": ["Bahasa (sebagai sistem)"],
+
+      "文|ぶん": ["Kalimat"],
+      "作文|さくぶん": ["Karangan", "Esai"],
+      "文学|ぶんがく": ["Sastra"],
+      "文化|ぶんか": ["Budaya"],
+      "文法|ぶんぽう": ["Tata Bahasa"],
+      "注文|ちゅうもん": ["Pesanan (makanan atau barang)"],
+
+      "字|じ": ["Aksara", "Tulisan Tangan"],
+      "文字|もじ": ["Huruf", "Karakter Tulisan"],
+      "ローマ字|ローマじ": ["Romaji", "Alfabet Latin"],
+      "数字|すうじ": ["Angka", "Digit"],
+      "赤字|あかじ": ["Defisit", "Merugi"],
+      "黒字|くろじ": ["Surplus", "Untung"],
+
+      "漢字|かんじ": ["Kanji", "Aksara Tionghoa"],
+      "漢語|かんご": ["Kata Serapan Tionghoa"],
+      "漢文|かんぶん": ["Bahasa Tionghoa Klasik"],
+      "漢方|かんぽう": ["Pengobatan Tradisional Tionghoa"],
+      "漢数字|かんすうじ": ["Angka Kanji"],
+
+      "英会話|えいかいわ": ["Percakapan Bahasa Inggris"],
+      "英国|えいこく": ["Inggris", "Britania Raya"],
+      "英文|えいぶん": ["Teks Bahasa Inggris", "Kalimat Bahasa Inggris"],
+      "英作文|えいさくぶん": ["Karangan Bahasa Inggris"],
+      "英単語|えいたんご": ["Kosakata Bahasa Inggris"]
+    }
+  },
+  "music-and-film": {
+    "title": "Musik dan film",
+    "summary": "楽 membagi dua artinya ke dua cara baca: ガク untuk musik (音楽, 楽器), ラク untuk kemudahan (楽, 気楽). 画 pun begitu — ガ untuk gambar, カク di 計画, rencana.",
+    "words": {
+      "歌|うた": ["Lagu"],
+      "歌う|うたう": ["Bernyanyi"],
+      "歌手|かしゅ": ["Penyanyi"],
+      "国歌|こっか": ["Lagu Kebangsaan"],
+      "校歌|こうか": ["Lagu Sekolah"],
+
+      "音|おと": ["Bunyi", "Suara"],
+      "音楽|おんがく": ["Musik"],
+      "発音|はつおん": ["Pelafalan"],
+      "足音|あしおと": ["Suara Langkah Kaki"],
+      "本音|ほんね": ["Perasaan Sebenarnya", "Isi Hati"],
+      "母音|ぼいん": ["Vokal"],
+
+      "楽しい|たのしい": ["Menyenangkan", "Seru"],
+      "楽しむ|たのしむ": ["Menikmati"],
+      "楽しみ|たのしみ": ["Sesuatu yang Dinantikan", "Kesenangan"],
+      "楽|らく": ["Mudah", "Nyaman"],
+      "気楽|きらく": ["Tanpa Beban", "Santai"],
+      "楽器|がっき": ["Alat Musik"],
+
+      "映画|えいが": ["Film"],
+      "映画館|えいがかん": ["Bioskop"],
+      "映る|うつる": ["Terpantul", "Tampil (di layar)"],
+      "映す|うつす": ["Memantulkan (sesuatu)", "Memproyeksikan"],
+      "上映|じょうえい": ["Pemutaran (film)"],
+
+      "計画|けいかく": ["Rencana"],
+      "画家|がか": ["Pelukis", "Seniman"],
+      "漫画|まんが": ["Manga", "Komik"],
+      "動画|どうが": ["Video"],
+      "洋画|ようが": ["Film Barat", "Lukisan Gaya Barat"]
+    }
+  },
+  "travel-and-photos": {
+    "title": "Perjalanan dan foto",
+    "summary": "写す dan 映す sama-sama dibaca うつす: 写す berarti menyalin atau memotret, 映す berarti memantulkan atau memproyeksikan. 真 di depan sebuah kata menjadikannya hal itu yang sesungguhnya — 真夜中, tengah malam buta — dan di depan warna ia menambahkan っ kecil: 真っ白 まっしろ, 真っ赤 まっか.",
+    "words": {
+      "旅|たび": ["Perjalanan", "Pelesiran"],
+      "旅館|りょかん": ["Penginapan Tradisional Jepang"],
+      "旅行者|りょこうしゃ": ["Pelancong", "Wisatawan"],
+      "一人旅|ひとりたび": ["Bepergian Sendirian"],
+      "旅先|たびさき": ["Tempat yang Dikunjungi (saat bepergian)", "Tujuan Perjalanan"],
+      "旅立つ|たびだつ": ["Berangkat Memulai Perjalanan"],
+
+      "写す|うつす": ["Menyalin", "Memotret"],
+      "写る|うつる": ["Tertangkap (dalam foto)", "Terpotret"],
+      "書き写す|かきうつす": ["Menyalin dengan Tangan", "Menuliskan Ulang"],
+      "写真家|しゃしんか": ["Fotografer"],
+      "写生|しゃせい": ["Sketsa Langsung dari Objek"],
+
+      "写真|しゃしん": ["Foto"],
+      "真面目|まじめ": ["Serius", "Sungguh-Sungguh", "Rajin"],
+      "真っ白|まっしろ": ["Putih Bersih"],
+      "真っ赤|まっか": ["Merah Menyala"],
+      "真っ黒|まっくろ": ["Hitam Pekat"],
+      "真っ青|まっさお": ["Biru Pekat", "Pucat Pasi"],
+      "真夜中|まよなか": ["Tengah Malam"],
+
+      "紙|かみ": ["Kertas"],
+      "手紙|てがみ": ["Surat"],
+      "用紙|ようし": ["Formulir", "Lembar Kertas (untuk keperluan tertentu)"],
+      "白紙|はくし": ["Kertas Kosong", "Lembaran Baru"],
+      "折り紙|おりがみ": ["Origami", "Kertas Lipat"],
+
+      "有料|ゆうりょう": ["Berbayar", "Tidak Gratis"],
+      "有名人|ゆうめいじん": ["Selebritas", "Orang Terkenal"],
+      "有効|ゆうこう": ["Berlaku", "Efektif"],
+      "有力|ゆうりょく": ["Berpengaruh", "Terkemuka"],
+      "有休|ゆうきゅう": ["Cuti Berbayar", "Libur Berbayar"]
+    }
+  },
+  "how-much-how-far": {
+    "title": "Seberapa banyak, seberapa jauh",
+    "summary": "多い dan 少ない terasa janggal jika langsung diletakkan di depan kata benda: orang yang banyak adalah 多くの人, bukan 多い人. Lalu, 少し adalah kata keterangan, sedikit, sedangkan 少ない adalah kata sifat, sedikit jumlahnya: 少し食べる, tetapi 人が少ない.",
+    "words": {
+      "多い|おおい": ["Banyak", "Berlimpah"],
+      "多く|おおく": ["Sangat Banyak", "Sebagian Besar"],
+      "多分|たぶん": ["Kemungkinan Besar", "Mungkin"],
+      "多少|たしょう": ["Agak", "Kurang Lebih"],
+      "多め|おおめ": ["Sedikit Lebih Banyak (dari biasanya)", "Ekstra"],
+
+      "少し|すこし": ["Sedikit", "Beberapa"],
+      "少ない|すくない": ["Sedikit (jumlahnya)", "Langka"],
+      "少年|しょうねん": ["Anak Laki-Laki", "Remaja"],
+      "少々|しょうしょう": ["Sebentar", "Sedikit (sopan)"],
+      "少なくとも|すくなくとも": ["Setidaknya"],
+      "少しずつ|すこしずつ": ["Sedikit Demi Sedikit"],
+
+      "重い|おもい": ["Berat", "Serius"],
+      "重さ|おもさ": ["Bobot"],
+      "体重|たいじゅう": ["Berat Badan"],
+      "重要|じゅうよう": ["Penting"],
+      "重大|じゅうだい": ["Gawat", "Sangat Serius"],
+      "重ねる|かさねる": ["Menumpuk", "Menyusun Bertumpuk"],
+
+      "広い|ひろい": ["Lebar", "Luas"],
+      "広さ|ひろさ": ["Luas Area", "Ukuran (ruang)"],
+      "広場|ひろば": ["Alun-Alun", "Plaza"],
+      "広告|こうこく": ["Iklan"],
+      "広がる|ひろがる": ["Menyebar", "Melebar"],
+      "広げる|ひろげる": ["Membentangkan (sesuatu)", "Membuka Lebar"],
+
+      "近い|ちかい": ["Dekat", "Tidak Jauh"],
+      "近く|ちかく": ["Sekitar Sini", "Lingkungan Sekitar"],
+      "近所|きんじょ": ["Lingkungan Rumah", "Dekat Rumah"],
+      "最近|さいきん": ["Akhir-Akhir Ini", "Belakangan Ini"],
+      "近道|ちかみち": ["Jalan Pintas"],
+      "近づく|ちかづく": ["Mendekat", "Menghampiri"]
+    }
+  },
+  "new-old-good-bad": {
+    "title": "Baru, lama, baik, buruk",
+    "summary": "古い dipakai untuk benda, bukan orang: orang tua adalah 年をとった人, dan 古い人 adalah orang yang kolot. 安 berarti murah di 安い, tetapi tenang di 安心 dan 安全 — arti lamanya.",
+    "words": {
+      "新しい|あたらしい": ["Baru"],
+      "新年|しんねん": ["Tahun Baru"],
+      "新幹線|しんかんせん": ["Shinkansen", "Kereta Peluru"],
+      "新人|しんじん": ["Pendatang Baru", "Karyawan Baru"],
+      "新品|しんぴん": ["Barang Baru"],
+      "新入生|しんにゅうせい": ["Siswa Baru", "Mahasiswa Tahun Pertama"],
+
+      "古い|ふるい": ["Lama (untuk benda)"],
+      "中古|ちゅうこ": ["Bekas", "Sudah Dipakai"],
+      "古本|ふるほん": ["Buku Bekas"],
+      "古着|ふるぎ": ["Pakaian Bekas"],
+      "古代|こだい": ["Zaman Kuno"],
+
+      "安い|やすい": ["Murah", "Tidak Mahal"],
+      "安心|あんしん": ["Rasa Lega", "Ketenangan Hati"],
+      "安全|あんぜん": ["Keselamatan", "Aman"],
+      "安売り|やすうり": ["Obral", "Jual Murah"],
+      "安物|やすもの": ["Barang Murahan", "Barang Murah"],
+
+      "明るい|あかるい": ["Terang", "Ceria"],
+      "明かり|あかり": ["Cahaya", "Lampu"],
+      "明らか|あきらか": ["Jelas", "Nyata"],
+      "説明|せつめい": ["Penjelasan"],
+      "発明|はつめい": ["Penemuan"],
+      "明後日|あさって": ["Lusa"],
+
+      "悪い|わるい": ["Buruk", "Salah"],
+      "悪口|わるぐち": ["Menjelekkan Orang", "Hinaan"],
+      "最悪|さいあく": ["Paling Buruk"],
+      "悪人|あくにん": ["Penjahat", "Orang Jahat"],
+      "意地悪|いじわる": ["Usil", "Dengki"],
+      "気持ち悪い|きもちわるい": ["Tidak Enak", "Menjijikkan", "Mual"]
+    }
+  },
+  "same-and-different": {
+    "title": "Sama dan berbeda",
+    "summary": "以上 dan 以下 mencakup angka itu sendiri: 三人以上 berarti tiga orang atau lebih, bukan lebih dari tiga. 不 menaruh makna \"tidak\" di depan sebuah kata dan hampir selalu dibaca ふ — yang perlu kamu waspadai di sini adalah 不気味, seram, yang dibaca ぶきみ.",
+    "words": {
+      "不安|ふあん": ["Cemas", "Gelisah", "Kecemasan"],
+      "不足|ふそく": ["Kekurangan", "Kurang"],
+      "不便|ふべん": ["Tidak Praktis"],
+      "不注意|ふちゅうい": ["Ceroboh", "Kecerobohan"],
+      "不親切|ふしんせつ": ["Tidak Ramah", "Tidak Membantu"],
+      "不気味|ぶきみ": ["Seram", "Mengerikan"],
+
+      "同じ|おなじ": ["Sama"],
+      "同時|どうじ": ["Waktu yang Sama", "Serentak"],
+      "同意|どうい": ["Persetujuan", "Izin"],
+      "同級生|どうきゅうせい": ["Teman Sekelas"],
+      "同一|どういつ": ["Identik", "Sama Persis"],
+
+      "別れる|わかれる": ["Berpisah", "Putus", "Mengucapkan Selamat Tinggal"],
+      "別|べつ": ["Lain", "Berbeda", "Terpisah"],
+      "別々|べつべつ": ["Secara Terpisah", "Masing-Masing"],
+      "別に|べつに": ["Tidak Begitu", "Secara Tersendiri"],
+      "送別会|そうべつかい": ["Pesta Perpisahan"],
+      "区別|くべつ": ["Pembedaan", "Membedakan"],
+
+      "特に|とくに": ["Terutama", "Khususnya"],
+      "特別|とくべつ": ["Istimewa"],
+      "特急|とっきゅう": ["Ekspres Terbatas (kereta)"],
+      "特売|とくばい": ["Obral Khusus", "Jual Murah"],
+      "特徴|とくちょう": ["Ciri Khas", "Karakteristik"],
+      "特大|とくだい": ["Ekstra Besar"],
+
+      "以上|いじょう": ["Atau Lebih", "Di Atas", "Sekian"],
+      "以下|いか": ["Atau Kurang", "Di Bawah", "Berikut Ini"],
+      "以外|いがい": ["Kecuali", "Selain"],
+      "以内|いない": ["Dalam Batas", "Maksimal"],
+      "以前|いぜん": ["Sebelum", "Dahulu"],
+      "以来|いらい": ["Sejak", "Semenjak"]
+    }
+  }
+}

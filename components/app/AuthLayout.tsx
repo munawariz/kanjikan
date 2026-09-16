@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { Wordmark } from "./Wordmark";
+import { LanguageToggle } from "./LanguageToggle";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
+import { getT } from "@/lib/i18n/server";
 
 /**
  * Split auth screen: forest panel carrying the proposition, white panel
  * carrying the form. The forest half collapses away below 900px rather than
  * stacking, so the form stays the first thing on a phone.
  */
-export function AuthLayout({
+export async function AuthLayout({
   eyebrow,
   title,
   children,
@@ -16,6 +18,7 @@ export function AuthLayout({
   title: string;
   children: React.ReactNode;
 }) {
+  const t = (await getT()).auth.layout;
   return (
     <main style={{ display: "grid", gridTemplateColumns: "1fr", minHeight: "100vh" }}>
       <div
@@ -53,7 +56,7 @@ export function AuthLayout({
                 color: "var(--white)",
               }}
             >
-              A handful of kanji a lesson, until every one sticks.
+              {t.headline}
             </h1>
             <p
               style={{
@@ -63,16 +66,15 @@ export function AuthLayout({
                 color: "var(--forest-200)",
               }}
             >
-              Stroke order, readings, and the words that fix them. Your place is saved on every
-              card, so you can stop after ninety seconds and pick it up tomorrow.
+              {t.body}
             </p>
           </div>
 
           <div style={{ position: "relative", zIndex: 1, display: "flex", gap: 40 }}>
             {[
-              ["80", "Kanji"],
-              ["16", "Lessons"],
-              ["380", "Words"],
+              ["80", t.statKanji],
+              ["16", t.statLessons],
+              ["380", t.statWords],
             ].map(([value, label]) => (
               <div key={label}>
                 <div
@@ -124,6 +126,10 @@ export function AuthLayout({
           }}
         >
           <div style={{ width: "100%", maxWidth: 400 }}>
+            {/* Before signing in there are no settings to pick a language in. */}
+            <div className="row" style={{ justifyContent: "flex-end", marginBottom: 16 }}>
+              <LanguageToggle />
+            </div>
             <div style={{ marginBottom: 32 }} className="auth-mobile-mark">
               <Link href="/" className="reset-link">
                 <Wordmark />

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { AuthLayout } from "@/components/app/AuthLayout";
 import { AuthForm } from "@/components/app/AuthForm";
+import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -19,19 +20,20 @@ export default async function LoginPage({
   // lands on the list.
   const next = searchParams.next;
   const guestHref = next === "/lessons" || next?.startsWith("/lessons/") ? next : "/lessons";
+  const t = (await getT()).auth.login;
 
   return (
-    <AuthLayout eyebrow="Welcome" title="Sign in or start learning">
+    <AuthLayout eyebrow={t.eyebrow} title={t.title}>
       <AuthForm next={next} />
 
       <div style={{ height: 1, background: "var(--border-subtle)", margin: "28px 0 20px" }} />
 
       <p className="body-sm muted" style={{ margin: 0, textAlign: "center" }}>
-        Not ready for an account?{" "}
-        <Link href={guestHref} style={{ fontWeight: "var(--weight-semibold)" }}>
-          Take lessons as a guest
-        </Link>
-        . Nothing you answer will be saved.
+        {t.guest(
+          <Link href={guestHref} style={{ fontWeight: "var(--weight-semibold)" }}>
+            {t.guestLink}
+          </Link>,
+        )}
       </p>
     </AuthLayout>
   );

@@ -2,6 +2,7 @@ import type { SessionUser } from "@/lib/auth";
 import { getDueCounts, getProfile, reviewsDue } from "@/lib/progress";
 import { signOut } from "@/app/auth/actions";
 import { AppShell } from "./AppShell";
+import { getT } from "@/lib/i18n/server";
 
 /**
  * The shell with its account half filled in — or left empty for a guest, who
@@ -11,7 +12,7 @@ import { AppShell } from "./AppShell";
 export async function AppFrame({ user, children }: { user: SessionUser | null; children: React.ReactNode }) {
   if (!user) return <AppShell account={null}>{children}</AppShell>;
 
-  const [profile, due] = await Promise.all([getProfile(user.id), getDueCounts(user.id)]);
+  const [profile, due, t] = await Promise.all([getProfile(user.id), getDueCounts(user.id), getT()]);
   const name = profile.display_name || user.username;
 
   return (
@@ -23,8 +24,8 @@ export async function AppFrame({ user, children }: { user: SessionUser | null; c
           <form action={signOut}>
             <button
               type="submit"
-              title="Sign out"
-              aria-label="Sign out"
+              title={t.shell.signOut}
+              aria-label={t.shell.signOut}
               style={{
                 display: "inline-flex",
                 alignItems: "center",

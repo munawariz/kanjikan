@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * Stroke-order diagram, drawn from KanjiVG path data.
@@ -29,6 +30,7 @@ export function StrokeDiagram({
   mode?: "static" | "animate";
   strokeDuration?: number;
 }) {
+  const t = useT();
   const [visible, setVisible] = useState(mode === "animate" ? 0 : paths.length);
   const [replayKey, setReplayKey] = useState(0);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -83,7 +85,7 @@ export function StrokeDiagram({
         width={size}
         height={size}
         role="img"
-        aria-label={`Stroke order for ${char}`}
+        aria-label={t.kanji.diagram.label(char)}
         style={{ display: "block" }}
       >
         {/* Writing guides, the way practice paper is ruled. */}
@@ -122,7 +124,7 @@ export function StrokeDiagram({
         <button
           type="button"
           onClick={() => setReplayKey((k) => k + 1)}
-          aria-label="Replay stroke order"
+          aria-label={t.kanji.diagram.replay}
           style={{
             position: "absolute",
             right: 6,

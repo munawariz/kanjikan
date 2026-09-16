@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/i18n/client";
 
 const KEY = "kanjikan-theme";
 
@@ -21,6 +22,7 @@ function systemTheme(): Theme {
  * would disagree with the server HTML and trip a hydration mismatch.
  */
 export function ThemeToggle() {
+  const t = useT();
   const [theme, setTheme] = useState<Theme | null>(null);
 
   useEffect(() => {
@@ -61,8 +63,8 @@ export function ThemeToggle() {
       onClick={toggle}
       // Rendered before the effect resolves the real value, so it must not
       // claim a state it does not know yet.
-      aria-label={theme === null ? "Switch theme" : isDark ? "Switch to light theme" : "Switch to dark theme"}
-      title={isDark ? "Light theme" : "Dark theme"}
+      aria-label={theme === null ? t.shell.theme.switch : isDark ? t.shell.theme.toLight : t.shell.theme.toDark}
+      title={isDark ? t.shell.theme.light : t.shell.theme.dark}
       style={{
         display: "inline-flex",
         alignItems: "center",

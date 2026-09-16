@@ -1,0 +1,136 @@
+{
+  "size-and-position": {
+    "title": "Big, small, up, down, middle",
+    "summary": "Five kanji that pair into opposites. 上 and 下 are the busiest: each has a noun reading, a verb reading, and a compound reading.",
+    "words": {
+      "大きい|おおきい": ["Big", "Large"],
+      "大学|だいがく": ["University"],
+      "大好き|だいすき": ["To Love", "To Like a Lot"],
+      "大切|たいせつ": ["Important", "Precious"],
+      "大丈夫|だいじょうぶ": ["All Right", "OK"],
+
+      "小さい|ちいさい": ["Small", "Little"],
+      "小学校|しょうがっこう": ["Elementary School"],
+      "小学生|しょうがくせい": ["Elementary School Pupil"],
+      "小鳥|ことり": ["Small Bird"],
+      "小さな|ちいさな": ["Small", "Little"],
+
+      "中|なか": ["Inside", "Middle"],
+      "中国|ちゅうごく": ["China"],
+      "中学校|ちゅうがっこう": ["Junior High School"],
+      "一日中|いちにちじゅう": ["All Day Long"],
+      "真ん中|まんなか": ["The Very Middle"],
+
+      "上|うえ": ["Above", "On Top Of"],
+      "上手|じょうず": ["Skilful", "Good At"],
+      "上がる|あがる": ["To Go Up", "To Rise"],
+      "上着|うわぎ": ["Jacket", "Outerwear"],
+      "上る|のぼる": ["To Climb", "To Ascend"],
+
+      "下|した": ["Below", "Under"],
+      "下手|へた": ["Unskilful", "Bad At"],
+      "下がる|さがる": ["To Go Down", "To Hang Down"],
+      "地下鉄|ちかてつ": ["Subway", "Underground"],
+      "靴下|くつした": ["Socks"]
+    }
+  },
+  "directions": {
+    "title": "The four directions",
+    "summary": "The compass, plus 外 for everything outside. Station exits are named with these, so 東口 and 西口 are the first signs you will need to read.",
+    "words": {
+      "東|ひがし": ["East"],
+      "東京|とうきょう": ["Tokyo"],
+      "東口|ひがしぐち": ["East Exit"],
+      "東西|とうざい": ["East and West"],
+      "東北|とうほく": ["Northeast", "Tohoku"],
+
+      "西|にし": ["West"],
+      "西口|にしぐち": ["West Exit"],
+      "関西|かんさい": ["Kansai Region"],
+      "西洋|せいよう": ["The West"],
+
+      "南|みなみ": ["South"],
+      "南口|みなみぐち": ["South Exit"],
+      "南北|なんぼく": ["North and South"],
+      "東南|とうなん": ["Southeast"],
+
+      "北|きた": ["North"],
+      "北口|きたぐち": ["North Exit"],
+      "北海道|ほっかいどう": ["Hokkaido"],
+      "北風|きたかぜ": ["North Wind"],
+
+      "外|そと": ["Outside"],
+      "外国|がいこく": ["Foreign Country"],
+      "海外|かいがい": ["Overseas", "Abroad"],
+      "外出|がいしゅつ": ["Going Out"],
+      "外食|がいしょく": ["Eating Out"]
+    }
+  },
+  "coming-and-going": {
+    "title": "Going, coming, in and out",
+    "summary": "Movement kanji. 出 and 入 are a pair you will read on every door in Japan: 出口 exit, 入口 entrance.",
+    "words": {
+      "行く|いく": ["To Go"],
+      "銀行|ぎんこう": ["Bank"],
+      "旅行|りょこう": ["Travel", "Trip"],
+      "行う|おこなう": ["To Carry Out", "To Hold (an event)"],
+      "急行|きゅうこう": ["Express Train"],
+
+      "来る|くる": ["To Come"],
+      "来週|らいしゅう": ["Next Week"],
+      "出来る|できる": ["To Be Able To", "Can Do"],
+      "来日|らいにち": ["Coming to Japan"],
+
+      "出る|でる": ["To Go Out", "To Leave"],
+      "出す|だす": ["To Take Out", "To Send"],
+      "出口|でぐち": ["Exit"],
+      "出かける|でかける": ["To Go Out", "To Set Off"],
+      "思い出|おもいで": ["A Memory"],
+
+      "入る|はいる": ["To Enter", "To Go In"],
+      "入れる|いれる": ["To Put In", "To Insert"],
+      "入口|いりぐち": ["Entrance"],
+      "入学|にゅうがく": ["Entering a School"],
+      "気に入る|きにいる": ["To Take a Liking To"],
+
+      "車|くるま": ["Car"],
+      "電車|でんしゃ": ["Train"],
+      "自転車|じてんしゃ": ["Bicycle"],
+      "自動車|じどうしゃ": ["Automobile"],
+      "車内|しゃない": ["Inside the Vehicle"]
+    }
+  },
+  "front-back-left-right": {
+    "title": "Front, back, left, right",
+    "summary": "Position words, all of them nouns in Japanese. 間 is the odd one out: あいだ between things, かん for spans of time.",
+    "words": {
+      "前|まえ": ["Front", "Before"],
+      "前日|ぜんじつ": ["The Previous Day"],
+      "駅前|えきまえ": ["In Front of the Station"],
+      "前半|ぜんはん": ["First Half"],
+
+      "後ろ|うしろ": ["Behind", "The Back"],
+      "後で|あとで": ["Later", "Afterwards"],
+      "最後|さいご": ["The Last", "The End"],
+      "後半|こうはん": ["Second Half"],
+
+      "左|ひだり": ["Left"],
+      "左手|ひだりて": ["Left Hand"],
+      "左側|ひだりがわ": ["Left Side"],
+      "左右|さゆう": ["Left and Right"],
+      "左足|ひだりあし": ["Left Foot", "Left Leg"],
+
+      "右|みぎ": ["Right"],
+      "右手|みぎて": ["Right Hand"],
+      "右側|みぎがわ": ["Right Side"],
+      "右足|みぎあし": ["Right Foot", "Right Leg"],
+      "右目|みぎめ": ["Right Eye"],
+
+      "間|あいだ": ["Between", "Interval"],
+      "人間|にんげん": ["Human Being"],
+      "昼間|ひるま": ["Daytime"],
+      "一週間|いっしゅうかん": ["One Week"],
+      "間に合う|まにあう": ["To Be in Time"]
+    }
+  }
+}

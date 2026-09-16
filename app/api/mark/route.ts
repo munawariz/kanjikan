@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
+import { getT } from "@/lib/i18n/server";
 import { getKanjiChar, getLesson, getWord, getWordsTeaching, type Kanji, type Word } from "@/lib/content";
 import { markWordsKnown, markWritingKnown, unmarkWords, unmarkWriting } from "@/lib/progress";
 
@@ -17,8 +18,8 @@ import { markWordsKnown, markWritingKnown, unmarkWords, unmarkWriting } from "@/
  * write a row for something outside the curriculum.
  */
 export async function POST(request: Request) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const [user, t] = await Promise.all([getUser(), getT()]);
+  if (!user) return NextResponse.json({ error: t.api.notSignedIn }, { status: 401 });
 
   const body = await request.json().catch(() => null);
   const scope = body?.scope;
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
   }
 
   if (skill === "reading" && words.length === 0) {
-    return NextResponse.json({ error: "Nothing to mark" }, { status: 404 });
+    return NextResponse.json({ error: t.api.nothingToMark }, { status: 404 });
   }
   if (skill === "writing" && kanji.length === 0) {
     return NextResponse.json({ error: "Writing is marked by kanji or by lesson" }, { status: 400 });

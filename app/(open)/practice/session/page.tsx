@@ -4,6 +4,7 @@ import { getUser } from "@/lib/auth";
 import { getWordProgress } from "@/lib/progress";
 import { PRACTICE_TYPES } from "@/lib/study";
 import { StudySession } from "@/components/app/StudySession";
+import { getLocale, getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +21,10 @@ export default async function PracticeSessionPage({
 }: {
   searchParams: { kanji?: string; levels?: string; types?: string };
 }) {
+  const locale = await getLocale();
   const wholeLevels = new Set((searchParams.levels ?? "").split(","));
   const singles = new Set(searchParams.kanji ?? "");
-  const kanji = getKanji().filter((k) => wholeLevels.has(k.level) || singles.has(k.char));
+  const kanji = getKanji(undefined, locale).filter((k) => wholeLevels.has(k.level) || singles.has(k.char));
   const requested = (searchParams.types ?? "").split(",");
   const types = PRACTICE_TYPES.filter((t) => requested.includes(t));
 
@@ -36,7 +38,8 @@ export default async function PracticeSessionPage({
   }
 
   const user = await getUser();
-  const words = types.includes("reading") ? kanji.flatMap((k) => getWordsTeaching(k.char)) : [];
+  const t = await getT();
+  const words = types.includes("reading") ? kanji.flatMap((k) => getWordsTeaching(k.char, locale)) : [];
 
   // Read only to choose how each word is asked, as a review would: a word
   // already well known is asked for its reading or recalled from English
@@ -61,11 +64,11 @@ export default async function PracticeSessionPage({
         practiceTypes={types}
         guest={!user}
         lessonSlug={null}
-        lessonTitle="Practice"
+        lessonTitle={t.practice.sessionTitle}
         kanji={kanji}
         words={words}
-        pool={touched.flatMap((l) => getAllWords(l))}
-        kanjiPool={touched.flatMap((l) => getKanji(l)).map(({ char, meanings }) => ({ char, meanings }))}
+        pool={touched.flatMap((l) => getAllWords(l, locale))}
+        kanjiPool={touched.flatMap((l) => getKanji(l, locale)).map(({ char, meanings }) => ({ char, meanings }))}
         wordStages={wordStages}
         seed={Date.now() % 2147483647}
       />

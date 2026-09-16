@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { asSystem, isDatabaseConfigured } from "@/lib/db";
 import { SESSION_COOKIE } from "@/lib/session-cookie";
+import type { Locale } from "@/lib/i18n/config";
 
 /**
  * Accounts are a username and a password — no email, anywhere.
@@ -137,6 +138,7 @@ export async function createAccount(
   username: string,
   displayName: string,
   password: string,
+  locale: Locale | null = null,
 ): Promise<{ id: string } | null> {
   const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   return asSystem(async (db) => {
@@ -148,7 +150,11 @@ export async function createAccount(
     );
     const account = rows[0];
     if (!account) return null;
-    await db.query(`insert into public.profiles (id, display_name) values ($1, $2)`, [account.id, displayName]);
+    await db.query(`insert into public.profiles (id, display_name, locale) values ($1, $2, $3)`, [
+      account.id,
+      displayName,
+      locale,
+    ]);
     return account;
   });
 }

@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { LOCALE_NAMES, LOCALES, type Locale } from "@/lib/i18n/config";
+import { useT } from "@/lib/i18n/client";
 import { post } from "./StudySession";
 
 /**
@@ -70,6 +72,7 @@ function Choice<T extends string | number | boolean | null>({
 
 /** Saves one setting, then refreshes so the nav badge and every figure follow it. */
 function useSave() {
+  const t = useT();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [busy, setBusy] = useState(false);
@@ -91,29 +94,43 @@ function useSave() {
 
   const status = error ? (
     <span role="alert" className="body-sm" style={{ color: "var(--negative-600)" }}>
-      Not saved. {error}
+      {t.settings.notSaved} {error}
     </span>
   ) : saved && !pending ? (
     <span role="status" className="body-sm muted">
-      Saved.
+      {t.settings.saved}
     </span>
   ) : null;
 
   return { save, working: busy || pending, status };
 }
 
-export const WRITING_OPTIONS = [
-  {
-    value: false,
-    title: "Reading only",
-    detail: "Recognise kanji and read the words. No drawing.",
-  },
-  {
-    value: true,
-    title: "Reading and writing",
-    detail: "Also write each kanji from memory, reviewed on its own schedule.",
-  },
-];
+/**
+ * The language the app is shown in. Saving refreshes the page, which is what
+ * switches it: the server renders in the saved language from then on.
+ */
+export function LanguageSetting({ initial }: { initial: Locale }) {
+  const t = useT();
+  const [value, setValue] = useState<Locale>(initial);
+  const { save, working, status } = useSave();
+
+  return (
+    <div className="stack" style={{ gap: 10 }}>
+      <Choice
+        label={t.settings.language.label}
+        options={LOCALES.map((l) => ({ value: l, title: LOCALE_NAMES[l] }))}
+        value={value}
+        onChange={async (next) => {
+          const before = value;
+          setValue(next);
+          if (!(await save({ locale: next }))) setValue(before);
+        }}
+        disabled={working}
+      />
+      {status}
+    </div>
+  );
+}
 
 /**
  * Whether writing is part of this learner's study. Switching keeps what is
@@ -121,14 +138,26 @@ export const WRITING_OPTIONS = [
  * and shown, and turning it back on picks up where it was.
  */
 export function WritingSetting({ initial }: { initial: boolean | null }) {
+  const t = useT();
   const [value, setValue] = useState<boolean | null>(initial);
   const { save, working, status } = useSave();
 
   return (
     <div className="stack" style={{ gap: 10 }}>
       <Choice
-        label="What you are learning"
-        options={WRITING_OPTIONS}
+        label={t.settings.writing.label}
+        options={[
+          {
+            value: false,
+            title: t.settings.writing.readingOnly,
+            detail: t.settings.writing.readingOnlyDetail,
+          },
+          {
+            value: true,
+            title: t.settings.writing.readingAndWriting,
+            detail: t.settings.writing.readingAndWritingDetail,
+          },
+        ]}
         // Unchosen reads as writing on, which is what it means until chosen.
         value={value ?? true}
         onChange={async (next) => {
@@ -143,27 +172,25 @@ export function WritingSetting({ initial }: { initial: boolean | null }) {
   );
 }
 
-const WARNING_OPTIONS: { value: number | null; title: string }[] = [
-  { value: 10, title: "10 reviews" },
-  { value: 20, title: "20 reviews" },
-  { value: 50, title: "50 reviews" },
-  { value: null, title: "Never" },
-];
+const WARNING_VALUES = [10, 20, 50, null];
 
 /** How many due reviews make a new lesson suggest reviewing first. */
 export function ReviewWarningSetting({ initial }: { initial: number | null }) {
+  const t = useT();
   const [value, setValue] = useState<number | null>(initial);
   const { save, working, status } = useSave();
 
   // A value set some other way still shows, rather than no option selected.
-  const options = WARNING_OPTIONS.some((o) => o.value === value)
-    ? WARNING_OPTIONS
-    : [{ value, title: `${value} reviews` }, ...WARNING_OPTIONS];
+  const values = WARNING_VALUES.includes(value) ? WARNING_VALUES : [value, ...WARNING_VALUES];
+  const options = values.map((v) => ({
+    value: v,
+    title: v === null ? t.settings.warning.never : t.settings.warning.reviews(v),
+  }));
 
   return (
     <div className="stack" style={{ gap: 10 }}>
       <Choice
-        label="Warn before a new lesson at"
+        label={t.settings.warning.label}
         options={options}
         value={value}
         onChange={async (next) => {

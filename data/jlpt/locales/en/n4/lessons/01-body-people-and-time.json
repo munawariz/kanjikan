@@ -1,0 +1,286 @@
+{
+  "the-body": {
+    "title": "The body",
+    "summary": "Alone, the body parts are native words — くち, め, て, あし, からだ — but in many compounds they switch to on readings: 人口 じんこう, 目的 もくてき, 手話 しゅわ. 足 is also a verb: 足りる, to be enough, and 足す, to add.",
+    "words": {
+      "口|くち": ["Mouth"],
+      "一口|ひとくち": ["A Mouthful", "A Bite"],
+      "人口|じんこう": ["Population"],
+      "出入り口|でいりぐち": ["Doorway", "Entrance and Exit"],
+      "窓口|まどぐち": ["Ticket Window", "Service Counter"],
+
+      "目|め": ["Eye"],
+      "目的|もくてき": ["Purpose", "Aim"],
+      "見た目|みため": ["Appearance", "Looks"],
+      "二つ目|ふたつめ": ["The Second One", "Second"],
+      "目の前|めのまえ": ["Before One's Eyes", "Right in Front"],
+      "目上|めうえ": ["One's Superior", "Senior"],
+
+      "手|て": ["Hand"],
+      "手伝う|てつだう": ["To Help", "To Assist"],
+      "手前|てまえ": ["This Side", "Just Before"],
+      "手本|てほん": ["Model (to copy)", "Example"],
+      "手話|しゅわ": ["Sign Language"],
+
+      "足|あし": ["Foot", "Leg"],
+      "足りる|たりる": ["To Be Enough", "To Be Sufficient"],
+      "足す|たす": ["To Add"],
+      "一足|いっそく": ["One Pair (of shoes)"],
+      "手足|てあし": ["Hands and Feet", "Limbs"],
+
+      "体|からだ": ["Body", "Health"],
+      "大体|だいたい": ["Mostly", "Roughly", "About"],
+      "体育|たいいく": ["Physical Education", "PE"],
+      "体中|からだじゅう": ["All Over the Body"],
+      "一体|いったい": ["On Earth (in questions)", "Ever"]
+    }
+  },
+  "heart-and-mind": {
+    "title": "Heart and mind",
+    "summary": "思う and 考える both come out as think: 思う is what you feel or believe, 考える is working something through. 心, the heart, sits under both 思 and 意 — in these characters the thinking happens there.",
+    "words": {
+      "心|こころ": ["Heart", "Mind"],
+      "心配|しんぱい": ["Worry", "Concern"],
+      "中心|ちゅうしん": ["Centre", "Core"],
+      "心から|こころから": ["Sincerely", "From the Heart"],
+      "本心|ほんしん": ["True Feelings", "Real Intention"],
+
+      "思う|おもう": ["To Think", "To Feel", "To Believe"],
+      "思い出す|おもいだす": ["To Remember", "To Recall"],
+      "思い|おもい": ["Feeling", "Thought", "Wish"],
+      "思いつく|おもいつく": ["To Hit Upon (an idea)", "To Think Of"],
+      "思わず|おもわず": ["Without Thinking", "Unintentionally"],
+
+      "考える|かんがえる": ["To Consider", "To Think About"],
+      "考え|かんがえ": ["Idea", "Way of Thinking"],
+      "考え出す|かんがえだす": ["To Think Up", "To Come Up With"],
+      "参考|さんこう": ["Reference"],
+      "思考|しこう": ["Thinking", "Thought"],
+
+      "知る|しる": ["To Know", "To Find Out"],
+      "知らせる|しらせる": ["To Inform", "To Let Know"],
+      "お知らせ|おしらせ": ["Notice", "Announcement"],
+      "知人|ちじん": ["Acquaintance"],
+      "知識|ちしき": ["Knowledge"],
+
+      "意見|いけん": ["Opinion"],
+      "意外|いがい": ["Unexpected", "Surprising"],
+      "意思|いし": ["Intention", "Will"],
+      "得意|とくい": ["Good At", "Strong Point"]
+    }
+  },
+  "self-and-others": {
+    "title": "Self and others",
+    "summary": "私 is わたし in conversation and わたくし when you need to sound formal: one kanji, two words. 者 means person too, but it is humble or bookish and lives in compounds like 学者 and 読者; the everyday word for a person is still 人.",
+    "words": {
+      "私|わたし": ["I", "Me"],
+      "私|わたくし": ["I (formal)", "Me"],
+      "私たち|わたしたち": ["We", "Us"],
+      "私鉄|してつ": ["Private Railway"],
+      "私大|しだい": ["Private University"],
+
+      "自由|じゆう": ["Freedom", "As One Likes"],
+      "自ら|みずから": ["Personally", "In Person", "Oneself"],
+      "自体|じたい": ["Itself", "The Thing Itself"],
+      "自国|じこく": ["One's Own Country"],
+      "自然|しぜん": ["Nature", "Natural"],
+
+      "者|もの": ["Person (humble)"],
+      "学者|がくしゃ": ["Scholar"],
+      "読者|どくしゃ": ["Reader"],
+      "若者|わかもの": ["Young People", "Youth"],
+      "何者|なにもの": ["What Sort of Person", "Who"],
+
+      "主に|おもに": ["Mainly", "Mostly"],
+      "主人|しゅじん": ["My Husband", "Head of the Household", "Owner"],
+      "ご主人|ごしゅじん": ["Husband (polite)", "Your Husband"],
+      "主婦|しゅふ": ["Housewife"],
+      "主語|しゅご": ["Subject (grammar)"],
+      "主食|しゅしょく": ["Staple Food"],
+
+      "親|おや": ["Parent", "Parents"],
+      "両親|りょうしん": ["Both Parents", "Parents"],
+      "親しい|したしい": ["Close", "Friendly", "Intimate"],
+      "親しみ|したしみ": ["Affection", "Familiarity"],
+      "親子|おやこ": ["Parent and Child"]
+    }
+  },
+  "family": {
+    "title": "Family",
+    "summary": "Family words come in pairs: plain 兄 and 姉 when you talk about your own family to others, polite お兄さん and お姉さん for someone else's — or when you speak to your own. 兄弟 is written with brothers but covers sisters too: it is the everyday word for siblings.",
+    "words": {
+      "家|いえ": ["House", "Home"],
+      "家|うち": ["One's Home", "Home", "One's Family"],
+      "家内|かない": ["My Wife"],
+      "大家|おおや": ["Landlord", "Landlady"],
+      "家出|いえで": ["Running Away from Home"],
+
+      "家族|かぞく": ["Family"],
+      "ご家族|ごかぞく": ["Family (polite)", "Your Family"],
+      "大家族|だいかぞく": ["Large Family", "Extended Family"],
+      "親族|しんぞく": ["Relatives", "Kin"],
+      "民族|みんぞく": ["Ethnic Group", "A People"],
+
+      "兄|あに": ["My Older Brother"],
+      "お兄さん|おにいさん": ["Older Brother (polite)", "Young Man"],
+      "兄さん|にいさん": ["Older Brother (familiar)", "Big Brother"],
+      "兄貴|あにき": ["Big Brother", "One's Senior"],
+      "父兄|ふけい": ["Parents and Guardians"],
+
+      "弟|おとうと": ["My Younger Brother"],
+      "弟さん|おとうとさん": ["Younger Brother (polite)"],
+      "兄弟|きょうだい": ["Siblings", "Brothers"],
+      "弟子|でし": ["Apprentice", "Disciple"],
+
+      "姉|あね": ["My Older Sister"],
+      "お姉さん|おねえさん": ["Older Sister (polite)", "Young Woman"],
+      "姉さん|ねえさん": ["Older Sister (familiar)", "Big Sister"],
+      "姉貴|あねき": ["Big Sister", "Older Woman One Looks Up To"],
+
+      "妹|いもうと": ["My Younger Sister"],
+      "妹さん|いもうとさん": ["Younger Sister (polite)"],
+      "姉妹|しまい": ["Sisters"],
+      "兄弟姉妹|きょうだいしまい": ["Brothers and Sisters", "Siblings"]
+    }
+  },
+  "morning-to-night": {
+    "title": "Morning to night",
+    "summary": "Each time of day has a native reading on its own and an on reading in compounds: あさ and ちょう, ひる and ちゅう, よる and や. 夕べ is written with the evening kanji, but in conversation it usually means last night.",
+    "words": {
+      "朝|あさ": ["Morning"],
+      "朝日|あさひ": ["Morning Sun", "Rising Sun"],
+      "早朝|そうちょう": ["Early Morning"],
+      "朝夕|あさゆう": ["Morning and Evening", "Constantly"],
+      "朝刊|ちょうかん": ["Morning Paper", "Morning Edition"],
+
+      "昼|ひる": ["Noon", "Daytime", "Lunch"],
+      "お昼|おひる": ["Lunch", "Noon"],
+      "昼食|ちゅうしょく": ["Midday Meal", "Lunch"],
+      "昼寝|ひるね": ["Nap", "Afternoon Nap"],
+      "昼前|ひるまえ": ["Late Morning", "Just Before Noon"],
+
+      "夕べ|ゆうべ": ["Last Night", "Evening"],
+      "夕日|ゆうひ": ["Setting Sun", "Evening Sun"],
+      "七夕|たなばた": ["Star Festival", "Tanabata"],
+      "夕焼け|ゆうやけ": ["Sunset Glow", "Red Evening Sky"],
+
+      "夜|よる": ["Night"],
+      "夜中|よなか": ["Middle of the Night"],
+      "夜食|やしょく": ["Late-Night Snack"],
+      "夜間|やかん": ["Night Hours", "At Night"],
+      "深夜|しんや": ["Late Night", "Dead of Night"],
+
+      "早い|はやい": ["Early", "Quick", "Soon"],
+      "早く|はやく": ["Quickly", "Early", "Soon"],
+      "早口|はやくち": ["Fast Talking", "Rapid Speech"],
+      "早速|さっそく": ["At Once", "Right Away"],
+      "早める|はやめる": ["To Bring Forward", "To Hasten"]
+    }
+  },
+  "weeks-and-clocks": {
+    "title": "Weeks, clocks and times",
+    "summary": "度 counts both times and degrees: 一度 is once, and in a weather forecast 三十度 is thirty degrees. 代 is a stand-in, an era, or a bill — 時代 is a period of history, 電気代 is what you pay for electricity.",
+    "words": {
+      "曜日|ようび": ["Day of the Week"],
+      "日曜|にちよう": ["Sunday"],
+      "月曜|げつよう": ["Monday"],
+      "金曜|きんよう": ["Friday"],
+      "土曜|どよう": ["Saturday"],
+
+      "週|しゅう": ["Week"],
+      "週末|しゅうまつ": ["Weekend"],
+      "先々週|せんせんしゅう": ["The Week Before Last"],
+      "何週間|なんしゅうかん": ["How Many Weeks"],
+      "二週間|にしゅうかん": ["Two Weeks"],
+
+      "度|ど": ["Degrees", "Times"],
+      "一度|いちど": ["Once", "One Time"],
+      "二度と|にどと": ["Never Again (with a negative)"],
+      "温度|おんど": ["Temperature"],
+      "度々|たびたび": ["Often", "Repeatedly"],
+      "年度|ねんど": ["Fiscal Year", "Academic Year"],
+
+      "代わる|かわる": ["To Take Someone's Place", "To Be Replaced"],
+      "代わり|かわり": ["Substitute", "Instead"],
+      "お代わり|おかわり": ["Second Helping", "Refill"],
+      "時代|じだい": ["Era", "Period", "The Times"],
+      "電気代|でんきだい": ["Electricity Bill"],
+      "十代|じゅうだい": ["One's Teens"],
+
+      "計る|はかる": ["To Measure", "To Time"],
+      "計算|けいさん": ["Calculation"],
+      "家計|かけい": ["Household Budget", "Family Finances"],
+      "小計|しょうけい": ["Subtotal"],
+      "日時計|ひどけい": ["Sundial"]
+    }
+  },
+  "the-seasons": {
+    "title": "The four seasons",
+    "summary": "Each season is a native word on its own — はる, なつ, あき, ふゆ — and all four on readings line up in 春夏秋冬, しゅんかしゅうとう. 風 and 風邪 are both read かぜ: one is the wind, the other a cold.",
+    "words": {
+      "春|はる": ["Spring"],
+      "春休み|はるやすみ": ["Spring Holiday", "Spring Break"],
+      "春分|しゅんぶん": ["Spring Equinox"],
+      "春雨|はるさめ": ["Spring Rain", "Glass Noodles"],
+      "春先|はるさき": ["Early Spring"],
+
+      "夏|なつ": ["Summer"],
+      "夏祭り|なつまつり": ["Summer Festival"],
+      "夏時間|なつじかん": ["Summer Time", "Daylight Saving Time"],
+      "夏日|なつび": ["Hot Day (25°C or above)", "Summer Day"],
+      "春夏秋冬|しゅんかしゅうとう": ["The Four Seasons", "All Year Round"],
+
+      "秋|あき": ["Autumn"],
+      "秋分|しゅうぶん": ["Autumn Equinox"],
+      "秋風|あきかぜ": ["Autumn Wind"],
+      "秋晴れ|あきばれ": ["Clear Autumn Weather"],
+      "秋雨|あきさめ": ["Autumn Rain"],
+
+      "冬|ふゆ": ["Winter"],
+      "冬休み|ふゆやすみ": ["Winter Holiday", "Winter Break"],
+      "冬眠|とうみん": ["Hibernation"],
+      "冬日|ふゆび": ["Freezing Day (below 0°C)", "Winter Day"],
+
+      "風|かぜ": ["Wind", "Breeze"],
+      "風邪|かぜ": ["A Cold", "Common Cold"],
+      "風車|ふうしゃ": ["Windmill"],
+      "春風|はるかぜ": ["Spring Breeze"],
+      "お風呂|おふろ": ["Bath"]
+    }
+  },
+  "colours": {
+    "title": "Colours",
+    "summary": "The oldest colour words — 赤い, 青い, 黒い, and 白い from N5 — are i-adjectives; most of the rest are nouns built on 色, like 茶色 and 水色. 青 covers green as well as blue, which is why a green traffic light is called 青.",
+    "words": {
+      "色|いろ": ["Colour"],
+      "色々|いろいろ": ["Various", "All Sorts"],
+      "黄色|きいろ": ["Yellow"],
+      "水色|みずいろ": ["Light Blue", "Sky Blue"],
+      "金色|きんいろ": ["Gold (colour)", "Golden"],
+      "景色|けしき": ["Scenery", "View"],
+
+      "赤い|あかい": ["Red"],
+      "赤|あか": ["The Colour Red", "Red"],
+      "赤ちゃん|あかちゃん": ["Baby"],
+      "赤ん坊|あかんぼう": ["Infant", "Baby"],
+      "赤ワイン|あかワイン": ["Red Wine"],
+
+      "青い|あおい": ["Blue", "Green", "Pale"],
+      "青|あお": ["The Colour Blue", "Blue", "Green (traffic light)"],
+      "青春|せいしゅん": ["Youth", "Springtime of Life"],
+      "青年|せいねん": ["Young Man", "Young People"],
+      "青白い|あおじろい": ["Pale", "Pallid"],
+
+      "黒い|くろい": ["Black", "Dark"],
+      "黒|くろ": ["The Colour Black", "Black"],
+      "黒板|こくばん": ["Blackboard"],
+      "黒目|くろめ": ["Iris (of the eye)", "Dark Eyes"],
+
+      "お茶|おちゃ": ["Tea", "Green Tea"],
+      "紅茶|こうちゃ": ["Black Tea"],
+      "茶色|ちゃいろ": ["Brown"],
+      "日本茶|にほんちゃ": ["Japanese Tea", "Green Tea"],
+      "茶わん|ちゃわん": ["Rice Bowl", "Teacup"]
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getLesson } from "@/lib/content";
+import { getLocale } from "@/lib/i18n/server";
 import { getUser } from "@/lib/auth";
 import { getDueCounts, getProfile, getProgress, reviewsDue, studiesWriting } from "@/lib/progress";
 import { StudySession } from "@/components/app/StudySession";
@@ -7,7 +8,7 @@ import { StudySession } from "@/components/app/StudySession";
 export const dynamic = "force-dynamic";
 
 export default async function StudyPage({ params }: { params: { slug: string } }) {
-  const lesson = getLesson(params.slug);
+  const lesson = getLesson(params.slug, await getLocale());
   if (!lesson) notFound();
 
   // A guest has no stored rows, so they always start at the first character

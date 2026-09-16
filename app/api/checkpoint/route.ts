@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
+import { getT } from "@/lib/i18n/server";
 import { getLesson } from "@/lib/content";
 import { saveCheckpoint } from "@/lib/progress";
 
@@ -8,8 +9,8 @@ import { saveCheckpoint } from "@/lib/progress";
  * so closing the tab halfway resumes at the same card rather than the start.
  */
 export async function POST(request: Request) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const [user, t] = await Promise.all([getUser(), getT()]);
+  if (!user) return NextResponse.json({ error: t.api.notSignedIn }, { status: 401 });
 
   const body = await request.json().catch(() => null);
   const lessonSlug = body?.lessonSlug;
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
 
   const lesson = typeof lessonSlug === "string" ? getLesson(lessonSlug) : undefined;
   if (!lesson) {
-    return NextResponse.json({ error: "Unknown lesson" }, { status: 400 });
+    return NextResponse.json({ error: t.api.unknownLesson }, { status: 400 });
   }
   if (!Number.isInteger(cursor) || cursor < 0) {
     return NextResponse.json({ error: "cursor must be a non-negative integer" }, { status: 400 });

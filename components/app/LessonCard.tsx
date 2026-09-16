@@ -2,11 +2,12 @@ import Link from "next/link";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import type { LessonSummary } from "@/lib/progress";
+import { getT } from "@/lib/i18n/server";
 
-const STATUS: Record<LessonSummary["status"], { label: string; tone: "sage" | "soft" | "accent" }> = {
-  not_started: { label: "Not started", tone: "sage" },
-  learning: { label: "In progress", tone: "soft" },
-  completed: { label: "Completed", tone: "accent" },
+const STATUS_TONE: Record<LessonSummary["status"], "sage" | "soft" | "accent"> = {
+  not_started: "sage",
+  learning: "soft",
+  completed: "accent",
 };
 
 /**
@@ -16,8 +17,8 @@ const STATUS: Record<LessonSummary["status"], { label: string; tone: "sage" | "s
  * type on the card. Atlas alternates cream and sage across a grid, so tone is
  * driven by position; status is carried by the badge.
  */
-export function LessonCard({ lesson, index }: { lesson: LessonSummary; index: number }) {
-  const status = STATUS[lesson.status];
+export async function LessonCard({ lesson, index }: { lesson: LessonSummary; index: number }) {
+  const t = await getT();
   const tone = index % 2 === 0 ? "cream" : "sage";
 
   return (
@@ -34,7 +35,7 @@ export function LessonCard({ lesson, index }: { lesson: LessonSummary; index: nu
             >
               {String(lesson.order).padStart(2, "0")}
             </span>
-            <Badge tone={status.tone}>{status.label}</Badge>
+            <Badge tone={STATUS_TONE[lesson.status]}>{t.shell.lessonStatus[lesson.status]}</Badge>
           </div>
 
           <div className="row jp" style={{ gap: 10, flexWrap: "wrap" }}>
@@ -63,10 +64,8 @@ export function LessonCard({ lesson, index }: { lesson: LessonSummary; index: nu
               className="row body-sm"
               style={{ justifyContent: "space-between", color: "var(--on-tint-body)" }}
             >
-              <span>
-                {lesson.kanjiKnown} of {lesson.kanji.length} kanji known
-              </span>
-              {lesson.due > 0 && <span>{lesson.due} due</span>}
+              <span>{t.shell.kanjiKnown(lesson.kanjiKnown, lesson.kanji.length)}</span>
+              {lesson.due > 0 && <span>{t.shell.due(lesson.due)}</span>}
             </div>
           </div>
         </div>

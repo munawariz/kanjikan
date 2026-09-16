@@ -1,0 +1,142 @@
+{
+  "one-to-five": {
+    "title": "Satu sampai lima",
+    "summary": "Lima angka pertama. Masing-masing punya dua cara baca — 一 dibaca いち saat berhitung dan ひと saat menghitung benda — dan satu-satunya cara menguasainya adalah mengenal keduanya.",
+    "words": {
+      "一つ|ひとつ": ["Satu Buah"],
+      "一人|ひとり": ["Satu Orang", "Sendirian"],
+      "一日|ついたち": ["Tanggal Satu"],
+      "一月|いちがつ": ["Januari"],
+      "一番|いちばん": ["Paling", "Nomor Satu"],
+
+      "二つ|ふたつ": ["Dua Buah"],
+      "二人|ふたり": ["Dua Orang"],
+      "二日|ふつか": ["Tanggal Dua", "Dua Hari"],
+      "二月|にがつ": ["Februari"],
+      "十二|じゅうに": ["Dua Belas"],
+
+      "三つ|みっつ": ["Tiga Buah"],
+      "三人|さんにん": ["Tiga Orang"],
+      "三日|みっか": ["Tanggal Tiga", "Tiga Hari"],
+      "三月|さんがつ": ["Maret"],
+      "三時|さんじ": ["Pukul Tiga"],
+
+      "四つ|よっつ": ["Empat Buah"],
+      "四人|よにん": ["Empat Orang"],
+      "四日|よっか": ["Tanggal Empat", "Empat Hari"],
+      "四月|しがつ": ["April"],
+      "四時|よじ": ["Pukul Empat"],
+
+      "五つ|いつつ": ["Lima Buah"],
+      "五人|ごにん": ["Lima Orang"],
+      "五日|いつか": ["Tanggal Lima", "Lima Hari"],
+      "五月|ごがつ": ["Mei"],
+      "五時|ごじ": ["Pukul Lima"]
+    }
+  },
+  "six-to-ten": {
+    "title": "Enam sampai sepuluh",
+    "summary": "Paruh kedua hitungan. Perhatikan tanggalnya: 六日 dibaca むいか, 七日 dibaca なのか, 八日 dibaca ようか — tidak satu pun mengikuti cara baca angkanya.",
+    "words": {
+      "六つ|むっつ": ["Enam Buah"],
+      "六人|ろくにん": ["Enam Orang"],
+      "六日|むいか": ["Tanggal Enam", "Enam Hari"],
+      "六月|ろくがつ": ["Juni"],
+      "六時|ろくじ": ["Pukul Enam"],
+
+      "七つ|ななつ": ["Tujuh Buah"],
+      "七人|しちにん": ["Tujuh Orang"],
+      "七日|なのか": ["Tanggal Tujuh", "Tujuh Hari"],
+      "七月|しちがつ": ["Juli"],
+      "七時|しちじ": ["Pukul Tujuh"],
+
+      "八つ|やっつ": ["Delapan Buah"],
+      "八人|はちにん": ["Delapan Orang"],
+      "八日|ようか": ["Tanggal Delapan", "Delapan Hari"],
+      "八月|はちがつ": ["Agustus"],
+      "八時|はちじ": ["Pukul Delapan"],
+
+      "九つ|ここのつ": ["Sembilan Buah"],
+      "九人|きゅうにん": ["Sembilan Orang"],
+      "九日|ここのか": ["Tanggal Sembilan", "Sembilan Hari"],
+      "九月|くがつ": ["September"],
+      "九時|くじ": ["Pukul Sembilan"],
+
+      "十|じゅう": ["Sepuluh"],
+      "十日|とおか": ["Tanggal Sepuluh", "Sepuluh Hari"],
+      "十月|じゅうがつ": ["Oktober"],
+      "十時|じゅうじ": ["Pukul Sepuluh"],
+      "十分|じゅっぷん": ["Sepuluh Menit"]
+    }
+  },
+  "hundreds-and-money": {
+    "title": "Ratusan, ribuan, dan uang",
+    "summary": "Berhitung di atas sepuluh, ditambah yen. Angka besar berubah bunyi dalam kata majemuk — 三百 dibaca さんびゃく, tetapi 六百 dibaca ろっぴゃく.",
+    "words": {
+      "百|ひゃく": ["Seratus"],
+      "三百|さんびゃく": ["Tiga Ratus"],
+      "六百|ろっぴゃく": ["Enam Ratus"],
+      "八百屋|やおや": ["Toko Sayur"],
+      "百人|ひゃくにん": ["Seratus Orang"],
+
+      "千|せん": ["Seribu"],
+      "三千|さんぜん": ["Tiga Ribu"],
+      "八千|はっせん": ["Delapan Ribu"],
+      "千人|せんにん": ["Seribu Orang"],
+      "千年|せんねん": ["Seribu Tahun"],
+
+      "万|まん": ["Sepuluh Ribu (satuan)"],
+      "一万|いちまん": ["Sepuluh Ribu"],
+      "十万|じゅうまん": ["Seratus Ribu"],
+      "百万|ひゃくまん": ["Satu Juta"],
+      "万年筆|まんねんひつ": ["Pena Tinta"],
+
+      "円|えん": ["Yen"],
+      "百円|ひゃくえん": ["Seratus Yen"],
+      "千円|せんえん": ["Seribu Yen"],
+      "一万円|いちまんえん": ["Sepuluh Ribu Yen"],
+      "円い|まるい": ["Bundar", "Melingkar"],
+
+      "半分|はんぶん": ["Setengah"],
+      "半日|はんにち": ["Setengah Hari"],
+      "半年|はんとし": ["Setengah Tahun"],
+      "半月|はんつき": ["Setengah Bulan"],
+      "三時半|さんじはん": ["Pukul Setengah Empat (3.30)"]
+    }
+  },
+  "days-months-time": {
+    "title": "Hari, bulan, tahun, waktu",
+    "summary": "Kanji kalender. 日 sendiri dibaca ひ, tetapi di dalam kata majemuk berubah menjadi にち, か, bahkan じつ — di sinilah cara baca ganda benar-benar dimulai.",
+    "words": {
+      "日|ひ": ["Hari", "Matahari"],
+      "日本|にほん": ["Jepang"],
+      "今日|きょう": ["Hari Ini"],
+      "日曜日|にちようび": ["Hari Minggu"],
+      "明日|あした": ["Besok"],
+
+      "月|つき": ["Bulan (benda langit)", "Bulan (kalender)"],
+      "月曜日|げつようび": ["Hari Senin"],
+      "今月|こんげつ": ["Bulan Ini"],
+      "来月|らいげつ": ["Bulan Depan"],
+      "先月|せんげつ": ["Bulan Lalu"],
+
+      "年|とし": ["Tahun", "Usia"],
+      "今年|ことし": ["Tahun Ini"],
+      "来年|らいねん": ["Tahun Depan"],
+      "去年|きょねん": ["Tahun Lalu"],
+      "一年生|いちねんせい": ["Siswa Kelas Satu"],
+
+      "時|とき": ["Waktu (saat)", "Ketika"],
+      "時間|じかん": ["Waktu (lamanya)", "Jam (satuan waktu)"],
+      "何時|なんじ": ["Jam Berapa"],
+      "時計|とけい": ["Jam (alat)", "Jam Tangan"],
+      "時々|ときどき": ["Terkadang"],
+
+      "分|ふん": ["Menit"],
+      "分かる|わかる": ["Mengerti"],
+      "分ける|わける": ["Membagi", "Membagikan"],
+      "自分|じぶん": ["Diri Sendiri"],
+      "気分|きぶん": ["Suasana Hati", "Perasaan"]
+    }
+  }
+}

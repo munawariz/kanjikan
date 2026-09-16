@@ -34,10 +34,13 @@ const isDatabaseConfigured = Boolean(process.env.SUPABASE_DB_URL || process.env.
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Without a database there is nothing to sign in to. Send everything to the
-  // setup page rather than failing on each route.
+  // Without a database there is nothing to sign in to, so everything that
+  // needs an account goes to the setup page rather than failing on each route.
+  // What a guest can use still works: that is enough to check a content
+  // change, which most contributions are, without a database of one's own.
   if (!isDatabaseConfigured) {
-    if (pathname === "/setup") return NextResponse.next();
+    if (isPublicPath(pathname) && pathname !== "/login") return NextResponse.next();
+    if (pathname === "/api/locale") return NextResponse.next();
     const url = request.nextUrl.clone();
     url.pathname = "/setup";
     return NextResponse.redirect(url);

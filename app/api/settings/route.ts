@@ -1,19 +1,22 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
+import { getT, rememberLocale } from "@/lib/i18n/server";
+import { isLocale, LOCALES, type Locale } from "@/lib/i18n/config";
 import { saveSettings } from "@/lib/progress";
 
 /**
- * Saves a learner's study choices. Either field may be sent alone.
+ * Saves a learner's study choices. Any field may be sent alone.
  *
  *   studyWriting   boolean
  *   reviewWarning  due reviews at which a new lesson warns first, 1–500, or null for never
+ *   locale         the language the app is shown in: "en" or "id"
  */
 export async function POST(request: Request) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const [user, t] = await Promise.all([getUser(), getT()]);
+  if (!user) return NextResponse.json({ error: t.api.notSignedIn }, { status: 401 });
 
   const body = await request.json().catch(() => null);
-  const settings: { studyWriting?: boolean; reviewWarning?: number | null } = {};
+  const settings: { studyWriting?: boolean; reviewWarning?: number | null; locale?: Locale } = {};
 
   if (body && "studyWriting" in body) {
     if (typeof body.studyWriting !== "boolean") {
@@ -28,9 +31,17 @@ export async function POST(request: Request) {
     }
     settings.reviewWarning = v;
   }
+  if (body && "locale" in body) {
+    if (!isLocale(body.locale)) {
+      return NextResponse.json({ error: `locale must be one of ${LOCALES.join(", ")}` }, { status: 400 });
+    }
+    settings.locale = body.locale;
+  }
 
   try {
     await saveSettings(user.id, settings);
+    // Also on this browser, so the language holds after signing out.
+    if (settings.locale) rememberLocale(settings.locale);
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
