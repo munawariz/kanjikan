@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
 import { getLocale } from "@/lib/i18n/server";
-import { messages } from "@/lib/i18n/messages";
+import { getMessages } from "@/lib/i18n/locales";
 import { localDate, requestTimeZone, shiftDate } from "@/lib/daily";
 import { recordDailyAnswer } from "@/lib/progress";
 
@@ -13,7 +13,7 @@ import { recordDailyAnswer } from "@/lib/progress";
  */
 export async function POST(request: Request) {
   const [user, locale] = await Promise.all([getUser(), getLocale()]);
-  const t = messages[locale];
+  const t = getMessages(locale);
   if (!user) return NextResponse.json({ error: t.api.notSignedIn }, { status: 401 });
 
   const body = await request.json().catch(() => null);

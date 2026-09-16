@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { LOCALE_NAMES, LOCALES, type Locale } from "@/lib/i18n/config";
-import { useT } from "@/lib/i18n/client";
+import type { Locale } from "@/lib/i18n/config";
+import { useLocales, useT } from "@/lib/i18n/client";
 import { post } from "./StudySession";
 
 /**
@@ -111,6 +111,7 @@ function useSave() {
  */
 export function LanguageSetting({ initial }: { initial: Locale }) {
   const t = useT();
+  const locales = useLocales();
   const [value, setValue] = useState<Locale>(initial);
   const { save, working, status } = useSave();
 
@@ -118,7 +119,7 @@ export function LanguageSetting({ initial }: { initial: Locale }) {
     <div className="stack" style={{ gap: 10 }}>
       <Choice
         label={t.settings.language.label}
-        options={LOCALES.map((l) => ({ value: l, title: LOCALE_NAMES[l] }))}
+        options={locales.map((l) => ({ value: l.code, title: l.name }))}
         value={value}
         onChange={async (next) => {
           const before = value;

@@ -1,11 +1,11 @@
 # Bahasa Indonesia: style guide
 
 Everything a learner reads in Indonesian lives in this folder. The files have the same shape as
-`locales/en/`, and the main README's **Contributing** section explains each one. This page covers
+`locales/en/`, and [CONTRIBUTING.md](../../../../CONTRIBUTING.md) explains each one. This page covers
 what is specific to Indonesian.
 
-`npm run validate:content` checks that every built level is fully translated here. Indonesian ships
-in the app, so a gap fails the build.
+`npm run validate:content` checks that every built level is fully translated here. Indonesian is
+marked `"complete": true` in `locale.json`, so a gap fails the build instead of showing English.
 
 ## Rules
 

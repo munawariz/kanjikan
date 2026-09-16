@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
 import { getT, rememberLocale } from "@/lib/i18n/server";
-import { isLocale, LOCALES, type Locale } from "@/lib/i18n/config";
+import type { Locale } from "@/lib/i18n/config";
+import { isAvailableLocale, listLocales } from "@/lib/i18n/locales";
 import { saveSettings } from "@/lib/progress";
 
 /**
@@ -9,7 +10,7 @@ import { saveSettings } from "@/lib/progress";
  *
  *   studyWriting   boolean
  *   reviewWarning  due reviews at which a new lesson warns first, 1–500, or null for never
- *   locale         the language the app is shown in: "en" or "id"
+ *   locale         the language the app is shown in: a code the app has a folder for
  */
 export async function POST(request: Request) {
   const [user, t] = await Promise.all([getUser(), getT()]);
@@ -32,8 +33,9 @@ export async function POST(request: Request) {
     settings.reviewWarning = v;
   }
   if (body && "locale" in body) {
-    if (!isLocale(body.locale)) {
-      return NextResponse.json({ error: `locale must be one of ${LOCALES.join(", ")}` }, { status: 400 });
+    if (!isAvailableLocale(body.locale)) {
+      const codes = listLocales().map((l) => l.code);
+      return NextResponse.json({ error: `locale must be one of ${codes.join(", ")}` }, { status: 400 });
     }
     settings.locale = body.locale;
   }

@@ -3,15 +3,17 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { getUser } from "@/lib/auth";
 import { asSystem } from "@/lib/db";
-import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE, type Locale } from "./config";
-import { messages, type Messages } from "./messages";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, type Locale } from "./config";
+import { getMessages, isAvailableLocale } from "./locales";
+import type { Messages } from "./messages";
 
 /**
  * The language of this request.
  *
  * A signed-in learner's setting, then the language last chosen on this
- * browser, then English. Memoised per request: the layout, the page and
- * everything they render all ask.
+ * browser, then English. A language whose folder has since been removed is
+ * skipped. Memoised per request: the layout, the page and everything they
+ * render all ask.
  */
 export const getLocale = cache(async (): Promise<Locale> => {
   const user = await getUser();
@@ -24,7 +26,7 @@ export const getLocale = cache(async (): Promise<Locale> => {
         );
         return rows[0]?.locale;
       });
-      if (isLocale(saved)) return saved;
+      if (isAvailableLocale(saved)) return saved;
     } catch (e) {
       // Before the migration that adds the column, fall through rather than
       // failing every page.
@@ -32,12 +34,12 @@ export const getLocale = cache(async (): Promise<Locale> => {
     }
   }
   const cookie = cookies().get(LOCALE_COOKIE)?.value;
-  return isLocale(cookie) ? cookie : DEFAULT_LOCALE;
+  return isAvailableLocale(cookie) ? cookie : DEFAULT_LOCALE;
 });
 
-/** The strings for this request's language. */
+/** The strings for this request's language, with English for anything untranslated. */
 export async function getT(): Promise<Messages> {
-  return messages[await getLocale()];
+  return getMessages(await getLocale());
 }
 
 /** Remembers a language on this browser. Route handlers and server actions only. */

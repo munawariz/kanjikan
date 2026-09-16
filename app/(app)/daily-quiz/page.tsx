@@ -9,7 +9,7 @@ import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import { DailyQuiz } from "@/components/app/DailyQuiz";
 import { DailyResults } from "@/components/app/DailyResults";
 import { getLocale, getT } from "@/lib/i18n/server";
-import { INTL_TAG } from "@/lib/i18n/format";
+import { intlTag } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages";
 
@@ -104,7 +104,7 @@ function History({
       <div style={{ display: "grid", gridTemplateColumns: `repeat(${HISTORY_DAYS}, minmax(0, 1fr))`, gap: 8 }}>
         {days.map((day) => {
           const h = history.get(day);
-          const weekday = new Date(`${day}T00:00:00Z`).toLocaleDateString(locale === "en" ? "en-GB" : INTL_TAG[locale], {
+          const weekday = new Date(`${day}T00:00:00Z`).toLocaleDateString(locale === "en" ? "en-GB" : intlTag(locale), {
             weekday: "short",
             timeZone: "UTC",
           });

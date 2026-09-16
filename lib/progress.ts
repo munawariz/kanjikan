@@ -24,8 +24,8 @@ import {
 } from "@/lib/srs";
 import { buildDailyQuiz, type KanjiQuizCard } from "@/lib/study";
 import { DAILY_QUIZ_SIZE, dailySeed, localDate } from "@/lib/daily";
-import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/config";
-import { INTL_TAG } from "@/lib/i18n/format";
+import { DEFAULT_LOCALE, isLocaleCode, type Locale } from "@/lib/i18n/config";
+import { intlTag } from "@/lib/i18n/format";
 
 export type WordProgressRow = {
   word_id: string;
@@ -133,7 +133,7 @@ export async function getProfile(userId: string): Promise<Profile> {
       [userId],
     );
     const row = rows[0];
-    return row ? { ...row, locale: isLocale(row.locale) ? row.locale : null } : fallback;
+    return row ? { ...row, locale: isLocaleCode(row.locale) ? row.locale : null } : fallback;
   });
 }
 
@@ -429,7 +429,7 @@ export async function getDashboard(userId: string, locale: Locale = DEFAULT_LOCA
   for (let i = 13; i >= 0; i--) {
     const d = new Date(now - i * 86_400_000);
     activity.push({
-      label: d.toLocaleDateString(INTL_TAG[locale], { weekday: "narrow" }),
+      label: d.toLocaleDateString(intlTag(locale), { weekday: "narrow" }),
       value: byDay.get(d.toDateString()) ?? 0,
     });
   }

@@ -14,7 +14,8 @@ import {
 } from "@/lib/username";
 import { cookies } from "next/headers";
 import { getLocale, getT, rememberLocale } from "@/lib/i18n/server";
-import { isLocale, LOCALE_COOKIE } from "@/lib/i18n/config";
+import { LOCALE_COOKIE } from "@/lib/i18n/config";
+import { isAvailableLocale } from "@/lib/i18n/locales";
 
 export type AuthState = {
   error?: string;
@@ -65,7 +66,7 @@ export async function authenticate(_prev: AuthState, formData: FormData): Promis
       // is case-insensitive.
       // A language picked before signing up becomes the account's own.
       const picked = cookies().get(LOCALE_COOKIE)?.value;
-      const account = await createAccount(username, typed, password, isLocale(picked) ? picked : null);
+      const account = await createAccount(username, typed, password, isAvailableLocale(picked) ? picked : null);
       if (!account) return { error: t.taken };
       await startSession(account.id);
     } catch (e) {

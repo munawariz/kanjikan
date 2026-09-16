@@ -21,10 +21,12 @@
  * from an earlier level, and a primitive is defined once, by the first level
  * that needs it.
  *
- * Every language the app ships (SHIPPED) must cover every built level
- * completely. A directory under locales/ that is not shipped yet is a
- * translation in progress: its gaps are reported as warnings, with how far it
- * has got, so it can be built up over many pull requests.
+ * Every folder under locales/ named like a language code is a language the
+ * app offers, finished or not; the app shows English for whatever it lacks.
+ * A language whose locale.json says "complete": true (English always is) must
+ * cover every built level, and its interface, completely. Any other is a
+ * translation in progress: its problems are reported as warnings, with how far
+ * it has got, so it can be built up over many pull requests.
  *
  * Run: npm run validate:content
  *      npm run validate:content -- --locale fr    also list what fr still lacks
@@ -32,11 +34,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { titleCase } from "./title-case.mjs";
+import { describe, loadEnglish } from "./lib/english-messages.mjs";
 
 /** Study order. Keep in step with LEVELS in lib/content.ts. */
 const LEVELS = ["n5", "n4"];
-/** Languages the app offers. Keep in step with LOCALES in lib/i18n/config.ts. English comes first: it is the reference. */
-const SHIPPED = ["en", "id"];
+/** The reference language. */
+const ENGLISH = "en";
+/** Languages whose interface text is TypeScript, in lib/i18n/messages. Keep in step with BUILT_IN_LOCALES in lib/i18n/config.ts. */
+const BUILT_IN = ["en", "id"];
+/** Keep in step with isLocaleCode in lib/i18n/config.ts. */
+const LOCALE_CODE = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
 const DATA_ROOT = path.join(process.cwd(), "data", "jlpt");
 const LOCALE_ROOT = path.join(DATA_ROOT, "locales");
 
@@ -333,23 +340,144 @@ for (const [c, level] of primitiveLevel) {
 }
 
 // ===========================================================================
+// Stories
+// ===========================================================================
+
+// <level>/stories.json is optional. Every kanji in a story must carry its
+// reading, as {漢字|かんじ}: the reader works out from the level of the story
+// which readings to show, and it can only show one that is written down.
+// A person's name is {田中|たなか|name}: no lesson teaches how names are
+// read, so it always shows its reading and its kanji are not counted as
+// ones the story tests. See lib/content.ts.
+const RUBY = /\{([^{}|]+)\|([^{}|]+)(\|name)?\}/g;
+const withoutNames = (text) => text.replace(RUBY, (_, base, _reading, name) => (name ? "" : base));
+const storySlugs = new Map(); // story slug -> level
+
+/** Problems with one piece of marked-up text, or none. */
+function rubyProblems(text) {
+  if (typeof text !== "string" || !text.trim()) return ["is empty"];
+  const problems = [];
+  for (const [, base, reading] of text.matchAll(RUBY)) {
+    if (![...base].every((ch) => HAN.test(ch))) problems.push(`{${base}|${reading}}: only kanji go before the |`);
+    if (!KANA_ONLY.test(reading)) problems.push(`{${base}|${reading}}: the reading must be kana`);
+  }
+  const rest = text.replace(RUBY, "");
+  if (/[{}|]/.test(rest)) {
+    problems.push("has a stray {, } or | - write a reading as {漢字|かんじ}, or a name as {田中|たなか|name}");
+  }
+  const bare = [...new Set([...rest].filter((ch) => HAN.test(ch)))];
+  if (bare.length) problems.push(`${bare.join(" ")} has no reading - write it as {漢字|かんじ}`);
+  return problems;
+}
+
+for (const [index, level] of LEVELS.entries()) {
+  const want = expected.get(level);
+  want.stories = new Map(); // slug -> number of paragraphs
+  const file = path.join(DATA_ROOT, level, "stories.json");
+  if (!fs.existsSync(file)) continue;
+  const stories = load(file, `${level}/stories.json`);
+  if (!Array.isArray(stories)) {
+    if (stories) errors.push(`${level}/stories.json: must be a list of stories`);
+    continue;
+  }
+  const own = new Set(kanjiLists.get(level).map((k) => k.char));
+  const used = new Set();
+
+  for (const story of stories) {
+    const where = `${level}/stories.json ${story.slug}`;
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(story.slug ?? "")) {
+      errors.push(`${level}/stories.json: bad slug ${JSON.stringify(story.slug)}`);
+    }
+    if (storySlugs.has(story.slug)) errors.push(`${where}: slug already used in ${storySlugs.get(story.slug)}`);
+    storySlugs.set(story.slug, level);
+    if ("translation" in story || "summary" in story) {
+      errors.push(`${where}: translations and summaries belong in locales/<locale>/${level}/stories.json`);
+    }
+
+    const check = (label, text) => {
+      for (const p of rubyProblems(text)) errors.push(`${where} ${label}: ${p}`);
+    };
+    check("title", story.title);
+    if (!Array.isArray(story.body) || !story.body.length) {
+      errors.push(`${where}: needs a body, a list of paragraphs`);
+      continue;
+    }
+    story.body.forEach((p, i) => check(`paragraph ${i + 1}`, p));
+
+    if (!Array.isArray(story.questions) || !story.questions.length) {
+      errors.push(`${where}: needs at least one question`);
+    }
+    (story.questions ?? []).forEach((q, i) => {
+      const label = `question ${i + 1}`;
+      check(label, q.prompt);
+      if (!Array.isArray(q.choices) || q.choices.length < 2) {
+        errors.push(`${where} ${label}: needs at least two choices`);
+        return;
+      }
+      q.choices.forEach((c, j) => check(`${label} choice ${j + 1}`, c));
+      if (new Set(q.choices).size !== q.choices.length) errors.push(`${where} ${label}: two choices are the same`);
+      if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= q.choices.length) {
+        errors.push(`${where} ${label}: answer must be the index of a choice, from 0`);
+      }
+    });
+
+    const chars = story.body.join("").replace(RUBY, "$1");
+    const tested = withoutNames(story.body.join(""));
+    const mine = [...new Set([...tested].filter((ch) => own.has(ch)))];
+    for (const c of mine) used.add(c);
+    const later = new Set([...tested].filter((ch) => kanjiLevel.has(ch) && LEVELS.indexOf(kanjiLevel.get(ch)) > index));
+    // A story that barely uses its level is not testing it.
+    if (mine.length < 10) warnings.push(`${where}: uses only ${mine.length} ${level} kanji`);
+    want.stories.set(story.slug, story.body.length);
+    notes.push(
+      `${where}: ${[...chars].length} characters, ${mine.length} ${level} kanji` +
+        (later.size ? `, ${later.size} from later levels` : ""),
+    );
+  }
+  notes.push(`${level}: ${stories.length} stories use ${used.size} of ${own.size} kanji`);
+}
+
+// ===========================================================================
 // The text, per language
 // ===========================================================================
 
-const onDisk = fs.existsSync(LOCALE_ROOT)
+const folders = fs.existsSync(LOCALE_ROOT)
   ? fs.readdirSync(LOCALE_ROOT, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name)
   : [];
-for (const locale of SHIPPED) {
-  if (!onDisk.includes(locale)) errors.push(`locales/${locale}: missing - the app offers this language`);
+for (const name of folders.filter((f) => !LOCALE_CODE.test(f))) {
+  warnings.push(`locales/${name}: not a language code, so the app ignores it (use "fr", "pt-BR"…)`);
 }
+const onDisk = folders.filter((f) => LOCALE_CODE.test(f));
+if (!onDisk.includes(ENGLISH)) errors.push(`locales/${ENGLISH}: missing - English is the reference`);
 const roadmap = load(path.join(DATA_ROOT, "levels.json"), "levels.json")?.levels ?? [];
+
+/** locale.json: { name, complete? }. Both optional; a bad file is reported and read as empty. */
+const manifests = new Map(
+  onDisk.map((locale) => {
+    const file = path.join(LOCALE_ROOT, locale, "locale.json");
+    const where = `locales/${locale}/locale.json`;
+    const manifest = fs.existsSync(file) ? load(file, where, warnings) ?? {} : {};
+    if (typeof manifest.name !== "string" || !manifest.name.trim()) {
+      warnings.push(`${where}: no "name", so the language picker shows "${locale}"`);
+    }
+    if ("complete" in manifest && typeof manifest.complete !== "boolean") {
+      errors.push(`${where}: "complete" must be true or false`);
+    }
+    return [locale, manifest];
+  }),
+);
+const complete = (locale) => locale === ENGLISH || manifests.get(locale)?.complete === true;
+
+// English's interface text, which a folder language's interface.json follows.
+const english = loadEnglish();
+const interfaceKeys = describe(english.en, english.excluded);
 
 // English first, so a draft can be measured against it.
 const reference = {};
 let referenceTotal = 0;
 
-for (const locale of [...SHIPPED.filter((l) => onDisk.includes(l)), ...onDisk.filter((l) => !SHIPPED.includes(l)).sort()]) {
-  const shipped = SHIPPED.includes(locale);
+for (const locale of [ENGLISH, ...onDisk.filter((l) => l !== ENGLISH).sort()].filter((l) => onDisk.includes(l))) {
+  const shipped = complete(locale);
   // A language still being written reports problems without failing the
   // build, and lists what it has not translated yet only when asked to.
   const report = shipped ? errors : warnings;
@@ -443,19 +571,134 @@ for (const locale of [...SHIPPED.filter((l) => onDisk.includes(l)), ...onDisk.fi
       }
       extras(where, Object.keys(overlay), new Set(lessons.map((l) => l.slug)));
     }
+    // stories.json: { slug: { title, summary, translation: [one per paragraph] } }
+    if (want.stories.size || fs.existsSync(path.join(dir, "stories.json"))) {
+      const where = `${rel}/stories.json`;
+      const overlay = load(path.join(dir, "stories.json"), where, gaps) ?? {};
+      for (const [slug, paragraphs] of want.stories) {
+        const t = overlay[slug];
+        need(text(t?.title), `${where} ${slug}: no title`);
+        need(text(t?.summary), `${where} ${slug}: no summary`);
+        const tr = t?.translation;
+        need(
+          Array.isArray(tr) && tr.length === paragraphs && tr.every(text),
+          `${where} ${slug}: translation needs ${paragraphs} paragraphs, one per paragraph of the story`,
+        );
+      }
+      extras(where, Object.keys(overlay), new Set(want.stories.keys()));
+    }
+
     for (const file of lessonFiles(path.join(dir, "lessons"))) {
       if (!want.lessons.has(file)) report.push(`${rel}/lessons/${file}: no such lesson file in ${level}/lessons`);
     }
   }
 
+  // interface.json: the interface text, for a language not written in lib/i18n/messages.
+  const interfaceFile = path.join(root, "interface.json");
+  let ui = "";
+  if (BUILT_IN.includes(locale)) {
+    if (fs.existsSync(interfaceFile)) {
+      warnings.push(`locales/${locale}/interface.json: ignored - ${locale}'s interface text is in lib/i18n/messages`);
+    }
+  } else {
+    const where = `locales/${locale}/interface.json`;
+    const given = fs.existsSync(interfaceFile) ? load(interfaceFile, where, report) ?? {} : {};
+    const translated = checkInterface(where, given, report);
+    for (const at of interfaceKeys.keys()) {
+      if (!translated.has(at)) gaps.push(`${where}: ${at} is not translated`);
+    }
+    const pct = Math.floor((translated.size / interfaceKeys.size) * 1000) / 10;
+    ui = `, ${translated.size}/${interfaceKeys.size} interface strings (${pct}%)`;
+  }
+
   // Whatever a draft has not started still counts against it.
-  if (locale === "en") referenceTotal = total;
+  if (locale === ENGLISH) referenceTotal = total;
   total = Math.max(total, referenceTotal);
   const percent = total ? Math.floor((done / total) * 1000) / 10 : 0;
   notes.push(
-    `${locale}: ${done}/${total} texts (${percent}%)` +
-      (shipped || locale === focus ? "" : ` - in progress; --locale ${locale} lists what is left`),
+    `${locale}: ${done}/${total} texts (${percent}%)${ui}` +
+      (shipped
+        ? ""
+        : ` - in progress, English fills the rest` + (locale === focus ? "" : `; --locale ${locale} lists what is left`)),
   );
+}
+
+/**
+ * Checks an interface.json against English's keys, reporting anything the
+ * app would ignore or could not fill in. Returns the keys it translates.
+ * See lib/i18n/template.ts for the format.
+ */
+function checkInterface(where, given, report) {
+  const translated = new Set();
+  const FORM = /^(zero|one|two|few|many|other|true|false|=\d+|\$arg)$/;
+
+  const template = (at, entry, value) => {
+    if (typeof value !== "string") return report.push(`${where}: ${at} must be text`), false;
+    let ok = true;
+    for (const [, n] of value.matchAll(/\{(\d+)\}/g)) {
+      if (entry.kind !== "function" || Number(n) >= entry.arity) {
+        report.push(`${where}: ${at} has {${n}}, but English gives it ${entry.kind === "function" ? entry.arity : 0} value(s)`);
+        ok = false;
+      }
+    }
+    for (const [, tag] of value.matchAll(/<([a-z]+)>/g)) {
+      if (!(entry.tags ?? []).includes(tag)) {
+        report.push(`${where}: ${at} uses <${tag}>, which it does not support`);
+        ok = false;
+      }
+    }
+    return ok;
+  };
+
+  const walk = (value, at) => {
+    const entry = interfaceKeys.get(at);
+    if (english.excluded.has(at)) {
+      return report.push(`${where}: ${at} cannot be translated in interface.json; it is shown in English`);
+    }
+    if (entry?.kind === "string") {
+      if (template(at, entry, value)) translated.add(at);
+      return;
+    }
+    if (entry?.kind === "function") {
+      if (typeof value === "string") {
+        if (template(at, entry, value)) translated.add(at);
+        return;
+      }
+      const forms = value && typeof value === "object" && !Array.isArray(value) ? Object.entries(value) : [];
+      if (!forms.length || !forms.every(([k]) => FORM.test(k))) {
+        return report.push(`${where}: ${at} must be text, or forms such as { "one": …, "other": … }`);
+      }
+      const keys = forms.map(([k]) => k);
+      const flag = keys.includes("true") || keys.includes("false");
+      if (flag ? !(keys.includes("true") && keys.includes("false")) && !keys.includes("other") : !keys.includes("other")) {
+        return report.push(`${where}: ${at} needs ${flag ? `both "true" and "false"` : `an "other" form`}`);
+      }
+      let ok = true;
+      for (const [k, v] of forms) {
+        if (k === "$arg") {
+          if (!Number.isInteger(v) || v < 0 || v >= entry.arity) {
+            report.push(`${where}: ${at} "$arg" must be 0 to ${entry.arity - 1}`);
+            ok = false;
+          }
+        } else if (!template(`${at} "${k}"`, entry, v)) ok = false;
+      }
+      if (ok) translated.add(at);
+      return;
+    }
+    // A group of keys, or an array English writes as one.
+    if (value && typeof value === "object") {
+      for (const [k, v] of Object.entries(value)) walk(v, at ? `${at}.${k}` : k);
+      return;
+    }
+    report.push(`${where}: ${at} is not a string of the app`);
+  };
+
+  if (!given || typeof given !== "object" || Array.isArray(given)) {
+    report.push(`${where}: must be an object`);
+    return translated;
+  }
+  walk(given, "");
+  return translated;
 }
 
 for (const n of notes) console.log(n);

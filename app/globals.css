@@ -445,3 +445,184 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+/* --- Stories -------------------------------------------------------------- */
+
+/* Reading passages. Line height leaves room above each line for furigana, so
+   a reading appearing never pushes the lines below it down. */
+.story-text {
+  font-size: 20px;
+  line-height: 2.3;
+  font-weight: 400;
+}
+
+.story-text ruby {
+  ruby-align: center;
+}
+
+.story-text rt {
+  font-size: 0.5em;
+  line-height: 1;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+/* A word the reader may tap for its reading. Looks like the text around it
+   until hovered, so the passage still reads as a passage. */
+.ruby-word {
+  all: unset;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+/* The chip ground, not the sunken one: in the dark theme sunken is darker
+   than the card the story sits on, and the highlight all but disappears. */
+.ruby-word:hover,
+.ruby-word[aria-pressed="true"] {
+  background: var(--surface-chip);
+}
+
+.ruby-word:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 1px;
+}
+
+.story-choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 18px;
+  text-align: left;
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-input);
+  color: var(--text-heading);
+  cursor: pointer;
+  transition: var(--transition-control);
+}
+
+.story-choice:disabled {
+  cursor: default;
+}
+
+.story-choice[data-state="open"]:hover {
+  border-color: var(--border-strong);
+}
+
+.story-choice[data-state="right"] {
+  background: var(--surface-accent);
+  border-color: var(--surface-accent);
+  color: var(--text-on-accent);
+}
+
+.story-choice[data-state="wrong"] {
+  background: var(--negative-100);
+  border-color: var(--negative-500);
+  color: var(--negative-600);
+}
+
+.story-choice[data-state="muted"] {
+  color: var(--text-muted);
+}
+
+.story-choice .story-text {
+  font-size: 18px;
+  line-height: 2.1;
+}
+
+.story-choice[data-state="right"] rt,
+.story-choice[data-state="wrong"] rt {
+  color: inherit;
+}
+
+.story-choice-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  border: 1px solid currentColor;
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+}
+
+@media (max-width: 560px) {
+  .story-text {
+    font-size: 18px;
+  }
+}
+
+/* --- Folds ---------------------------------------------------------------- */
+
+/* A section that opens and closes: a level on the Reading page, a story's
+   questions. A native <details>, so it works before any script loads.
+
+   The body animates by transitioning its grid row between 0fr and 1fr, which
+   every current engine can interpolate, unlike height: auto. content-visibility
+   is transitioned as a discrete property so the body stays painted while it
+   closes, and a browser without ::details-content just opens and closes
+   instantly. The reduced-motion rule above shortens all of it. */
+.fold::details-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  /* The slow step: a panel can be two thousand pixels tall, and at the base
+     duration it all but jumps. */
+  transition:
+    grid-template-rows var(--duration-slow) var(--ease-standard),
+    content-visibility var(--duration-slow) var(--ease-standard) allow-discrete;
+}
+
+.fold[open]::details-content {
+  grid-template-rows: 1fr;
+}
+
+/* The one row. Clipped so it can shrink to nothing, with a margin so a card
+   lifting on hover, and its shadow, are not cut off at the edges. */
+.fold-body {
+  min-height: 0;
+  overflow: clip;
+  overflow-clip-margin: 16px;
+}
+
+.fold-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  color: var(--text-heading);
+  cursor: pointer;
+  list-style: none;
+  transition: var(--transition-control);
+}
+
+/* The browser's own triangle, in both engines that draw one. */
+.fold-summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold-summary:hover {
+  border-color: var(--border-strong);
+}
+
+.fold-summary:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+}
+
+.fold-chevron {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--text-heading);
+  transition: transform var(--duration-slow) var(--ease-standard);
+}
+
+.fold[open] > summary .fold-chevron {
+  transform: rotate(180deg);
+}

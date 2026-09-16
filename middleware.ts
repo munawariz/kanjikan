@@ -1,14 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE } from "@/lib/session-cookie";
 
-const PUBLIC_PATHS = ["/", "/login", "/setup"];
+/**
+ * /api/locale is how a guest's header switch changes language, so it must be
+ * reachable without an account, with or without a database.
+ */
+const PUBLIC_PATHS = ["/", "/login", "/setup", "/api/locale"];
 
 /**
- * Whole sections a guest may use: lessons and practice work without an
+ * Whole sections a guest may use: lessons, practice and reading work without an
  * account, just without anything being saved. These are the pages under
  * app/(open), and the tabs a guest sees in the nav.
  */
-const GUEST_SECTIONS = ["/lessons", "/practice"];
+const GUEST_SECTIONS = ["/lessons", "/practice", "/reading"];
 
 function isPublicPath(pathname: string) {
   return (
@@ -40,7 +44,6 @@ export function middleware(request: NextRequest) {
   // change, which most contributions are, without a database of one's own.
   if (!isDatabaseConfigured) {
     if (isPublicPath(pathname) && pathname !== "/login") return NextResponse.next();
-    if (pathname === "/api/locale") return NextResponse.next();
     const url = request.nextUrl.clone();
     url.pathname = "/setup";
     return NextResponse.redirect(url);

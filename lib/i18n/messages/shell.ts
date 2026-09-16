@@ -7,6 +7,7 @@ const en = {
     review: "Review",
     kanji: "Kanji",
     practice: "Practice",
+    reading: "Reading",
   },
   settings: "Settings",
   settingsFor: (name: string) => `Settings for ${name || "your account"}`,
@@ -14,7 +15,7 @@ const en = {
   signIn: "Sign In",
   signOut: "Sign out",
   guestTitle: "You are studying as a guest.",
-  guestBody: "Lessons and practice work in full, but nothing you answer is saved.",
+  guestBody: "Lessons, practice and reading work in full, but nothing you answer is saved.",
   guestSignIn: "Sign in to keep your progress",
   theme: {
     switch: "Switch theme",
@@ -32,6 +33,7 @@ const en = {
   due: (n: number) => `${n} due`,
   undo: "Undo",
   switchLanguage: (name: string) => `Switch language to ${name}`,
+  chooseLanguage: (name: string) => `Language: ${name}. Choose another`,
 };
 
 const id: typeof en = {
@@ -41,6 +43,7 @@ const id: typeof en = {
     review: "Ulasan",
     kanji: "Kanji",
     practice: "Latihan",
+    reading: "Bacaan",
   },
   settings: "Pengaturan",
   settingsFor: (name: string) => `Pengaturan untuk ${name || "akunmu"}`,
@@ -48,7 +51,7 @@ const id: typeof en = {
   signIn: "Masuk",
   signOut: "Keluar",
   guestTitle: "Kamu belajar sebagai tamu.",
-  guestBody: "Pelajaran dan latihan bisa dipakai sepenuhnya, tetapi jawabanmu tidak disimpan.",
+  guestBody: "Pelajaran, latihan, dan bacaan bisa dipakai sepenuhnya, tetapi jawabanmu tidak disimpan.",
   guestSignIn: "Masuk agar progresmu tersimpan",
   theme: {
     switch: "Ganti tema",
@@ -66,6 +69,7 @@ const id: typeof en = {
   due: (n: number) => `${n} perlu diulas`,
   undo: "Urungkan",
   switchLanguage: (name: string) => `Ganti bahasa ke ${name}`,
+  chooseLanguage: (name: string) => `Bahasa: ${name}. Pilih bahasa lain`,
 };
 
 export const shell = { en, id };

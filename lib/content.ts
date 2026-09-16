@@ -620,3 +620,160 @@ export function levelStats(l?: Level) {
     words: lessons.reduce((n, x) => n + x.words.length, 0),
   };
 }
+
+/*
+ * Stories: longer passages for reading practice, one list per level.
+ *
+ *   <level>/stories.json               The Japanese: title, paragraphs, and
+ *                                      comprehension questions with their answers.
+ *   locales/<locale>/<level>/stories.json  Title, summary and a translation,
+ *                                      paragraph for paragraph.
+ *
+ * Every word written in kanji is marked up with its reading, as
+ * {日本語|にほんご}, so the reader can always show it. Whether it shows by
+ * default depends on the story's level: a word with a kanji the learner has
+ * not reached by then carries furigana, and a word whose kanji are all from
+ * this level or an earlier one is the test. See {@link parseRuby}.
+ *
+ * A person's name is marked {田中|たなか|name}. Names are read their own way
+ * and no lesson teaches them, so a name always carries furigana, and its
+ * kanji do not count towards the ones a story tests.
+ *
+ * Nothing about a story is saved: reading one is practice.
+ */
+
+/**
+ * One run of story text. Plain text has no reading; a word written in kanji
+ * has one, and `beyond` says whether that reading is always shown: the word
+ * uses a kanji from a later level than the story's, or one outside the
+ * curriculum, or it is a name.
+ */
+export type RubySegment = { text: string; reading: string | null; beyond: boolean };
+
+export type RubyText = RubySegment[];
+
+type AuthoredQuestion = { prompt: string; choices: string[]; answer: number };
+
+type AuthoredStory = {
+  slug: string;
+  title: string;
+  body: string[];
+  questions: AuthoredQuestion[];
+};
+
+type StoryText = Record<string, { title: string; summary: string; translation: string[] }>;
+
+export type StoryQuestion = { prompt: RubyText; choices: RubyText[]; answer: number };
+
+export type Story = {
+  slug: string;
+  level: Level;
+  /** 1-based position among its level's stories. */
+  order: number;
+  /** In the learner's language. */
+  title: string;
+  summary: string;
+  /** The Japanese title. */
+  heading: RubyText;
+  paragraphs: RubyText[];
+  /** One entry per paragraph. */
+  translation: string[];
+  questions: StoryQuestion[];
+  /** The kanji of the story's own level it uses, in curriculum order. */
+  kanji: string[];
+  /** Characters in the body, not counting readings. */
+  length: number;
+};
+
+/** {base|reading} or {base|reading|name}. The validator guarantees every kanji sits inside one. */
+const RUBY = /\{([^{}|]+)\|([^{}|]+)(\|name)?\}/g;
+
+/** The text as a reader sees it. */
+const plain = (source: string) => source.replace(RUBY, "$1");
+
+/** The same, less names: what a story tests. */
+const withoutNames = (source: string) =>
+  source.replace(RUBY, (_, base: string, _reading: string, name?: string) => (name ? "" : base));
+
+/** 々 repeats the kanji before it, so it is never a kanji to know on its own. */
+const REPEAT = "々";
+
+/**
+ * Splits marked-up text into plain runs and words with readings. `known`
+ * holds the kanji a reader of this level is expected to read unaided.
+ */
+export function parseRuby(source: string, known: ReadonlySet<string>): RubyText {
+  const out: RubyText = [];
+  let last = 0;
+  for (const m of source.matchAll(RUBY)) {
+    if (m.index > last) out.push({ text: source.slice(last, m.index), reading: null, beyond: false });
+    const base = m[1];
+    const beyond =
+      Boolean(m[3]) || [...base].some((ch) => ch !== REPEAT && HAN.test(ch) && !known.has(ch));
+    out.push({ text: base, reading: m[2], beyond });
+    last = m.index + m[0].length;
+  }
+  if (last < source.length) out.push({ text: source.slice(last), reading: null, beyond: false });
+  return out;
+}
+
+function loadStories(locale: Locale): Story[] {
+  const { kanji } = curriculum(locale);
+  const stories: Story[] = [];
+
+  for (const [index, level] of LEVELS.entries()) {
+    const file = path.join(DATA_ROOT, level.toLowerCase(), "stories.json");
+    if (!fs.existsSync(file)) continue;
+
+    const known = new Set(kanji.filter((k) => LEVELS.indexOf(k.level) <= index).map((k) => k.char));
+    const own = kanji.filter((k) => k.level === level).map((k) => k.char);
+    const textFor = (l: Locale): StoryText => {
+      const f = path.join(LOCALE_ROOT, l, level.toLowerCase(), "stories.json");
+      return fs.existsSync(f) ? readJson<StoryText>(f) : {};
+    };
+    const en = textFor(DEFAULT_LOCALE);
+    const t = locale === DEFAULT_LOCALE ? en : textFor(locale);
+    const parse = (s: string) => parseRuby(s, known);
+
+    readJson<AuthoredStory[]>(file).forEach((raw, i) => {
+      const text = t[raw.slug];
+      const fallback = en[raw.slug];
+      const used = new Set(withoutNames(raw.body.join("")));
+      stories.push({
+        slug: raw.slug,
+        level,
+        order: i + 1,
+        title: text?.title ?? fallback?.title ?? raw.slug,
+        summary: text?.summary ?? fallback?.summary ?? "",
+        heading: parse(raw.title),
+        paragraphs: raw.body.map(parse),
+        translation: text?.translation ?? fallback?.translation ?? [],
+        questions: raw.questions.map((q) => ({
+          prompt: parse(q.prompt),
+          choices: q.choices.map(parse),
+          answer: q.answer,
+        })),
+        kanji: own.filter((c) => used.has(c)),
+        length: raw.body.reduce((n, p) => n + [...plain(p)].length, 0),
+      });
+    });
+  }
+  return stories;
+}
+
+const storyCache = new Map<Locale, Story[]>();
+
+/** Every story, level by level, or one level's. */
+export function getStories(l?: Level, locale: Locale = DEFAULT_LOCALE): Story[] {
+  let stories = storyCache.get(locale);
+  if (!stories) {
+    stories = loadStories(locale);
+    storyCache.set(locale, stories);
+  }
+  return l ? stories.filter((s) => s.level === l) : stories;
+}
+
+/** Slugs are unique across levels, so a slug alone names a story. */
+export function getStory(slug: string, locale: Locale = DEFAULT_LOCALE): Story | undefined {
+  return getStories(undefined, locale).find((s) => s.slug === slug);
+}

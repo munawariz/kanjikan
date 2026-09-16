@@ -19,10 +19,10 @@ export type ShellAccount = {
 };
 
 /**
- * Five destinations, five distinct glyphs.
+ * Six destinations, six distinct glyphs.
  *
  * They have to be distinguishable on their own: on a narrow phone the labels
- * are dropped so all five tabs fit, and two items sharing an icon there would
+ * are dropped so all six tabs fit, and two items sharing an icon there would
  * be indistinguishable. See the label breakpoint in the style block below.
  *
  * Home is the dashboard, which took in the learning path; /path and /progress
@@ -38,6 +38,7 @@ const NAV: { href: string; label: keyof Messages["shell"]["nav"]; icon: string; 
   { href: "/review", label: "review", icon: "zap" },
   { href: "/kanji", label: "kanji", icon: "grid-2x2" },
   { href: "/practice", label: "practice", icon: "target", guest: true },
+  { href: "/reading", label: "reading", icon: "book-open", guest: true },
 ];
 
 /**
@@ -190,7 +191,7 @@ export function AppShell({
 
           The first moves the nav out of the header and pins it to the bottom,
           within thumb reach. The second, further down, drops the tab labels
-          once all five stop fitting across the width — and shortens the
+          once all six stop fitting across the width — and shortens the
           bar to match, since an icon needs less height than an icon over a
           label. Both heights come from --nav-tab-h so the page's bottom
           padding tracks them automatically.
@@ -292,13 +293,13 @@ export function AppShell({
           .app-username { display: none; }
         }
 
-        /* Five short labels still crowd a small phone: at 560px each tab is
-           about 110px, but at 360px it is under 70px, with "Lessons" and
+        /* Six short labels still crowd a small phone: at 560px each tab is
+           about 90px, but at 360px it is under 60px, with "Lessons" and
            "Practice" at 10px taking most of that.
 
            Dropping the label leaves only the icon, so the bar shortens to
            match. 44px is the floor: it is the minimum comfortable tap target,
-           and the tabs are already only ~48px wide on a 360px phone. */
+           and the tabs are already only ~58px wide on a 360px phone. */
         @media (max-width: 560px) {
           :root {
             --nav-tab-h: 44px;
@@ -310,7 +311,7 @@ export function AppShell({
 
           .app-nav a .nav-label { display: none; }
 
-          /* A guest has two tabs, and two fit with their labels at any width.
+          /* A guest has three tabs, and three fit with their labels at any width.
              Icon and label sit side by side so the shorter bar still holds
              them, and the whole tab takes the highlight in place of the
              icon-sized square, which would sit oddly off to one side. */

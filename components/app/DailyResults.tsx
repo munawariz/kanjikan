@@ -5,7 +5,7 @@ import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import type { DailyAnswerRow } from "@/lib/progress";
 import type { Locale } from "@/lib/i18n/config";
-import { INTL_TAG } from "@/lib/i18n/format";
+import { intlTag } from "@/lib/i18n/format";
 import { useLocale, useT } from "@/lib/i18n/client";
 
 /**
@@ -14,10 +14,10 @@ import { useLocale, useT } from "@/lib/i18n/client";
  * Fixed locale and UTC: the date is already the learner's own day, and this
  * renders on the server and again in the browser, where any other choice
  * could disagree and trip a hydration mismatch. English keeps its day-month
- * order (en-GB) rather than INTL_TAG's en-US.
+ * order (en-GB) rather than intlTag's en-US.
  */
 export function formatQuizDate(date: string, locale: Locale) {
-  return new Date(`${date}T00:00:00Z`).toLocaleDateString(locale === "en" ? "en-GB" : INTL_TAG[locale], {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString(locale === "en" ? "en-GB" : intlTag(locale), {
     weekday: "long",
     day: "numeric",
     month: "long",

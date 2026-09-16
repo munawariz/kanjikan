@@ -4,6 +4,7 @@ import { TimeZoneScript } from "@/components/app/TimeZoneScript";
 import { ServiceWorker } from "@/components/app/ServiceWorker";
 import { LocaleProvider } from "@/lib/i18n/client";
 import { getLocale, getT } from "@/lib/i18n/server";
+import { listLocales, readInterface } from "@/lib/i18n/locales";
 import "@/styles/atlas/styles.css";
 import "./globals.css";
 
@@ -57,7 +58,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <TimeZoneScript />
       </head>
       <body>
-        <LocaleProvider locale={locale}>
+        <LocaleProvider locale={locale} locales={listLocales()} text={readInterface(locale)}>
           {children}
           <ServiceWorker />
         </LocaleProvider>

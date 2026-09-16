@@ -12,12 +12,12 @@ for looking a character up, not a drill.
 - Every kanji taught by at least four words that fix its readings
 - Spaced repetition with 8 scheduling stages, from ten minutes to three months
 - Multi-user accounts with per-lesson resume checkpoints, and lessons open to guests without one
-- In **English** or **Indonesian**: the interface, meanings, lesson notes and memory stories
+- In **English** or **Indonesian**, and open to more: a new language is just a folder, with English filling any gaps
 - UI built on the **Atlas Design System** in this repository
 
 > **Kanjikan is community-supported, and you can help without writing code.** Fix a meaning, add a
 > word, write a better memory story, or translate the app into your language. Most changes are one
-> JSON file. See **[Contributing](#contributing)**.
+> JSON file. See **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ---
 
@@ -128,7 +128,8 @@ npm run dev
 | `npm run dev` | Dev server on :3000 |
 | `npm run build` | Production build |
 | `npm run migrate` | Apply `supabase/migrations/*.sql`. Idempotent; tracks applied files in `schema_migrations` |
-| `npm run validate:content` | Check the content: duplicate ids, kana-only readings, unknown parts of speech, kanji coverage, parts and stories, and that every language is complete. `-- --locale xx` also lists what language `xx` still lacks |
+| `npm run validate:content` | Check the content: duplicate ids, kana-only readings, unknown parts of speech, kanji coverage, parts and stories, that every complete language is complete, and every language's `interface.json`. `-- --locale xx` also lists what language `xx` still lacks |
+| `npm run locale:new -- xx "Name"` | Start a new language: its folder, `locale.json`, `interface.json`, and a reference of every English interface string |
 | `npm run doctor` | Check the database: reachable, every table created with row level security on, accounts and sessions closed to the API. Run this first whenever progress is not saving. Prints no secrets. |
 
 ---
@@ -306,15 +307,19 @@ data/jlpt/
     kanji.json            Characters, readings, stroke counts
     parts.json            Each kanji's radical and parts, and the primitives they are built from
     lessons/*.json        Lessons: which kanji each teaches, and the words that teach them
+    stories.json          Reading stories: the Japanese, with readings, and comprehension questions
     strokes.json          Stroke order, from KanjiVG
-  locales/              What a learner reads, one directory per language:
+  locales/              What a learner reads, one directory per language; each one is a language of the app:
     en/                   English, the reference every other language is checked against
+      locale.json           The language's own name, and whether it is complete
       levels.json           Each level's title and description
       n5/, n4/              Mirrors the curriculum:
         kanji.json            Kanji meanings
         mnemonics.json        Memory stories, part roles, primitive meanings
         lessons/*.json        Lesson titles and summaries, word meanings
+        stories.json          Story titles, summaries and translations
     id/                   Indonesian, the same shape, plus its style guide (README.md)
+    <other>/              Any other language: the same shape, plus interface.json for its interface text
 lib/
   content.ts            Loads and indexes the JSON; derives word ids
   srs.ts                Scheduling, mastery bands, streaks
@@ -323,7 +328,11 @@ lib/
   db.ts                 The Postgres pool; runs queries as one learner, under RLS
   auth.ts               Accounts, passwords, sessions
   progress.ts           Everything about a learner's progress
-  i18n/                 Languages: the locale setting and every interface string
+  i18n/                 Languages:
+    config.ts             Language codes and the cookie; safe in the browser
+    locales.ts            The languages on disk, and each one's strings (server)
+    template.ts           Compiles a language's interface.json onto English
+    messages/             English and Indonesian interface strings, in TypeScript
 components/
   atlas/                Components copied from the Atlas Design System
   app/                  Kanjikan screens
@@ -332,6 +341,8 @@ scripts/
   migrate.mjs           Applies migrations straight to Postgres
   doctor.mjs            Checks the database: tables, row level security, access
   validate-content.mjs  Checks the curriculum and every language against it
+  new-locale.mjs        Starts a new language folder
+  lib/english-messages.mjs  Loads the TypeScript interface strings for the scripts above
   title-case.mjs        The Title Case rule meanings are written in, per language
 ```
 
@@ -339,15 +350,28 @@ scripts/
 
 ## Languages
 
-The app runs in English and Indonesian. Japanese is the language being learned, so it is never one
-the app itself is shown in.
+The app runs in English and Indonesian, and in any other language someone adds. Japanese is the
+language being learned, so it is never one the app itself is shown in.
 
+- **A language is a folder.** Every folder under `data/jlpt/locales/` named with a language code is
+  offered in the pickers (`lib/i18n/locales.ts`). Its `locale.json` gives the name to show. There is
+  no list to edit, and removing the folder removes the language. In development the folders are read
+  on every request, so a new one appears without a restart. See
+  [Translating into a new language](CONTRIBUTING.md#translating-into-a-new-language).
+- **English fills every gap.** A language can be offered before it is finished:
+  - Content missing from its folder is shown in English, entry by entry (`lib/content.ts`).
+  - Interface text missing from its `interface.json` is shown in English too.
 - **Choosing.** A learner picks a language in Settings, and it is saved on their profile
-  (`profiles.locale`, migration `0007`). A guest switches with the EN/ID button in the header, and
-  the choice is kept in a cookie. A new account starts in the language chosen before signing up.
-- **Interface strings** live in `lib/i18n/messages/`, one file per area, each exporting
-  `{ en, id }`. `id` is typed as `typeof en`, so a string missing in Indonesian fails `tsc`. Server
-  components use `getT()` from `lib/i18n/server`; client components use `useT()` from
+  (`profiles.locale`, migrations `0007` and `0008`). A guest uses the switch in the header: a
+  button with two languages, a list with more. The choice is kept in a cookie. A new account starts
+  in the language chosen before signing up. A saved language whose folder has gone falls back to
+  English.
+- **Interface strings** for English and Indonesian live in `lib/i18n/messages/`, one file per area,
+  each exporting `{ en, id }`. `id` is typed as `typeof en`, so a string missing in Indonesian fails
+  `tsc`. Any other language writes them in its folder's `interface.json`, as templates
+  (`"{0} histoires"`, plural and yes/no forms, `<strong>` markup). `lib/i18n/template.ts` compiles
+  that onto English, on the server and again in the browser, since functions cannot be sent between
+  them. Server components use `getT()` from `lib/i18n/server`; client components use `useT()` from
   `lib/i18n/client`.
 - **Content** is split in two:
   - The curriculum (`data/jlpt/<level>/`) holds what is the same in every language.
@@ -358,10 +382,10 @@ the app itself is shown in.
 - **Progress does not depend on language.** Word ids come from the curriculum alone. The daily
   quiz is chosen from the English and only labelled in the learner's language, so switching
   languages mid-day changes nothing.
-- **Completeness is checked.** `npm run validate:content` fails if a language the app ships is
-  missing any text for a built level, or if one of its memory stories leaves out a part. A language
-  that isn't shipped yet only gets a progress report; see
-  [Translating into a new language](#translating-into-a-new-language).
+- **Completeness is checked where it is promised.** `npm run validate:content` fails if a language
+  marked `"complete": true` (English and Indonesian) is missing any text for a built level, or if one
+  of its memory stories leaves out a part. Every other language gets a progress report for its
+  content and its interface, and warnings for anything the app would ignore.
 
 ---
 
@@ -392,7 +416,7 @@ are always written with a character from a later level (部屋, 田舎).
 
 Readings, meanings and parts of speech should be spot-checked against a dictionary before anyone
 relies on them for an exam. A correction is usually one edit to one JSON file (see
-[Contributing](#contributing)), and `npm run validate:content` will catch a structural mistake.
+[CONTRIBUTING.md](CONTRIBUTING.md)), and `npm run validate:content` will catch a structural mistake.
 
 ### How meanings are written
 
@@ -437,250 +461,9 @@ and as a particle, and 本 as both *book* and the counter for long thin objects.
 
 ## Contributing
 
-Kanjikan is built and maintained by its community. Every meaning, word, memory story and
-translation here can be improved by anyone, and most improvements are an edit to a single JSON file
-with no code involved.
+Kanjikan is built and maintained by its community, and most improvements need no code: a meaning, a
+word, a memory story, a reading story or a translation is usually one JSON file.
 
-### Ways to help
-
-| You want to… | Where | Guide |
-|---|---|---|
-| Report a mistake without editing anything | A GitHub issue | [Reporting a mistake](#reporting-a-mistake) |
-| Fix a meaning, title or summary | `data/jlpt/locales/<locale>/<level>/` | [Fixing text](#fixing-a-meaning-a-lesson-title-or-a-summary) |
-| Fix a reading or a stroke count | `data/jlpt/<level>/kanji.json`, `lessons/*.json` | [Fixing Japanese](#fixing-a-reading-or-other-japanese) |
-| Add, move or remove a word | `data/jlpt/<level>/lessons/*.json`, plus every language | [Words](#adding-or-changing-a-word) |
-| Write a better memory story | `data/jlpt/locales/<locale>/<level>/mnemonics.json` | [Memory stories](#improving-a-memory-story) |
-| Correct a radical or a kanji's parts | `data/jlpt/<level>/parts.json` | [Parts](#changing-a-radical-or-a-kanjis-parts) |
-| Improve an existing translation | `data/jlpt/locales/<locale>/`, `lib/i18n/messages/` | [Translating](#improving-a-translation) |
-| Translate the app into a new language | A new `data/jlpt/locales/<locale>/` | [New language](#translating-into-a-new-language) |
-| Build N3, N2 or N1 | A new `data/jlpt/<level>/` | [New level](#adding-a-level) |
-| Fix a bug or build a feature | `app/`, `components/`, `lib/` | [Code](#changing-code) |
-
-### Getting set up
-
-```bash
-git clone <your fork>
-cd kanjikan
-npm install
-npm run validate:content    # the check every content change must pass
-npm run dev                 # http://localhost:3000
-```
-
-**You don't need a database to check a content change.** Without one, the home page, lessons and
-practice all work as they do for a guest, in every language: use the EN/ID button in the header to
-switch. Signing in, reviews and the dashboard need the database described under [Setup](#setup).
-
-Work on a branch and open a pull request. In the description, say what you changed and why, and
-link a dictionary entry or another source for any change to readings or meanings.
-
-### How the content is organised
-
-The content is split in two, and most changes touch only one side:
-
-- **`data/jlpt/<level>/` is the curriculum.** It holds what is true in every language: which kanji a
-  level has, their readings and stroke counts, their parts, which lesson teaches each one, and the
-  words that teach them. There is no English in it.
-- **`data/jlpt/locales/<locale>/` is what a learner reads, one folder per language.** It holds
-  meanings, lesson titles and summaries, memory stories and level descriptions. Each language's
-  folder mirrors the curriculum file for file.
-- **English (`locales/en/`) is the reference.** Every other language must have an entry for
-  everything English has.
-
-Every text file is keyed by something in the curriculum:
-
-| File | Keyed by | Shape |
-|---|---|---|
-| `locales/<l>/levels.json` | level | `{ "N5": { "title", "blurb", "canDo" } }` for every level in `data/jlpt/levels.json`, built or not |
-| `locales/<l>/<level>/kanji.json` | character | `{ "日": ["Day", "Sun"] }` |
-| `locales/<l>/<level>/lessons/<file>.json` | lesson slug, then `word\|reading` | `{ "<slug>": { "title", "summary", "words": { "一人\|ひとり": ["One Person", "Alone"] } } }` |
-| `locales/<l>/<level>/mnemonics.json` | character | `{ "primitives": { "亻": { "meaning", "note"? } }, "kanji": { "休": { "mnemonic", "roles"? } } }` |
-
-Keep entries in curriculum order, one per line, as the existing files do. That keeps a pull request's
-diff to the lines that actually changed.
-
-### What makes a good contribution
-
-These rules apply in every language. Each language may add its own; see its `README.md`, such as
-[`locales/id/README.md`](data/jlpt/locales/id/README.md).
-
-- **A kanji's meanings are only what the kanji means by itself.** See
-  [How meanings are written](#how-meanings-are-written).
-- **Meanings are Title Case**, following each language's rule in `scripts/title-case.mjs`. The
-  validator tells you the exact spelling it expects.
-- **Glosses are short.** They are quiz answers, not definitions. Two or three meanings at most.
-- **Within a lesson, words start with different meanings.** A quiz shows a word's first meaning
-  beside other words' first meanings, so two identical ones make a question unanswerable.
-- **Memory stories name every part, in brackets:** *A person (亻) leaning on a tree (木): rest.* The
-  validator checks this. Keep a story to one or two sentences, and make it land on the meaning.
-- **"Once a picture of" means real etymology.** Write it only when it is the character's actual
-  origin. Every other story is a memory aid, and should read as one.
-- **Write it yourself.** Don't paste from textbooks, paid apps or copyrighted dictionaries. Checking
-  your work against a dictionary is encouraged; copying one is not.
-
-### Reporting a mistake
-
-Open an issue with the kanji or word, the lesson it is in, what is wrong, and a source, such as a
-dictionary entry. That is enough for someone else to make the fix.
-
-### Fixing a meaning, a lesson title or a summary
-
-1. Find the entry in `data/jlpt/locales/<locale>/<level>/`. Kanji meanings are in `kanji.json`;
-   word meanings, lesson titles and summaries are in `lessons/`, in the file named like the
-   lesson's own.
-2. Edit it and run `npm run validate:content`.
-
-Changing text never affects anyone's progress.
-
-### Fixing a reading or other Japanese
-
-Kanji readings and stroke counts are in `data/jlpt/<level>/kanji.json`. A word's reading is in
-`data/jlpt/<level>/lessons/*.json`.
-
-**A word's written form and reading are its identity.** Progress is stored against an id made from
-the level, the lesson slug, the word and its reading (see [Word ids](#word-ids)). Correcting a
-reading therefore makes it a new word, and learners start that one word over. That's the right
-outcome for a wrong reading, but it is why a word should never be renamed casually.
-
-When you change a word or its reading, rename its key (`"word|reading"`) in **every** language's
-lesson file to match. The validator lists any file you missed.
-
-### Adding or changing a word
-
-A word needs one line in the curriculum and one in each language:
-
-```jsonc
-// data/jlpt/n5/lessons/02-people-and-nature.json, in its lesson's "words"
-{ "word": "人気", "reading": "にんき", "pos": "noun", "teaches": "人" },
-
-// data/jlpt/locales/en/n5/lessons/02-people-and-nature.json, in the same lesson's "words"
-"人気|にんき": ["Popularity"],
-
-// data/jlpt/locales/id/n5/lessons/02-people-and-nature.json
-"人気|にんき": ["Popularitas"],
-```
-
-- **`teaches`** is the kanji of this lesson the word is there to demonstrate. The word must contain
-  it.
-- **`pos`** is one of the parts of speech listed at the top of `scripts/validate-content.mjs`.
-- **Each word is taught once in the whole curriculum.** The validator rejects a duplicate, including
-  one in another level.
-- **A word uses only kanji taught by that point**, apart from a few standard words always written
-  with a later one (部屋, 田舎).
-- **Every kanji keeps at least four words.**
-
-**If you don't speak one of the app's languages,** add your word in English and say so in the pull
-request. The check will fail until someone adds the missing translation, and translators watch for
-these.
-
-Removing a word, or moving it to another lesson, resets learners' progress on it, as with a
-reading. Say why in the pull request.
-
-### Improving a memory story
-
-Stories are in `data/jlpt/locales/<locale>/<level>/mnemonics.json`, under `kanji`. Rewrite one
-freely, as long as it still names every part the kanji lists in `data/jlpt/<level>/parts.json`, in
-brackets. A part the kanji lists under `roles` plays a special part in that character; its name for
-that part is in the story's `roles`.
-
-A story is written per language, not translated. A better English story doesn't need the others
-changed; just say in the pull request that the others might want a look.
-
-Primitives (pieces that aren't kanji of the curriculum) get their meaning, and optionally a note on
-how they look inside other characters, under `primitives` in the same file.
-
-### Changing a radical or a kanji's parts
-
-This is structure, so it's the same in every language: `data/jlpt/<level>/parts.json`.
-
-- **`radical`** is the dictionary (Kangxi) radical, in the form it takes inside the character.
-- **`parts`** are the pieces a learner can see. Each must be a kanji of any level or a primitive.
-  - A new primitive goes under `primitives`, in the first level that uses it, with its Japanese
-    name if it has one.
-  - Every language then needs a meaning for it in its `mnemonics.json`.
-- **`roles`** lists the parts that stand for something other than their usual meaning in this kanji.
-
-Changing parts usually means the stories need updating in every language, because each must name
-every part. The validator lists exactly which ones.
-
-### Improving a translation
-
-Content is in `data/jlpt/locales/<locale>/`, and interface text is in `lib/i18n/messages/`, one file
-per area of the app. Each messages file holds every language side by side:
-
-```ts
-const en = { title: "How you study.", reviews: (n: number) => `${n} reviews` };
-const id: typeof en = { title: "Cara kamu belajar.", reviews: (n: number) => `${n} ulasan` };
-```
-
-Edit the string for your language. `npx tsc --noEmit` confirms nothing is missing. Follow the
-language's style guide and glossary in `data/jlpt/locales/<locale>/README.md`, so the whole app reads
-in one voice.
-
-### Translating into a new language
-
-A new language can be built up over many pull requests. Until it ships, the validator only reports
-how far it has got, so an unfinished translation never fails the build.
-
-1. **Start the content.** Create `data/jlpt/locales/<locale>/` (a two-letter code: `fr`, `es`,
-   `vi`) and copy the shape of `locales/en/`.
-   - Start with `levels.json`, then each level's `kanji.json` and `lessons/`.
-   - Memory stories come last: they need the most care.
-   - `npm run validate:content` prints the percentage done, and
-     `npm run validate:content -- --locale fr` lists exactly what is left.
-2. **Write a style guide** in `data/jlpt/locales/<locale>/README.md`, with a glossary of the app's
-   terms, like the [Indonesian one](data/jlpt/locales/id/README.md). Add your language's joining
-   words to `MINOR` in `scripts/title-case.mjs`, so the Title Case check knows them.
-3. **Translate the interface.** In every file in `lib/i18n/messages/`, add your language beside the
-   others (`const fr: typeof en = { … }`) and export it (`export const settings = { en, id, fr }`).
-   Typing it as `typeof en` makes the type checker list every string still missing.
-4. **Ship it.** Once the content is at 100% and the interface is complete, make it selectable:
-   - Add the language to `LOCALES` and `LOCALE_NAMES` in `lib/i18n/config.ts`, `INTL_TAG` in
-     `lib/i18n/format.ts`, and `messages` in `lib/i18n/messages/index.ts`. The language picker in
-     Settings and the guest switch in the header list it from there.
-   - Add it to `SHIPPED` in `scripts/validate-content.mjs`. From then on it's held to the same
-     standard as English and Indonesian.
-   - Add a migration that widens `profiles_locale_check` (see
-     `supabase/migrations/0007_locale.sql`).
-
-### Adding a level
-
-N3, N2 and N1 are on the roadmap and not yet written. A level is a large piece of work, so open an
-issue first to agree on its kanji list and lesson plan.
-
-1. **The curriculum.** Create `data/jlpt/n3/` with `kanji.json`, `parts.json` and
-   `lessons/*.json`, in the same shape as `n4/`.
-   - Number the lesson files so they sort in study order, and pick slugs no other level uses.
-   - Leave out any word an earlier level already teaches.
-2. **The text.** Create `data/jlpt/locales/<locale>/n3/` for **every** shipped language (English
-   and Indonesian today), mirroring the curriculum.
-3. **Wire it up.**
-   - Add `"N3"` to `LEVELS` in `lib/content.ts`, and `"n3"` to `LEVELS` in
-     `scripts/validate-content.mjs`.
-   - Add a loader for its stroke data to `lib/strokeBank.ts`.
-4. **Check it.** Run `npm run fetch:strokes -- n3`, then `npm run validate:content`.
-
-No database change is needed: `level` is already a column on every table. A level can be built over
-several pull requests on a shared branch. It goes live when it's added to `LEVELS`, and that's also
-when it must pass every check.
-
-### Changing code
-
-Read the sections above on how mastery, scheduling and the daily quiz work before changing them.
-Then:
-
-- **Put all interface text in `lib/i18n/messages/`**, never inline, and write it in every language.
-  If you can only write English, say so in the pull request.
-- **Content is read through `lib/content.ts`.** Pass the learner's locale
-  (`await getLocale()` from `lib/i18n/server`) to anything whose text reaches the screen.
-- **Schema changes are new files** in `supabase/migrations/`, and only ever add to the schema.
-  Existing migrations are never edited.
-
-### Before you open a pull request
-
-```bash
-npm run validate:content   # content: must end with "Content OK"
-npx tsc --noEmit           # code and interface strings: must print nothing
-npm run build              # for code changes
-```
-
-Then check your change in the app, in each language it touches.
+**[CONTRIBUTING.md](CONTRIBUTING.md)** explains how to change each kind of content, what the rules
+are, and what a change does to learners' progress. It also covers translating the app into a new
+language, building a new level, and changing code.

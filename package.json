@@ -10,6 +10,7 @@
     "fetch:strokes": "node scripts/fetch-strokes.mjs",
     "icons": "node scripts/generate-icons.mjs",
     "lint": "next lint",
+    "locale:new": "node scripts/new-locale.mjs",
     "migrate": "node scripts/migrate.mjs",
     "start": "next start",
     "validate:content": "node scripts/validate-content.mjs"

@@ -21,9 +21,7 @@ import {
 import { KanjiAnatomy } from "./KanjiAnatomy";
 import { StrokeDiagram } from "./StrokeDiagram";
 import { WritingPad } from "./WritingPad";
-import { useT } from "@/lib/i18n/client";
-import { isLocale } from "@/lib/i18n/config";
-import { messages } from "@/lib/i18n/messages";
+import { currentMessages, useT } from "@/lib/i18n/client";
 
 type Mode = "lesson" | "review" | "practice";
 
@@ -90,9 +88,8 @@ type Props = {
  * every write is in. It never rejects.
  */
 export function post(url: string, body: unknown, onFail?: (detail: string) => void): Promise<boolean> {
-  // A plain function, not a hook, so the language comes from <html lang>.
-  const lang = typeof document === "undefined" ? undefined : document.documentElement.lang;
-  const t = messages[isLocale(lang) ? lang : "en"].study.save;
+  // A plain function, not a hook, so it takes the language last provided.
+  const t = currentMessages().study.save;
   return fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json" },
