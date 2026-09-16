@@ -1,0 +1,341 @@
+{
+  "teaching-and-studying": {
+    "title": "Teaching and studying",
+    "summary": "習う is learning from a teacher; 勉強 is the hours you put in yourself. 強 is strong, and in 勉強 it is the effort of forcing yourself — which is why a shopkeeper who says 勉強します is offering you a discount.",
+    "words": {
+      "教える|おしえる": ["To Teach", "To Tell"],
+      "教わる|おそわる": ["To Be Taught", "To Learn (from someone)"],
+      "教室|きょうしつ": ["Classroom"],
+      "教会|きょうかい": ["Church"],
+      "教育|きょういく": ["Education"],
+      "教え方|おしえかた": ["How to Teach", "Teaching Method"],
+
+      "習う|ならう": ["To Learn", "To Take Lessons"],
+      "練習|れんしゅう": ["Practice"],
+      "学習|がくしゅう": ["Learning", "Study"],
+      "自習|じしゅう": ["Self-Study", "Studying on Your Own"],
+      "見習う|みならう": ["To Follow Someone's Example", "To Learn by Watching"],
+      "習い事|ならいごと": ["Lessons (after school or as a hobby)"],
+
+      "勉強|べんきょう": ["Study", "Discount (shop talk)"],
+      "勉強会|べんきょうかい": ["Study Group", "Study Session"],
+      "勉強家|べんきょうか": ["Hard Worker", "Diligent Student"],
+      "勉学|べんがく": ["Pursuit of Learning", "Studies"],
+      "勉強部屋|べんきょうべや": ["Study Room"],
+
+      "強い|つよい": ["Strong"],
+      "強さ|つよさ": ["Strength"],
+      "強まる|つよまる": ["To Get Stronger", "To Intensify"],
+      "強める|つよめる": ["To Strengthen (something)", "To Turn Up"],
+      "強力|きょうりょく": ["Powerful"],
+      "強風|きょうふう": ["Strong Wind", "Gale"],
+
+      "授業|じゅぎょう": ["Class", "Lesson"],
+      "卒業|そつぎょう": ["Graduation"],
+      "工業|こうぎょう": ["Industry", "Manufacturing"],
+      "作業|さぎょう": ["Work", "Task"],
+      "事業|じぎょう": ["Business", "Enterprise"],
+      "休業|きゅうぎょう": ["Closed for Business"]
+    }
+  },
+  "questions-and-exams": {
+    "title": "Questions and exams",
+    "summary": "問, 聞 and 間 are all a gate with something inside: a mouth to ask, an ear to listen, the sun shining through the gap. 入試 is just 入学試験, an entrance exam, cut down to two kanji.",
+    "words": {
+      "問題|もんだい": ["Problem", "Question (on a test)"],
+      "問い|とい": ["A Question"],
+      "問う|とう": ["To Ask", "To Question"],
+      "学問|がくもん": ["Learning", "Scholarship"],
+      "問い合わせ|といあわせ": ["Inquiry", "Enquiry"],
+
+      "題|だい": ["Title", "Subject"],
+      "宿題|しゅくだい": ["Homework"],
+      "話題|わだい": ["Topic of Conversation"],
+      "題名|だいめい": ["Name of a Work", "Title (of a book or film)"],
+      "出題|しゅつだい": ["Setting a Question (for a test)"],
+
+      "答え|こたえ": ["Answer"],
+      "答える|こたえる": ["To Answer", "To Reply"],
+      "回答|かいとう": ["Reply", "Response (to a survey or inquiry)"],
+      "問答|もんどう": ["Questions and Answers", "Dialogue"],
+      "口答え|くちごたえ": ["Talking Back", "Backchat"],
+
+      "試す|ためす": ["To Try Out", "To Test"],
+      "試合|しあい": ["Match", "Game"],
+      "入試|にゅうし": ["Entrance Exam"],
+      "試着|しちゃく": ["Trying Clothes On"],
+      "試食|ししょく": ["Tasting (a free sample)"],
+
+      "試験|しけん": ["Exam", "Test"],
+      "経験|けいけん": ["Experience"],
+      "体験|たいけん": ["Personal Experience", "Hands-On Experience"],
+      "入学試験|にゅうがくしけん": ["School Entrance Examination"],
+      "試験勉強|しけんべんきょう": ["Studying for an Exam"]
+    }
+  },
+  "research-and-care": {
+    "title": "Research and getting it right",
+    "summary": "正 is セイ in most compounds but ショウ in a few old, everyday ones: 正月, 正直. 質 has a trap of its own — しつ in 質問, but しち in 質屋, a pawnshop.",
+    "words": {
+      "研究|けんきゅう": ["Research", "Study"],
+      "研ぐ|とぐ": ["To Sharpen (a blade)", "To Wash (rice)"],
+      "研修|けんしゅう": ["Training", "Training Course"],
+      "研究生|けんきゅうせい": ["Research Student"],
+      "研究会|けんきゅうかい": ["Research Society", "Research Meeting"],
+
+      "研究者|けんきゅうしゃ": ["Researcher", "Scientist"],
+      "研究室|けんきゅうしつ": ["Laboratory", "Professor's Office"],
+      "研究家|けんきゅうか": ["Specialist (in a subject)", "Scholar"],
+      "究極|きゅうきょく": ["Ultimate", "Final"],
+      "究める|きわめる": ["To Master", "To Investigate Thoroughly"],
+
+      "質問|しつもん": ["Question"],
+      "質|しつ": ["Quality", "Nature"],
+      "品質|ひんしつ": ["Quality (of goods)"],
+      "体質|たいしつ": ["Constitution (of the body)", "Physical Make-Up"],
+      "物質|ぶっしつ": ["Substance", "Matter"],
+      "質屋|しちや": ["Pawnshop"],
+
+      "正しい|ただしい": ["Correct", "Right"],
+      "正す|ただす": ["To Correct", "To Put Right"],
+      "正月|しょうがつ": ["New Year", "The New Year Holidays"],
+      "正直|しょうじき": ["Honest", "Honestly"],
+      "正社員|せいしゃいん": ["Full-Time Employee", "Permanent Staff"],
+
+      "注意|ちゅうい": ["Caution", "Care", "Warning"],
+      "注目|ちゅうもく": ["Attention", "Notice"],
+      "注射|ちゅうしゃ": ["Injection", "Jab"],
+      "注ぐ|そそぐ": ["To Pour", "To Flow Into"],
+      "注ぐ|つぐ": ["To Pour Out (a drink)", "To Fill (a cup)"]
+    }
+  },
+  "words-and-writing": {
+    "title": "Words and writing",
+    "summary": "言う is spelled いう but said ゆう — write it the first way, say it the second. 文 keeps an old reading, モン, in 注文, and wears it down to も in 文字.",
+    "words": {
+      "言う|いう": ["To Say"],
+      "言葉|ことば": ["Word", "Language"],
+      "一言|ひとこと": ["A Word", "A Few Words"],
+      "方言|ほうげん": ["Dialect"],
+      "言い方|いいかた": ["Way of Saying Something", "Phrasing"],
+      "言語|げんご": ["Language (as a system)"],
+
+      "文|ぶん": ["Sentence"],
+      "作文|さくぶん": ["Essay", "Composition"],
+      "文学|ぶんがく": ["Literature"],
+      "文化|ぶんか": ["Culture"],
+      "文法|ぶんぽう": ["Grammar"],
+      "注文|ちゅうもん": ["Order (for food or goods)"],
+
+      "字|じ": ["Character", "Handwriting"],
+      "文字|もじ": ["Letter", "Written Character"],
+      "ローマ字|ローマじ": ["Romaji", "The Latin Alphabet"],
+      "数字|すうじ": ["Number", "Digit"],
+      "赤字|あかじ": ["Deficit", "In the Red"],
+      "黒字|くろじ": ["Surplus", "In the Black"],
+
+      "漢字|かんじ": ["Kanji", "Chinese Characters"],
+      "漢語|かんご": ["Word of Chinese Origin"],
+      "漢文|かんぶん": ["Classical Chinese"],
+      "漢方|かんぽう": ["Traditional Chinese Medicine"],
+      "漢数字|かんすうじ": ["Kanji Numerals"],
+
+      "英会話|えいかいわ": ["English Conversation"],
+      "英国|えいこく": ["Britain", "The United Kingdom"],
+      "英文|えいぶん": ["English Text", "A Sentence in English"],
+      "英作文|えいさくぶん": ["English Composition"],
+      "英単語|えいたんご": ["English Word"]
+    }
+  },
+  "music-and-film": {
+    "title": "Music and film",
+    "summary": "楽 splits its two meanings between two readings: ガク for music (音楽, 楽器), ラク for ease (楽, 気楽). 画 does the same — ガ for pictures, カク in 計画, a plan.",
+    "words": {
+      "歌|うた": ["Song"],
+      "歌う|うたう": ["To Sing"],
+      "歌手|かしゅ": ["Singer"],
+      "国歌|こっか": ["National Anthem"],
+      "校歌|こうか": ["School Song"],
+
+      "音|おと": ["Sound", "Noise"],
+      "音楽|おんがく": ["Music"],
+      "発音|はつおん": ["Pronunciation"],
+      "足音|あしおと": ["Footsteps"],
+      "本音|ほんね": ["True Feelings", "What You Really Think"],
+      "母音|ぼいん": ["Vowel"],
+
+      "楽しい|たのしい": ["Fun", "Enjoyable"],
+      "楽しむ|たのしむ": ["To Enjoy"],
+      "楽しみ|たのしみ": ["Something to Look Forward To", "Pleasure"],
+      "楽|らく": ["Easy", "Comfortable"],
+      "気楽|きらく": ["Carefree", "Relaxed"],
+      "楽器|がっき": ["Musical Instrument"],
+
+      "映画|えいが": ["Film", "Movie"],
+      "映画館|えいがかん": ["Cinema"],
+      "映る|うつる": ["To Be Reflected", "To Appear (on a screen)"],
+      "映す|うつす": ["To Reflect (something)", "To Project"],
+      "上映|じょうえい": ["Screening (of a film)"],
+
+      "計画|けいかく": ["Plan"],
+      "画家|がか": ["Painter", "Artist"],
+      "漫画|まんが": ["Manga", "Comic"],
+      "動画|どうが": ["Video"],
+      "洋画|ようが": ["Western Film", "Western-Style Painting"]
+    }
+  },
+  "travel-and-photos": {
+    "title": "Travel and photos",
+    "summary": "写す and 映す are both うつす: 写す copies or photographs, 映す reflects or projects. 真 in front of a word makes it the very thing — 真夜中, the dead of night — and before a colour it adds a small っ: 真っ白 まっしろ, 真っ赤 まっか.",
+    "words": {
+      "旅|たび": ["Journey", "Trip"],
+      "旅館|りょかん": ["Japanese Inn"],
+      "旅行者|りょこうしゃ": ["Traveller", "Tourist"],
+      "一人旅|ひとりたび": ["Travelling Alone"],
+      "旅先|たびさき": ["Place You Are Travelling", "Destination"],
+      "旅立つ|たびだつ": ["To Set Off on a Journey"],
+
+      "写す|うつす": ["To Copy", "To Take (a photo)"],
+      "写る|うつる": ["To Come Out (in a photo)", "To Be Photographed"],
+      "書き写す|かきうつす": ["To Copy by Hand", "To Transcribe"],
+      "写真家|しゃしんか": ["Photographer"],
+      "写生|しゃせい": ["Sketching from Life"],
+
+      "写真|しゃしん": ["Photograph"],
+      "真面目|まじめ": ["Serious", "Earnest", "Diligent"],
+      "真っ白|まっしろ": ["Pure White"],
+      "真っ赤|まっか": ["Bright Red"],
+      "真っ黒|まっくろ": ["Pitch Black"],
+      "真っ青|まっさお": ["Deep Blue", "Deathly Pale"],
+      "真夜中|まよなか": ["The Middle of the Night"],
+
+      "紙|かみ": ["Paper"],
+      "手紙|てがみ": ["Letter"],
+      "用紙|ようし": ["Form", "Sheet of Paper (for a set use)"],
+      "白紙|はくし": ["Blank Paper", "Clean Slate"],
+      "折り紙|おりがみ": ["Origami", "Folding Paper"],
+
+      "有料|ゆうりょう": ["Paid", "Not Free"],
+      "有名人|ゆうめいじん": ["Celebrity", "Famous Person"],
+      "有効|ゆうこう": ["Valid", "Effective"],
+      "有力|ゆうりょく": ["Influential", "Leading"],
+      "有休|ゆうきゅう": ["Paid Leave", "Paid Holiday"]
+    }
+  },
+  "how-much-how-far": {
+    "title": "How much, how far",
+    "summary": "多い and 少ない sit awkwardly straight before a noun: many people is 多くの人, not 多い人. And 少し is the adverb, a little, while 少ない is the adjective, few: 少し食べる, but 人が少ない.",
+    "words": {
+      "多い|おおい": ["Many", "A Lot"],
+      "多く|おおく": ["A Great Many", "Mostly"],
+      "多分|たぶん": ["Probably", "Perhaps"],
+      "多少|たしょう": ["Somewhat", "More or Less"],
+      "多め|おおめ": ["A Bit More (than usual)", "Extra"],
+
+      "少し|すこし": ["A Little", "A Few"],
+      "少ない|すくない": ["Few", "Scarce"],
+      "少年|しょうねん": ["Boy", "Youth"],
+      "少々|しょうしょう": ["Just a Moment", "A Little (polite)"],
+      "少なくとも|すくなくとも": ["At Least"],
+      "少しずつ|すこしずつ": ["Little by Little"],
+
+      "重い|おもい": ["Heavy", "Serious"],
+      "重さ|おもさ": ["Weight"],
+      "体重|たいじゅう": ["Body Weight"],
+      "重要|じゅうよう": ["Important"],
+      "重大|じゅうだい": ["Grave", "Very Serious"],
+      "重ねる|かさねる": ["To Pile Up", "To Stack"],
+
+      "広い|ひろい": ["Wide", "Spacious"],
+      "広さ|ひろさ": ["Area", "Size (of a space)"],
+      "広場|ひろば": ["Square", "Plaza"],
+      "広告|こうこく": ["Advertisement"],
+      "広がる|ひろがる": ["To Spread", "To Widen"],
+      "広げる|ひろげる": ["To Spread (something) Out", "To Open Up"],
+
+      "近い|ちかい": ["Near", "Close"],
+      "近く|ちかく": ["Nearby", "The Neighbourhood"],
+      "近所|きんじょ": ["Neighbourhood", "Nearby"],
+      "最近|さいきん": ["Recently", "These Days"],
+      "近道|ちかみち": ["Shortcut"],
+      "近づく|ちかづく": ["To Approach", "To Draw Near"]
+    }
+  },
+  "new-old-good-bad": {
+    "title": "New, old, good, bad",
+    "summary": "古い is for things, not people: an old person is 年をとった人, and a 古い人 is someone old-fashioned. 安 is cheap in 安い but calm in 安心 and 安全 — its older sense.",
+    "words": {
+      "新しい|あたらしい": ["New"],
+      "新年|しんねん": ["New Year"],
+      "新幹線|しんかんせん": ["Shinkansen", "Bullet Train"],
+      "新人|しんじん": ["Newcomer", "New Recruit"],
+      "新品|しんぴん": ["Brand-New Item"],
+      "新入生|しんにゅうせい": ["New Student", "First-Year Student"],
+
+      "古い|ふるい": ["Old (of things)"],
+      "中古|ちゅうこ": ["Second-Hand", "Used"],
+      "古本|ふるほん": ["Second-Hand Book"],
+      "古着|ふるぎ": ["Second-Hand Clothes"],
+      "古代|こだい": ["Ancient Times"],
+
+      "安い|やすい": ["Cheap", "Inexpensive"],
+      "安心|あんしん": ["Relief", "Peace of Mind"],
+      "安全|あんぜん": ["Safety", "Safe"],
+      "安売り|やすうり": ["Bargain Sale", "Selling Cheaply"],
+      "安物|やすもの": ["Cheap Goods", "Cheap Stuff"],
+
+      "明るい|あかるい": ["Bright", "Cheerful"],
+      "明かり|あかり": ["Light", "Lamp"],
+      "明らか|あきらか": ["Clear", "Obvious"],
+      "説明|せつめい": ["Explanation"],
+      "発明|はつめい": ["Invention"],
+      "明後日|あさって": ["The Day After Tomorrow"],
+
+      "悪い|わるい": ["Bad", "Wrong"],
+      "悪口|わるぐち": ["Speaking Ill of Someone", "Insult"],
+      "最悪|さいあく": ["The Worst"],
+      "悪人|あくにん": ["Villain", "Wicked Person"],
+      "意地悪|いじわる": ["Mean", "Spiteful"],
+      "気持ち悪い|きもちわるい": ["Unpleasant", "Gross", "Feeling Sick"]
+    }
+  },
+  "same-and-different": {
+    "title": "Same and different",
+    "summary": "以上 and 以下 include the number itself: 三人以上 is three or more, not more than three. 不 puts a no in front of a word and is almost always ふ — the one here to watch is 不気味, eerie, read ぶきみ.",
+    "words": {
+      "不安|ふあん": ["Anxious", "Uneasy", "Anxiety"],
+      "不足|ふそく": ["Shortage", "Lack"],
+      "不便|ふべん": ["Inconvenient"],
+      "不注意|ふちゅうい": ["Careless", "Carelessness"],
+      "不親切|ふしんせつ": ["Unkind", "Unhelpful"],
+      "不気味|ぶきみ": ["Eerie", "Creepy"],
+
+      "同じ|おなじ": ["Same"],
+      "同時|どうじ": ["The Same Time", "Simultaneous"],
+      "同意|どうい": ["Agreement", "Consent"],
+      "同級生|どうきゅうせい": ["Classmate"],
+      "同一|どういつ": ["Identical", "One and the Same"],
+
+      "別れる|わかれる": ["To Part", "To Break Up", "To Say Goodbye"],
+      "別|べつ": ["Another", "Different", "Separate"],
+      "別々|べつべつ": ["Separately", "Individually"],
+      "別に|べつに": ["Not Particularly", "Separately"],
+      "送別会|そうべつかい": ["Farewell Party"],
+      "区別|くべつ": ["Distinction", "Telling Apart"],
+
+      "特に|とくに": ["Especially", "In Particular"],
+      "特別|とくべつ": ["Special"],
+      "特急|とっきゅう": ["Limited Express (train)"],
+      "特売|とくばい": ["Special Sale", "Bargain Sale"],
+      "特徴|とくちょう": ["Feature", "Characteristic"],
+      "特大|とくだい": ["Extra-Large"],
+
+      "以上|いじょう": ["Or More", "Above", "That Is All"],
+      "以下|いか": ["Or Less", "Below", "The Following"],
+      "以外|いがい": ["Except", "Other Than"],
+      "以内|いない": ["Within", "Not More Than"],
+      "以前|いぜん": ["Before", "Formerly"],
+      "以来|いらい": ["Since", "Ever Since"]
+    }
+  }
+}

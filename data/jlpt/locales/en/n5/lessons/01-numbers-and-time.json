@@ -1,0 +1,142 @@
+{
+  "one-to-five": {
+    "title": "One to five",
+    "summary": "The first five numerals. Each one carries two readings — 一 is いち when counting and ひと when counting things — and the only way to fix that is to meet both.",
+    "words": {
+      "一つ|ひとつ": ["One Thing"],
+      "一人|ひとり": ["One Person", "Alone"],
+      "一日|ついたち": ["First of the Month"],
+      "一月|いちがつ": ["January"],
+      "一番|いちばん": ["The Most", "Number One"],
+
+      "二つ|ふたつ": ["Two Things"],
+      "二人|ふたり": ["Two People"],
+      "二日|ふつか": ["Second of the Month", "Two Days"],
+      "二月|にがつ": ["February"],
+      "十二|じゅうに": ["Twelve"],
+
+      "三つ|みっつ": ["Three Things"],
+      "三人|さんにん": ["Three People"],
+      "三日|みっか": ["Third of the Month", "Three Days"],
+      "三月|さんがつ": ["March"],
+      "三時|さんじ": ["Three O'clock"],
+
+      "四つ|よっつ": ["Four Things"],
+      "四人|よにん": ["Four People"],
+      "四日|よっか": ["Fourth of the Month", "Four Days"],
+      "四月|しがつ": ["April"],
+      "四時|よじ": ["Four O'clock"],
+
+      "五つ|いつつ": ["Five Things"],
+      "五人|ごにん": ["Five People"],
+      "五日|いつか": ["Fifth of the Month", "Five Days"],
+      "五月|ごがつ": ["May"],
+      "五時|ごじ": ["Five O'clock"]
+    }
+  },
+  "six-to-ten": {
+    "title": "Six to ten",
+    "summary": "The second half of the count. Watch the dates: 六日 is むいか, 七日 is なのか, 八日 is ようか — none of them follow the numeral reading.",
+    "words": {
+      "六つ|むっつ": ["Six Things"],
+      "六人|ろくにん": ["Six People"],
+      "六日|むいか": ["Sixth of the Month", "Six Days"],
+      "六月|ろくがつ": ["June"],
+      "六時|ろくじ": ["Six O'clock"],
+
+      "七つ|ななつ": ["Seven Things"],
+      "七人|しちにん": ["Seven People"],
+      "七日|なのか": ["Seventh of the Month", "Seven Days"],
+      "七月|しちがつ": ["July"],
+      "七時|しちじ": ["Seven O'clock"],
+
+      "八つ|やっつ": ["Eight Things"],
+      "八人|はちにん": ["Eight People"],
+      "八日|ようか": ["Eighth of the Month", "Eight Days"],
+      "八月|はちがつ": ["August"],
+      "八時|はちじ": ["Eight O'clock"],
+
+      "九つ|ここのつ": ["Nine Things"],
+      "九人|きゅうにん": ["Nine People"],
+      "九日|ここのか": ["Ninth of the Month", "Nine Days"],
+      "九月|くがつ": ["September"],
+      "九時|くじ": ["Nine O'clock"],
+
+      "十|じゅう": ["Ten"],
+      "十日|とおか": ["Tenth of the Month", "Ten Days"],
+      "十月|じゅうがつ": ["October"],
+      "十時|じゅうじ": ["Ten O'clock"],
+      "十分|じゅっぷん": ["Ten Minutes"]
+    }
+  },
+  "hundreds-and-money": {
+    "title": "Hundreds, thousands and money",
+    "summary": "Counting past ten, plus the yen. The big numbers change sound in compounds — 三百 is さんびゃく but 六百 is ろっぴゃく.",
+    "words": {
+      "百|ひゃく": ["Hundred"],
+      "三百|さんびゃく": ["Three Hundred"],
+      "六百|ろっぴゃく": ["Six Hundred"],
+      "八百屋|やおや": ["Greengrocer"],
+      "百人|ひゃくにん": ["One Hundred People"],
+
+      "千|せん": ["Thousand"],
+      "三千|さんぜん": ["Three Thousand"],
+      "八千|はっせん": ["Eight Thousand"],
+      "千人|せんにん": ["One Thousand People"],
+      "千年|せんねん": ["A Thousand Years"],
+
+      "万|まん": ["Ten Thousand"],
+      "一万|いちまん": ["Ten Thousand"],
+      "十万|じゅうまん": ["One Hundred Thousand"],
+      "百万|ひゃくまん": ["One Million"],
+      "万年筆|まんねんひつ": ["Fountain Pen"],
+
+      "円|えん": ["Yen"],
+      "百円|ひゃくえん": ["One Hundred Yen"],
+      "千円|せんえん": ["One Thousand Yen"],
+      "一万円|いちまんえん": ["Ten Thousand Yen"],
+      "円い|まるい": ["Round", "Circular"],
+
+      "半分|はんぶん": ["Half"],
+      "半日|はんにち": ["Half a Day"],
+      "半年|はんとし": ["Half a Year"],
+      "半月|はんつき": ["Half a Month"],
+      "三時半|さんじはん": ["Half Past Three"]
+    }
+  },
+  "days-months-time": {
+    "title": "Day, month, year, time",
+    "summary": "The calendar kanji. 日 alone is ひ, but it turns into にち, か and even じつ inside compounds — this is where multiple readings really start.",
+    "words": {
+      "日|ひ": ["Day", "Sun"],
+      "日本|にほん": ["Japan"],
+      "今日|きょう": ["Today"],
+      "日曜日|にちようび": ["Sunday"],
+      "明日|あした": ["Tomorrow"],
+
+      "月|つき": ["Moon", "Month"],
+      "月曜日|げつようび": ["Monday"],
+      "今月|こんげつ": ["This Month"],
+      "来月|らいげつ": ["Next Month"],
+      "先月|せんげつ": ["Last Month"],
+
+      "年|とし": ["Year", "Age"],
+      "今年|ことし": ["This Year"],
+      "来年|らいねん": ["Next Year"],
+      "去年|きょねん": ["Last Year"],
+      "一年生|いちねんせい": ["First-Year Student"],
+
+      "時|とき": ["Time", "When"],
+      "時間|じかん": ["Time", "Hour"],
+      "何時|なんじ": ["What Time"],
+      "時計|とけい": ["Clock", "Watch"],
+      "時々|ときどき": ["Sometimes"],
+
+      "分|ふん": ["Minute"],
+      "分かる|わかる": ["To Understand"],
+      "分ける|わける": ["To Divide", "To Share Out"],
+      "自分|じぶん": ["Oneself"],
+      "気分|きぶん": ["Mood", "Feeling"]
+    }
+  }
+}

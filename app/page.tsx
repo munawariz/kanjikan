@@ -7,7 +7,9 @@ import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Wordmark } from "@/components/app/Wordmark";
 import { ThemeToggle } from "@/components/app/ThemeToggle";
+import { LanguageToggle } from "@/components/app/LanguageToggle";
 import { KanjiAnatomy } from "@/components/app/KanjiAnatomy";
+import { getLocale, getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -23,13 +25,14 @@ const ISSUES_URL = `${REPO_URL}/issues`;
 export default async function LandingPage() {
   if (isDatabaseConfigured && (await getUser())) redirect("/dashboard");
 
+  const [t, locale] = await Promise.all([getT(), getLocale()]);
   const stats = levelStats();
-  const levels = getLevelPath();
+  const levels = getLevelPath(locale);
   const built = levels.filter((l) => l.available);
   const unbuilt = levels.filter((l) => !l.available);
-  const first = getLessons()[0];
+  const first = getLessons(undefined, locale)[0];
   // A real entry from the content, so the example is exactly what a lesson shows.
-  const example = getKanjiChar("休");
+  const example = getKanjiChar("休", locale);
 
   return (
     <main>
@@ -37,10 +40,11 @@ export default async function LandingPage() {
         <div className="page row" style={{ height: 72, justifyContent: "space-between", gap: 16 }}>
           <Wordmark size={22} />
           <div className="row" style={{ gap: 12 }}>
+            <LanguageToggle />
             <ThemeToggle />
             <Link href="/login" className="reset-link">
               <Button variant="outline" size="sm" shape="pill">
-                Sign In
+                {t.home.signIn}
               </Button>
             </Link>
           </div>
@@ -52,7 +56,7 @@ export default async function LandingPage() {
           {/* ---- What this is ------------------------------------------------ */}
           <section className="stack" style={{ gap: 20 }}>
             <p className="eyebrow" style={{ margin: 0 }}>
-              A free study aid for the JLPT {built.map((l) => l.level).join(" and ")} kanji
+              {t.home.eyebrow(built.map((l) => l.level))}
             </p>
             <h1
               style={{
@@ -62,27 +66,23 @@ export default async function LandingPage() {
                 lineHeight: "var(--leading-display)",
               }}
             >
-              For anyone who finds kanji hard to remember.
+              {t.home.title}
             </h1>
             <p style={{ margin: 0, fontSize: "var(--text-body-lg)" }}>
-              If you have ever learned a kanji on Monday and lost it by Wednesday, you are not alone.
-              Kanjikan goes slowly: about five kanji a lesson. It shows how each one is built, gives you a
-              short story to hang it on, teaches the everyday words that use it, and brings it back
-              for review before you forget.
+              {t.home.intro}
             </p>
             <p style={{ margin: 0 }}>
-              You do not need an account to take the lessons. Sign in only if you want your progress
-              remembered.
+              {t.home.noAccount}
             </p>
             <div className="row" style={{ gap: 12, flexWrap: "wrap", marginTop: 4 }}>
               <Link href={`/lessons/${first.slug}`} className="reset-link">
                 <Button variant="primary" size="lg" icon="chevron-right">
-                  Start with Lesson 1
+                  {t.home.startLesson1}
                 </Button>
               </Link>
               <Link href="/lessons" className="reset-link">
                 <Button variant="outline" size="lg">
-                  See All Lessons
+                  {t.home.seeAllLessons}
                 </Button>
               </Link>
             </div>
@@ -90,34 +90,9 @@ export default async function LandingPage() {
 
           {/* ---- How it tries to help ---------------------------------------- */}
           <section className="stack" style={{ gap: 24 }}>
-            <h2 style={{ margin: 0, fontSize: "var(--text-heading-1)" }}>How it tries to help</h2>
+            <h2 style={{ margin: 0, fontSize: "var(--text-heading-1)" }}>{t.home.howTitle}</h2>
             <ol className="stack" style={{ gap: 18, margin: 0, paddingLeft: 22 }}>
-              {[
-                [
-                  "A few at a time.",
-                  "Each lesson has about five kanji, and each one is finished — seen, used in words, quizzed and, if you like, written — before the next one starts.",
-                ],
-                [
-                  "Built from parts.",
-                  "Most kanji are made of smaller pieces. Every new kanji shows its parts, what they mean, and a short story that ties them together, so it becomes something you can picture instead of a jumble of strokes.",
-                ],
-                [
-                  "Words, not just characters.",
-                  "Each kanji comes with a handful of real words that use it. Readings are much easier to keep when they belong to words you know.",
-                ],
-                [
-                  "Writing by hand, if you want it.",
-                  "Reading is enough for travel and most everyday Japanese, so writing is your choice. Choose it and you watch the stroke order, then draw the kanji yourself from memory. Each stroke is checked against the model for its order, direction, length and shape.",
-                ],
-                [
-                  "Reviews before you forget.",
-                  "If you sign in, what you get wrong comes back within minutes and what you know moves further out. A five-question daily quiz checks what has stuck.",
-                ],
-                [
-                  "Skip what you already know.",
-                  "Learned some kanji somewhere else? Mark a word, a kanji or a whole lesson as known and the lessons skip it. It comes back once, about a week later, to check.",
-                ],
-              ].map(([title, body]) => (
+              {t.home.how.map(([title, body]) => (
                 <li key={title} style={{ paddingLeft: 6 }}>
                   <strong style={{ color: "var(--text-heading)" }}>{title}</strong> {body}
                 </li>
@@ -129,8 +104,8 @@ export default async function LandingPage() {
           {example && (
             <section className="stack" style={{ gap: 20 }}>
               <div className="stack" style={{ gap: 8 }}>
-                <h2 style={{ margin: 0, fontSize: "var(--text-heading-2)" }}>What a new kanji looks like</h2>
-                <p style={{ margin: 0 }}>This is how a lesson introduces 休, from lesson {example.lessonOrder}.</p>
+                <h2 style={{ margin: 0, fontSize: "var(--text-heading-2)" }}>{t.home.exampleTitle}</h2>
+                <p style={{ margin: 0 }}>{t.home.exampleIntro(example.char, example.lessonOrder)}</p>
               </div>
               <Card tone="white" pad="md" radius="lg" bordered>
                 <div className="row" style={{ gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
@@ -155,26 +130,14 @@ export default async function LandingPage() {
 
           {/* ---- What is here, and what is not ------------------------------- */}
           <section className="stack" style={{ gap: 20 }}>
-            <h2 style={{ margin: 0, fontSize: "var(--text-heading-2)" }}>What is here, and what is not</h2>
+            <h2 style={{ margin: 0, fontSize: "var(--text-heading-2)" }}>{t.home.hereTitle}</h2>
             <ul className="stack" style={{ gap: 12, margin: 0, paddingLeft: 22 }}>
-              <li>
-                {built.map((l, i) => `${i === 0 ? "All" : "all"} ${l.kanji} ${l.level} kanji`).join(" and ")}, in{" "}
-                {stats.lessons}{" "}
-                lessons, with {stats.words} words that use them.
-              </li>
+              <li>{t.home.hereContent(built, stats.lessons, stats.words)}</li>
               {unbuilt.length > 0 && (
-                <li>
-                  {unbuilt.length === 1
-                    ? `${unbuilt[0].level} is`
-                    : `${unbuilt[0].level} to ${unbuilt[unbuilt.length - 1].level} are`}{" "}
-                  not written yet.
-                </li>
+                <li>{t.home.hereUnbuilt(unbuilt.map((l) => l.level))}</li>
               )}
-              <li>It is free. There are no ads, nothing to buy, and no premium version.</li>
-              <li>
-                An account is only a username and a password — no email address. That also means
-                there is no password reset, so keep yours somewhere safe.
-              </li>
+              <li>{t.home.hereFree}</li>
+              <li>{t.home.hereAccount}</li>
             </ul>
           </section>
 
@@ -183,27 +146,21 @@ export default async function LandingPage() {
             <Card tone="sage" pad="lg" radius="lg">
               <div className="stack" style={{ gap: 16 }}>
                 <h2 style={{ margin: 0, fontSize: "var(--text-heading-2)", color: "var(--on-tint-heading)" }}>
-                  A note on accuracy
+                  {t.home.accuracyTitle}
                 </h2>
                 <p style={{ margin: 0, color: "var(--on-tint-heading)" }}>
-                  Kanjikan was built with the help of AI — the app itself, and much of the learning
-                  content too: the word lists, readings, meanings and memory stories.
+                  {t.home.accuracy1}
                 </p>
                 <p style={{ margin: 0, color: "var(--on-tint-heading)" }}>
-                  I made it, and I check what I can, but I am still learning Japanese myself. There is
-                  only so much I can catch, and some of it is bound to be wrong. Please treat it as a
-                  study aid rather than an authority, and check anything important against a
-                  dictionary — especially before an exam.
+                  {t.home.accuracy2}
                 </p>
                 <p style={{ margin: 0, color: "var(--on-tint-heading)" }}>
-                  If you find a mistake, or would like to help correct or add lessons, please open an
-                  issue on GitHub. Every correction makes it better for the next person who is
-                  struggling with the same kanji.
+                  {t.home.accuracy3}
                 </p>
                 <div className="row" style={{ gap: 12, flexWrap: "wrap", marginTop: 4 }}>
                   <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer" className="reset-link">
                     <Button variant="primary" size="md" icon="arrow-up-right">
-                      Open an Issue on GitHub
+                      {t.home.openIssue}
                     </Button>
                   </a>
                 </div>
@@ -222,13 +179,13 @@ export default async function LandingPage() {
           {/* KanjiVG is CC BY-SA 3.0 and requires attribution wherever the
               stroke data is used. See data/jlpt/STROKES-LICENSE.md. */}
           <span className="muted">
-            Stroke order from{" "}
+            {t.home.strokesFrom}{" "}
             <a href="https://kanjivg.tagaini.net" target="_blank" rel="noopener noreferrer">
               KanjiVG
             </a>
-            , CC BY-SA 3.0 ·{" "}
+            {t.home.strokesLicence}{" "}
             <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
-              Source on GitHub
+              {t.home.source}
             </a>
           </span>
         </div>

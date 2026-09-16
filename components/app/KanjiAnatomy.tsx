@@ -1,7 +1,10 @@
+"use client";
+
 import { Fragment } from "react";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import type { Kanji, KanjiPart, RelatedKanji } from "@/lib/content";
+import { useT } from "@/lib/i18n/client";
 import { Tooltip } from "./Tooltip";
 
 type Anatomy = Pick<Kanji, "char" | "parts" | "radical" | "radicalPart" | "mnemonic" | "usedIn">;
@@ -49,6 +52,8 @@ export function KanjiAnatomy({
   /** Sitting on a cream or sage card, where the text colours differ. */
   onTint?: boolean;
 }) {
+  const t = useT();
+  const a = t.kanji.anatomy;
   const heading = onTint ? "var(--on-tint-heading)" : "var(--text-heading)";
   const body = onTint ? "var(--on-tint-body)" : "var(--text-body)";
   const tile = onTint ? "var(--surface-card)" : "var(--surface-sunken)";
@@ -74,7 +79,7 @@ export function KanjiAnatomy({
                   {p.char}
                 </span>{" "}
                 {p.role ?? p.meaning}
-                {p.char === kanji.radical && " · radical"}
+                {p.char === kanji.radical && a.radicalTag}
               </span>
             ))}
           </div>
@@ -98,7 +103,7 @@ export function KanjiAnatomy({
           <div className="row" style={{ gap: 8 }}>
             <Sparkle size={13} color={heading} />
             <span className="eyebrow" style={{ color: body }}>
-              How to remember it
+              {a.howToRemember}
             </span>
           </div>
           <p style={{ margin: 0, color: heading, lineHeight: "var(--leading-body)" }}>
@@ -110,14 +115,14 @@ export function KanjiAnatomy({
       <div className="stack" style={{ gap: 12 }}>
         <div className="row" style={{ gap: 8 }}>
           <span className="eyebrow" style={{ color: body }}>
-            {kanji.parts.length ? "Built from" : "A basic shape"}
+            {kanji.parts.length ? a.builtFrom : a.basicShape}
           </span>
           <PartsHelp color={body} />
         </div>
 
         {kanji.parts.length === 0 && (
           <p className="body-sm" style={{ margin: 0, color: body }}>
-            Not built from smaller parts — it is one of the pieces other kanji are made of.
+            {a.notBuilt}
           </p>
         )}
 
@@ -138,18 +143,18 @@ export function KanjiAnatomy({
           <p className="body-sm" style={{ margin: 0, color: body }}>
             {radicalIsSelf ? (
               <>
-                <strong style={{ color: heading }}>It is a radical itself</strong>
+                <strong style={{ color: heading }}>{a.radicalItself}</strong>
                 {kanji.radicalPart.name && (
                   <>
                     , <span className="jp">{kanji.radicalPart.name}</span>
                   </>
                 )}
-                : dictionaries file other kanji under it.
+                {a.radicalItselfTail}
               </>
             ) : (
               <>
                 <strong style={{ color: heading }}>
-                  Radical <span className="jp">{kanji.radicalPart.char}</span>
+                  {a.radical} <span className="jp">{kanji.radicalPart.char}</span>
                 </strong>{" "}
                 {kanji.radicalPart.meaning}
                 {kanji.radicalPart.name && (
@@ -159,7 +164,7 @@ export function KanjiAnatomy({
                   </>
                 )}
                 {" — "}
-                the part dictionaries file it under, even though it is hard to see here.
+                {a.radicalHidden}
               </>
             )}
           </p>
@@ -169,7 +174,7 @@ export function KanjiAnatomy({
       {kanji.usedIn.length > 0 && (
         <div className="stack" style={{ gap: 10 }}>
           <span className="eyebrow" style={{ color: body }}>
-            {variant === "teach" ? "You will see it again in" : "A part of"}
+            {variant === "teach" ? a.seeAgainIn : a.partOf}
           </span>
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
             {kanji.usedIn.map((k) => (
@@ -214,23 +219,21 @@ function InfoIcon() {
  * clutter every time after.
  */
 function PartsHelp({ color }: { color: string }) {
+  const a = useT().kanji.anatomy;
   return (
     <Tooltip
-      label="What are radicals and parts?"
+      label={a.partsHelpTitle}
       width={300}
       triggerStyle={{ display: "inline-flex", alignItems: "center", color }}
       content={
         <div className="stack" style={{ gap: 8 }}>
-          <strong style={{ color: "var(--text-heading)" }}>What are radicals and parts?</strong>
+          <strong style={{ color: "var(--text-heading)" }}>{a.partsHelpTitle}</strong>
+          <span>{a.partsHelpBody}</span>
           <span>
-            Most kanji are put together from a few hundred recurring parts. Know what the parts mean
-            and a new character becomes a short story instead of a tangle of strokes.
-          </span>
-          <span>
-            One part is the <strong style={{ color: "var(--text-heading)" }}>radical</strong>: the
-            part a dictionary files the character under. It often hints at the meaning —{" "}
-            <span className="jp">亻</span> for people, <span className="jp">氵</span> for water,{" "}
-            <span className="jp">言</span> for speech — though not always.
+            {a.partsHelpRadical({
+              strong: (text) => <strong style={{ color: "var(--text-heading)" }}>{text}</strong>,
+              jp: (text) => <span className="jp">{text}</span>,
+            })}
           </span>
         </div>
       }
@@ -241,6 +244,7 @@ function PartsHelp({ color }: { color: string }) {
 }
 
 function RelatedKanjiInfo({ kanji }: { kanji: RelatedKanji }) {
+  const t = useT();
   return (
     <div className="stack" style={{ gap: 8 }}>
       <div className="row" style={{ gap: 12, alignItems: "center" }}>
@@ -249,13 +253,13 @@ function RelatedKanjiInfo({ kanji }: { kanji: RelatedKanji }) {
         </span>
         <div className="stack" style={{ gap: 2, minWidth: 0 }}>
           <strong style={{ color: "var(--text-heading)" }}>{kanji.meanings.join(", ")}</strong>
-          <span className="muted">Lesson {kanji.lessonOrder}</span>
+          <span className="muted">{t.kanji.anatomy.lesson(kanji.lessonOrder)}</span>
         </div>
       </div>
       {(
         [
-          ["On", kanji.onyomi],
-          ["Kun", kanji.kunyomi],
+          [t.kanji.on, kanji.onyomi],
+          [t.kanji.kun, kanji.kunyomi],
         ] as const
       ).map(([label, readings]) => (
         <div key={label} className="row" style={{ gap: 10, alignItems: "baseline" }}>
@@ -288,6 +292,7 @@ function PartRow({
   body: string;
   tile: string;
 }) {
+  const a = useT().kanji.anatomy;
   return (
     <div className="row" style={{ gap: 14, alignItems: "flex-start" }}>
       <span
@@ -317,7 +322,7 @@ function PartRow({
               the part will mean in the next kanji, so both are worth seeing. */}
           {part.role && (
             <span className="body-sm" style={{ color: body }}>
-              usually {part.meaning}
+              {a.usually(part.meaning)}
             </span>
           )}
           {part.name && (
@@ -325,15 +330,16 @@ function PartRow({
               {part.name}
             </span>
           )}
-          {isRadical && <Badge tone="accent">Radical</Badge>}
+          {isRadical && <Badge tone="accent">{a.radicalBadge}</Badge>}
           {isNew ? (
-            <Badge tone="soft">New part</Badge>
+            <Badge tone="soft">{a.newPart}</Badge>
           ) : (
             <span className="body-sm" style={{ color: body }}>
-              seen in lesson {part.firstLesson}
+              {a.seenIn(part.firstLesson)}
               {part.firstSeen !== part.char && (
                 <>
-                  , in <span className="jp">{part.firstSeen}</span>
+                  {a.seenInKanji}
+                  <span className="jp">{part.firstSeen}</span>
                 </>
               )}
             </span>

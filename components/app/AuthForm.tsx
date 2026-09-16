@@ -7,12 +7,14 @@ import { Field } from "@/components/atlas/forms/Field.jsx";
 import { Input } from "@/components/atlas/forms/Input.jsx";
 import { authenticate, type AuthState } from "@/app/auth/actions";
 import { PASSWORD_MIN, USERNAME_MAX, USERNAME_MIN } from "@/lib/username";
+import { useT } from "@/lib/i18n/client";
 
 function Submit({ label, ...rest }: { label: string; name?: string; value?: string }) {
   const { pending } = useFormStatus();
+  const t = useT().auth.form;
   return (
     <Button type="submit" variant="primary" size="lg" fullWidth disabled={pending} {...rest}>
-      {pending ? "One moment…" : label}
+      {pending ? t.pending : label}
     </Button>
   );
 }
@@ -20,6 +22,7 @@ function Submit({ label, ...rest }: { label: string; name?: string; value?: stri
 export function AuthForm({ next }: { next?: string }) {
   const [state, formAction] = useFormState<AuthState, FormData>(authenticate, {});
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const t = useT().auth.form;
 
   // Every submission returns a fresh state object, so this runs once per
   // answer: it opens the prompt for a free username, and closes it when the
@@ -36,10 +39,10 @@ export function AuthForm({ next }: { next?: string }) {
       {next && <input type="hidden" name="next" value={next} />}
 
       <Field
-        label="Username"
+        label={t.username}
         htmlFor="username"
         required
-        hint="Letters, numbers, underscores or hyphens."
+        hint={t.usernameHint}
       >
         <Input
           id="username"
@@ -57,10 +60,10 @@ export function AuthForm({ next }: { next?: string }) {
       </Field>
 
       <Field
-        label="Password"
+        label={t.password}
         htmlFor="password"
         required
-        hint={`New accounts need at least ${PASSWORD_MIN} characters.`}
+        hint={t.passwordHint(PASSWORD_MIN)}
       >
         <Input
           id="password"
@@ -88,10 +91,10 @@ export function AuthForm({ next }: { next?: string }) {
         </p>
       )}
 
-      <Submit label="Continue" />
+      <Submit label={t.submit} />
 
       <p className="body-sm muted" style={{ margin: 0, textAlign: "center" }}>
-        New here? Enter the username you want, and you will be asked before an account is made.
+        {t.newHere}
       </p>
 
       {/* Must come after the main submit button. Pressing Enter in a field
@@ -106,31 +109,30 @@ export function AuthForm({ next }: { next?: string }) {
         <div className="stack" style={{ gap: 20 }}>
           <div className="stack" style={{ gap: 10 }}>
             <p className="eyebrow" style={{ margin: 0 }}>
-              New account
+              {t.dialogEyebrow}
             </p>
             <h3
               id="create-account-title"
               style={{ margin: 0, fontSize: "var(--text-heading-2)", letterSpacing: "var(--tracking-heading)" }}
             >
-              Create an account?
+              {t.dialogTitle}
             </h3>
           </div>
 
           <div id="create-account-body" className="stack" style={{ gap: 10 }}>
             <p style={{ margin: 0 }}>
-              No account uses the username <strong style={{ color: "var(--text-heading)" }}>{state.confirmCreate}</strong>{" "}
-              yet. An account will be created with this username and the password you entered.
+              {t.dialogBody(<strong style={{ color: "var(--text-heading)" }}>{state.confirmCreate}</strong>)}
             </p>
             <p className="body-sm muted" style={{ margin: 0 }}>
-              There is no email address to reset it with, so keep the password somewhere safe.
+              {t.dialogNote}
             </p>
           </div>
 
           {/* showModal() focuses the first focusable element, which is this. */}
           <div className="stack" style={{ gap: 10 }}>
-            <Submit label="Create Account" name="intent" value="create" />
+            <Submit label={t.create} name="intent" value="create" />
             <Button variant="ghost" size="lg" fullWidth onClick={() => dialogRef.current?.close()}>
-              Cancel
+              {t.cancel}
             </Button>
           </div>
         </div>

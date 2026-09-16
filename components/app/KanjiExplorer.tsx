@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import type { Kanji, Level } from "@/lib/content";
-import { BAND_LABEL, type KanjiReading, type MarkState } from "@/lib/srs";
+import { useT } from "@/lib/i18n/client";
+import type { KanjiReading, MarkState } from "@/lib/srs";
 import { KanjiAnatomy } from "./KanjiAnatomy";
 import { MarkControl } from "./MarkControl";
 import { StrokeDiagram } from "./StrokeDiagram";
@@ -40,6 +41,8 @@ export type KanjiEntry = Pick<Kanji, "parts" | "radicalPart" | "mnemonic" | "use
  * the lessons are where the work happens.
  */
 export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; viewBox: string }) {
+  const t = useT();
+  const x = t.kanji.explorer;
   const [selected, setSelected] = useState(entries[0]?.char ?? "");
   const active = entries.find((e) => e.char === selected) ?? entries[0];
   const detailRef = useRef<HTMLDivElement | null>(null);
@@ -67,7 +70,7 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
           <section key={level} className="stack" style={{ gap: 12 }}>
             {levels.length > 1 && (
               <p className="eyebrow">
-                {level} · {entries.filter((e) => e.level === level).length} kanji
+                {x.levelCount(level, entries.filter((e) => e.level === level).length)}
               </p>
             )}
             <div
@@ -114,7 +117,7 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
                       </span>
                       {entry.canWrite && (
                         <span
-                          aria-label="can write"
+                          aria-label={x.canWriteDot}
                           style={{
                             width: 5,
                             height: 5,
@@ -154,12 +157,12 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
                     {active.meanings.join(", ")}
                   </div>
                   <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
-                    <Badge tone="sage">{active.strokes} strokes</Badge>
-                    <Badge tone="soft">{BAND_LABEL[active.reading.band]}</Badge>
-                    {active.canWrite && <Badge tone="accent">Can write</Badge>}
+                    <Badge tone="sage">{t.kanji.strokes(active.strokes)}</Badge>
+                    <Badge tone="soft">{t.common.band[active.reading.band]}</Badge>
+                    {active.canWrite && <Badge tone="accent">{x.canWrite}</Badge>}
                   </div>
                   <div className="body-sm" style={{ color: "var(--on-tint-body)" }}>
-                    {active.reading.known} of {active.reading.total} of its words known
+                    {x.wordsKnown(active.reading.known, active.reading.total)}
                   </div>
                 </div>
               </div>
@@ -171,9 +174,9 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
                   id={active.char}
                   skill="reading"
                   state={active.readingMarks}
-                  markLabel={`I Know ${active.char}`}
-                  markedLabel="Marked as known"
-                  title={`Mark the words that teach ${active.char} as known`}
+                  markLabel={x.markReading(active.char)}
+                  markedLabel={x.markedReading}
+                  title={x.markReadingTitle(active.char)}
                   onTint
                 />
                 {active.writingMarks && (
@@ -182,8 +185,8 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
                     id={active.char}
                     skill="writing"
                     state={active.writingMarks}
-                    markLabel={`I Can Write ${active.char}`}
-                    markedLabel="Writing marked as known"
+                    markLabel={x.markWriting(active.char)}
+                    markedLabel={x.markedWriting}
                     onTint
                   />
                 )}
@@ -191,8 +194,8 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
 
               <div className="stack" style={{ gap: 10 }}>
                 {[
-                  ["On", active.onyomi],
-                  ["Kun", active.kunyomi],
+                  [t.kanji.on, active.onyomi],
+                  [t.kanji.kun, active.kunyomi],
                 ].map(([label, readings]) => (
                   <div key={label as string} className="row" style={{ gap: 14, alignItems: "baseline" }}>
                     <span className="eyebrow" style={{ width: 36, color: "var(--on-tint-body)" }}>
@@ -211,7 +214,7 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
 
               <div className="stack" style={{ gap: 12 }}>
                 <p className="eyebrow" style={{ color: "var(--on-tint-body)" }}>
-                  {active.level} · Taught in lesson {String(active.lessonOrder).padStart(2, "0")}
+                  {x.taughtIn(active.level, String(active.lessonOrder).padStart(2, "0"))}
                 </p>
                 <Link href={`/lessons/${active.lessonSlug}`} className="reset-link">
                   <span style={{ color: "var(--on-tint-heading)", fontWeight: "var(--weight-semibold)" }}>
@@ -222,7 +225,7 @@ export function KanjiExplorer({ entries, viewBox }: { entries: KanjiEntry[]; vie
 
               <div className="stack" style={{ gap: 12 }}>
                 <p className="eyebrow" style={{ color: "var(--on-tint-body)" }}>
-                  {active.words.length} words use it
+                  {x.wordsUseIt(active.words.length)}
                 </p>
                 <div className="stack" style={{ gap: 10, maxHeight: 280, overflowY: "auto" }}>
                   {active.words.map((w) => (

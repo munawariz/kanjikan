@@ -1,0 +1,300 @@
+{
+  "buying-and-lending": {
+    "title": "Buying, selling, lending",
+    "summary": "貸す and 借りる both start with か and are easy to swap: 貸す is lending something out, 借りる is borrowing it in. 売 and 買 share the on reading ばい, so 売買, buying and selling, is ばいばい.",
+    "words": {
+      "売る|うる": ["To Sell"],
+      "売れる|うれる": ["To Sell Well", "To Be Sold"],
+      "売り場|うりば": ["Sales Floor", "Counter"],
+      "売店|ばいてん": ["Kiosk", "Stall"],
+      "売り手|うりて": ["Seller"],
+      "商売|しょうばい": ["Business", "Trade"],
+
+      "買う|かう": ["To Buy"],
+      "買い手|かいて": ["Buyer"],
+      "売買|ばいばい": ["Buying and Selling"],
+      "買い出し|かいだし": ["Shopping for Supplies"],
+      "お買い上げ|おかいあげ": ["Purchase (polite)"],
+
+      "貸す|かす": ["To Lend", "To Rent Out"],
+      "貸し出し|かしだし": ["Lending", "Loan"],
+      "貸し借り|かしかり": ["Lending and Borrowing"],
+      "貸家|かしや": ["House for Rent"],
+      "賃貸|ちんたい": ["Rental", "Renting Out"],
+
+      "借りる|かりる": ["To Borrow", "To Rent"],
+      "借金|しゃっきん": ["Debt", "Loan"],
+      "借家|しゃくや": ["Rented House"],
+      "借り手|かりて": ["Borrower", "Tenant"],
+      "前借り|まえがり": ["Advance (on wages)"],
+
+      "銀|ぎん": ["Silver"],
+      "銀色|ぎんいろ": ["Silver (colour)"],
+      "銀行員|ぎんこういん": ["Bank Employee", "Bank Clerk"],
+      "銀メダル|ぎんメダル": ["Silver Medal"],
+      "水銀|すいぎん": ["Mercury"]
+    }
+  },
+  "clothes-and-things": {
+    "title": "Clothes and things",
+    "summary": "物 has three readings: もの on its own and in native words like 食べ物, ぶつ in compounds like 名物, and もつ in a few, above all 荷物, luggage. 着 means both wear and arrive — 着る and 着く.",
+    "words": {
+      "服|ふく": ["Clothes"],
+      "制服|せいふく": ["Uniform"],
+      "私服|しふく": ["Plain Clothes", "Own Clothes (not a uniform)"],
+      "夏服|なつふく": ["Summer Clothes"],
+      "一服|いっぷく": ["A Short Break", "A Dose"],
+
+      "着る|きる": ["To Wear", "To Put on (clothes)"],
+      "着く|つく": ["To Arrive"],
+      "着物|きもの": ["Kimono"],
+      "下着|したぎ": ["Underwear"],
+      "水着|みずぎ": ["Swimsuit"],
+      "到着|とうちゃく": ["Arrival"],
+
+      "洋服|ようふく": ["Western Clothes", "Clothes"],
+      "洋食|ようしょく": ["Western Food"],
+      "洋室|ようしつ": ["Western-Style Room"],
+      "洋風|ようふう": ["Western Style"],
+      "東洋|とうよう": ["The East", "The Orient"],
+      "太平洋|たいへいよう": ["Pacific Ocean"],
+
+      "物|もの": ["Thing", "Object"],
+      "買い物|かいもの": ["Shopping"],
+      "食べ物|たべもの": ["Food"],
+      "飲み物|のみもの": ["Drink", "Beverage"],
+      "建物|たてもの": ["Building"],
+      "荷物|にもつ": ["Luggage", "Baggage"],
+      "名物|めいぶつ": ["Local Speciality", "Famous Product"],
+
+      "品物|しなもの": ["Goods", "Article"],
+      "食品|しょくひん": ["Food Products", "Groceries"],
+      "商品|しょうひん": ["Product", "Merchandise"],
+      "上品|じょうひん": ["Elegant", "Refined"],
+      "下品|げひん": ["Vulgar", "Crude"],
+      "手品|てじな": ["Magic Trick", "Conjuring"]
+    }
+  },
+  "using-and-making": {
+    "title": "Using and making",
+    "summary": "切る, to cut, and 着る, to wear, are both きる, but 切る is godan and 着る ichidan: 切って, 着て. 方 is ほう for a direction or side, and かた for a person or a way of doing something (使い方).",
+    "words": {
+      "使う|つかう": ["To Use"],
+      "使い方|つかいかた": ["How to Use", "Way of Using"],
+      "大使|たいし": ["Ambassador"],
+      "大使館|たいしかん": ["Embassy"],
+      "天使|てんし": ["Angel"],
+
+      "用|よう": ["Business", "Something to Do"],
+      "用事|ようじ": ["Errand", "Things to Do"],
+      "用意|ようい": ["Preparation", "Getting Ready"],
+      "使用|しよう": ["Use", "Usage"],
+      "利用|りよう": ["Making Use Of", "Utilisation"],
+      "日用品|にちようひん": ["Daily Necessities"],
+
+      "作る|つくる": ["To Make"],
+      "作り方|つくりかた": ["How to Make", "Recipe"],
+      "手作り|てづくり": ["Handmade", "Homemade"],
+      "作品|さくひん": ["Work (of art)", "Piece"],
+      "作家|さっか": ["Writer", "Author"],
+      "作物|さくもつ": ["Crops"],
+
+      "方|かた": ["Person (polite)"],
+      "方|ほう": ["Direction", "Side"],
+      "夕方|ゆうがた": ["Evening"],
+      "地方|ちほう": ["Region", "The Provinces"],
+      "方法|ほうほう": ["Method", "Way"],
+      "仕方がない|しかたがない": ["It Can't Be Helped"],
+
+      "切る|きる": ["To Cut"],
+      "切れる|きれる": ["To Be Cut", "To Run Out", "To Break"],
+      "切手|きって": ["Postage Stamp"],
+      "切符|きっぷ": ["Ticket"],
+      "親切|しんせつ": ["Kind", "Kindness"],
+      "売り切れ|うりきれ": ["Sold Out"]
+    }
+  },
+  "health": {
+    "title": "Health and the hospital",
+    "summary": "元気 and 病気 are already N5 words. 元 is もと on its own, げん in 元気 and がん in 元日; 死ぬ is the only everyday verb ending in ぬ, so it alone shows that conjugation — 死んで, 死んだ.",
+    "words": {
+      "元|もと": ["Origin", "Source", "Former"],
+      "地元|じもと": ["Local Area", "Hometown"],
+      "足元|あしもと": ["At One's Feet", "Footing"],
+      "元々|もともと": ["Originally", "From the Start"],
+      "元日|がんじつ": ["New Year's Day"],
+
+      "医者|いしゃ": ["Doctor"],
+      "歯医者|はいしゃ": ["Dentist"],
+      "医学|いがく": ["Medical Science", "Medicine"],
+      "名医|めいい": ["Skilled Doctor"],
+      "医大|いだい": ["Medical School", "Medical University"],
+
+      "病院|びょういん": ["Hospital"],
+      "病人|びょうにん": ["Sick Person", "Patient"],
+      "病室|びょうしつ": ["Hospital Room", "Ward"],
+      "看病|かんびょう": ["Looking After the Sick", "Nursing"],
+      "病名|びょうめい": ["Name of an Illness", "Diagnosis"],
+
+      "入院|にゅういん": ["Hospitalisation", "Going Into Hospital"],
+      "退院|たいいん": ["Leaving Hospital", "Discharge from Hospital"],
+      "大学院|だいがくいん": ["Graduate School"],
+      "院長|いんちょう": ["Hospital Director", "Head of an Institution"],
+      "医院|いいん": ["Clinic", "Doctor's Surgery"],
+
+      "死ぬ|しぬ": ["To Die"],
+      "死|し": ["Death"],
+      "死者|ししゃ": ["The Dead", "Fatalities"],
+      "病死|びょうし": ["Death from Illness"],
+      "必死|ひっし": ["Desperate", "Frantic"]
+    }
+  },
+  "running-and-stopping": {
+    "title": "Running and stopping",
+    "summary": "走る looks like an ichidan verb but is godan: 走って, never 走て. 起 gives three verbs to keep apart — 起きる you get up, 起こす you wake someone or cause something, 起こる something happens.",
+    "words": {
+      "走る|はしる": ["To Run"],
+      "走り出す|はしりだす": ["To Start Running", "To Break Into a Run"],
+      "小走り|こばしり": ["Trotting", "A Quick Trot"],
+      "走者|そうしゃ": ["Runner"],
+      "競走|きょうそう": ["Race", "Running Race"],
+
+      "歩く|あるく": ["To Walk"],
+      "散歩|さんぽ": ["A Walk", "Stroll"],
+      "歩道|ほどう": ["Pavement", "Footpath"],
+      "一歩|いっぽ": ["One Step", "A Step"],
+      "歩行者|ほこうしゃ": ["Pedestrian"],
+
+      "止まる|とまる": ["To Stop", "To Come to a Halt"],
+      "止める|とめる": ["To Stop (something)", "To Park"],
+      "止む|やむ": ["To Let Up (of rain)", "To Cease"],
+      "中止|ちゅうし": ["Cancellation", "Calling Off"],
+      "禁止|きんし": ["Prohibition", "Ban"],
+      "行き止まり|いきどまり": ["Dead End"],
+
+      "起きる|おきる": ["To Get Up", "To Wake Up"],
+      "起こす|おこす": ["To Wake (someone) Up", "To Cause"],
+      "起こる|おこる": ["To Happen", "To Occur"],
+      "早起き|はやおき": ["Getting Up Early", "Early Riser"],
+      "起立|きりつ": ["Standing Up", "Stand Up (command)"],
+
+      "急ぐ|いそぐ": ["To Hurry"],
+      "急に|きゅうに": ["Suddenly"],
+      "急用|きゅうよう": ["Urgent Business"],
+      "救急車|きゅうきゅうしゃ": ["Ambulance"],
+      "大急ぎ|おおいそぎ": ["A Big Rush", "Great Haste"]
+    }
+  },
+  "going-back-and-sending": {
+    "title": "Going back, sending, carrying",
+    "summary": "Like 走る, 帰る is godan despite its looks: 帰って, never 帰て. 通る is passing through; 通う is going somewhere again and again — to school, to work, to the dentist.",
+    "words": {
+      "帰る|かえる": ["To Go Home", "To Return"],
+      "帰り道|かえりみち": ["The Way Home"],
+      "日帰り|ひがえり": ["Day Trip"],
+      "帰宅|きたく": ["Returning Home", "Getting Home"],
+      "お帰りなさい|おかえりなさい": ["Welcome Home"],
+      "お持ち帰り|おもちかえり": ["Takeaway", "Taking Home"],
+
+      "去る|さる": ["To Leave", "To Pass"],
+      "過去|かこ": ["The Past"],
+      "立ち去る|たちさる": ["To Walk Away", "To Leave (a place)"],
+      "走り去る|はしりさる": ["To Run Off"],
+      "死去|しきょ": ["Passing Away", "Death (formal)"],
+
+      "送る|おくる": ["To Send", "To Escort"],
+      "見送る|みおくる": ["To See Off", "To Let Pass"],
+      "送料|そうりょう": ["Postage", "Shipping Fee"],
+      "送金|そうきん": ["Sending Money", "Remittance"],
+      "放送|ほうそう": ["Broadcast", "Broadcasting"],
+
+      "通る|とおる": ["To Pass Through", "To Go Along"],
+      "通う|かよう": ["To Commute", "To Go Regularly"],
+      "大通り|おおどおり": ["Main Street", "Avenue"],
+      "普通|ふつう": ["Normal", "Usual", "Local Train"],
+      "通学|つうがく": ["Going to School", "Commuting to School"],
+      "通行止め|つうこうどめ": ["Road Closed", "No Through Road"],
+
+      "持つ|もつ": ["To Hold", "To Have", "To Carry"],
+      "持って行く|もっていく": ["To Take (something)", "To Take Along"],
+      "持って来る|もってくる": ["To Bring"],
+      "金持ち|かねもち": ["Rich Person"],
+      "持ち物|もちもの": ["Belongings", "Possessions"],
+      "持参|じさん": ["Bringing Along", "Bringing with You"]
+    }
+  },
+  "power-and-motion": {
+    "title": "Power and motion",
+    "summary": "発 is はつ, but it shrinks to はっ before a k, s or h sound — 発見 はっけん, 発車 はっしゃ, 発表 はっぴょう — and after 出 it becomes ぱつ: 出発, しゅっぱつ. 力 is ちから on its own, りょく in most compounds and りき in a few, such as 人力車.",
+    "words": {
+      "力|ちから": ["Power", "Strength"],
+      "努力|どりょく": ["Effort"],
+      "体力|たいりょく": ["Stamina", "Physical Strength"],
+      "電力|でんりょく": ["Electric Power"],
+      "力持ち|ちからもち": ["Strong Person"],
+      "人力車|じんりきしゃ": ["Rickshaw"],
+
+      "動く|うごく": ["To Move"],
+      "動かす|うごかす": ["To Move (something)", "To Operate"],
+      "動物|どうぶつ": ["Animal"],
+      "動物園|どうぶつえん": ["Zoo"],
+      "自動|じどう": ["Automatic"],
+      "行動|こうどう": ["Action", "Behaviour"],
+
+      "運ぶ|はこぶ": ["To Carry", "To Transport"],
+      "運|うん": ["Luck", "Fortune"],
+      "運動|うんどう": ["Exercise", "Physical Activity"],
+      "運動会|うんどうかい": ["Sports Day"],
+      "運転|うんてん": ["Driving", "Operating (a machine)"],
+
+      "転ぶ|ころぶ": ["To Fall Over", "To Tumble"],
+      "転がる|ころがる": ["To Roll", "To Roll Around"],
+      "運転手|うんてんしゅ": ["Driver"],
+      "転校|てんこう": ["Changing Schools"],
+      "回転|かいてん": ["Rotation", "Spinning"],
+
+      "出発|しゅっぱつ": ["Departure"],
+      "発見|はっけん": ["Discovery"],
+      "発表|はっぴょう": ["Announcement", "Presentation"],
+      "発売|はつばい": ["Release", "Going on Sale"],
+      "発車|はっしゃ": ["Train or Bus Departure", "Pulling Out"],
+      "発生|はっせい": ["Occurrence", "Outbreak"]
+    }
+  },
+  "starting-and-finishing": {
+    "title": "Starting, waiting, finishing",
+    "summary": "Three verb pairs in one lesson: 始まる and 始める, 集まる and 集める, 開く and 開ける. In each, the first happens by itself and the second is something someone does; 始発 and 終電, the first and last trains, bracket every night out.",
+    "words": {
+      "始まる|はじまる": ["To Begin"],
+      "始める|はじめる": ["To Start (something)"],
+      "開始|かいし": ["Start", "Commencement"],
+      "始発|しはつ": ["First Train", "First Service of the Day"],
+      "年始|ねんし": ["Start of the Year", "New Year Holidays"],
+
+      "終わる|おわる": ["To End", "To Finish"],
+      "終える|おえる": ["To Finish (something)"],
+      "終わり|おわり": ["The End"],
+      "終電|しゅうでん": ["Last Train"],
+      "終点|しゅうてん": ["Last Stop", "Terminus"],
+
+      "開ける|あける": ["To Open (something)"],
+      "開く|あく": ["To Open", "To Come Open"],
+      "開く|ひらく": ["To Open Up", "To Hold (an event)"],
+      "開店|かいてん": ["Shop Opening", "Opening for Business"],
+      "開発|かいはつ": ["Development"],
+      "満開|まんかい": ["Full Bloom"],
+
+      "待つ|まつ": ["To Wait"],
+      "お待ちください|おまちください": ["Please Wait"],
+      "お待たせしました|おまたせしました": ["Sorry to Keep You Waiting"],
+      "待ち時間|まちじかん": ["Waiting Time"],
+      "招待|しょうたい": ["Invitation"],
+
+      "集まる|あつまる": ["To Gather", "To Assemble"],
+      "集める|あつめる": ["To Collect", "To Gather (something)"],
+      "集まり|あつまり": ["A Gathering", "A Meeting"],
+      "集中|しゅうちゅう": ["Concentration", "Focus"],
+      "集合|しゅうごう": ["Assembly", "Meeting Up"]
+    }
+  }
+}

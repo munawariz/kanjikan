@@ -7,6 +7,7 @@ import { StudySession } from "@/components/app/StudySession";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
+import { getLocale, getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -17,12 +18,13 @@ const WRITING_BATCH = 10;
 export default async function ReviewPage() {
   const user = await getUser();
   if (!user) redirect("/login");
+  const [t, locale] = await Promise.all([getT().then((m) => m.study.review), getLocale()]);
 
   const profile = await getProfile(user.id);
   const writing = studiesWriting(profile);
   const [queue, writingQueue] = await Promise.all([
-    getReviewQueue(user.id, BATCH),
-    writing ? getWritingReviewQueue(user.id, WRITING_BATCH) : [],
+    getReviewQueue(user.id, BATCH, locale),
+    writing ? getWritingReviewQueue(user.id, WRITING_BATCH, locale) : [],
   ]);
 
   if (queue.length === 0 && writingQueue.length === 0) {
@@ -33,7 +35,7 @@ export default async function ReviewPage() {
             <div className="row" style={{ gap: 10 }}>
               <Sparkle size={16} color="var(--on-tint-heading)" />
               <span className="eyebrow" style={{ color: "var(--on-tint-heading)" }}>
-                Nothing due
+                {t.nothingDue}
               </span>
             </div>
             <h1
@@ -44,17 +46,15 @@ export default async function ReviewPage() {
                 lineHeight: "var(--leading-display)",
               }}
             >
-              Your review queue is empty.
+              {t.empty}
             </h1>
             <p style={{ margin: 0, color: "var(--on-tint-body)", maxWidth: 440 }}>
-              {writing
-                ? "Words, and the kanji you have written, come back on a schedule that stretches as you get them right. Start a lesson to put new ones into the queue."
-                : "Words come back on a schedule that stretches as you get them right. Start a lesson to put new kanji and their vocabulary into the queue."}
+              {writing ? t.emptyWriting : t.emptyReading}
             </p>
             <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
               <Link href="/lessons" className="reset-link">
                 <Button variant="primary" size="lg" icon="chevron-right">
-                  Browse Lessons
+                  {t.browseLessons}
                 </Button>
               </Link>
             </div>
@@ -77,13 +77,13 @@ export default async function ReviewPage() {
       <StudySession
         mode="review"
         lessonSlug={null}
-        lessonTitle="Review"
+        lessonTitle={t.title}
         kanji={writingQueue}
         words={queue}
         // Distractors are drawn from the whole of each level being reviewed,
         // so a question is not answerable by elimination within one lesson,
         // and a learner still in N5 is not offered N4 words as options.
-        pool={getAllWords().filter((w) => levels.has(w.level))}
+        pool={getAllWords(undefined, locale).filter((w) => levels.has(w.level))}
         wordStages={wordStages}
         seed={Date.now() % 2147483647}
       />

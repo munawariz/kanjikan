@@ -1,0 +1,136 @@
+{
+  "size-and-position": {
+    "title": "Besar, kecil, atas, bawah, tengah",
+    "summary": "Lima kanji yang saling berpasangan sebagai lawan kata. 上 dan 下 paling sibuk: masing-masing punya cara baca kata benda, cara baca kata kerja, dan cara baca dalam kata majemuk.",
+    "words": {
+      "大きい|おおきい": ["Besar", "Berukuran Besar"],
+      "大学|だいがく": ["Universitas"],
+      "大好き|だいすき": ["Sangat Suka", "Cinta"],
+      "大切|たいせつ": ["Penting", "Berharga"],
+      "大丈夫|だいじょうぶ": ["Tidak Apa-Apa", "Oke"],
+
+      "小さい|ちいさい": ["Kecil", "Mungil"],
+      "小学校|しょうがっこう": ["Sekolah Dasar"],
+      "小学生|しょうがくせい": ["Murid Sekolah Dasar"],
+      "小鳥|ことり": ["Burung Kecil"],
+      "小さな|ちいさな": ["Kecil (sebelum kata benda)", "Mungil"],
+
+      "中|なか": ["Bagian Dalam", "Tengah"],
+      "中国|ちゅうごく": ["Tiongkok"],
+      "中学校|ちゅうがっこう": ["Sekolah Menengah Pertama"],
+      "一日中|いちにちじゅう": ["Sepanjang Hari"],
+      "真ん中|まんなか": ["Tepat di Tengah"],
+
+      "上|うえ": ["Atas", "Di Atas"],
+      "上手|じょうず": ["Pandai", "Mahir"],
+      "上がる|あがる": ["Naik", "Meningkat"],
+      "上着|うわぎ": ["Jaket", "Pakaian Luar"],
+      "上る|のぼる": ["Mendaki", "Menaiki"],
+
+      "下|した": ["Bawah", "Di Bawah"],
+      "下手|へた": ["Tidak Pandai", "Payah"],
+      "下がる|さがる": ["Turun", "Menggantung ke Bawah"],
+      "地下鉄|ちかてつ": ["Kereta Bawah Tanah", "Metro"],
+      "靴下|くつした": ["Kaus Kaki"]
+    }
+  },
+  "directions": {
+    "title": "Empat arah mata angin",
+    "summary": "Arah kompas, ditambah 外 untuk segala sesuatu di luar. Pintu keluar stasiun dinamai dengan kanji-kanji ini, jadi 東口 dan 西口 adalah papan petunjuk pertama yang perlu kamu baca.",
+    "words": {
+      "東|ひがし": ["Timur"],
+      "東京|とうきょう": ["Tokyo"],
+      "東口|ひがしぐち": ["Pintu Keluar Timur"],
+      "東西|とうざい": ["Timur dan Barat"],
+      "東北|とうほく": ["Timur Laut", "Tohoku"],
+
+      "西|にし": ["Barat"],
+      "西口|にしぐち": ["Pintu Keluar Barat"],
+      "関西|かんさい": ["Wilayah Kansai"],
+      "西洋|せいよう": ["Dunia Barat"],
+
+      "南|みなみ": ["Selatan"],
+      "南口|みなみぐち": ["Pintu Keluar Selatan"],
+      "南北|なんぼく": ["Utara dan Selatan"],
+      "東南|とうなん": ["Tenggara"],
+
+      "北|きた": ["Utara"],
+      "北口|きたぐち": ["Pintu Keluar Utara"],
+      "北海道|ほっかいどう": ["Hokkaido"],
+      "北風|きたかぜ": ["Angin Utara"],
+
+      "外|そと": ["Luar"],
+      "外国|がいこく": ["Negara Asing"],
+      "海外|かいがい": ["Luar Negeri", "Mancanegara"],
+      "外出|がいしゅつ": ["Keluar Rumah"],
+      "外食|がいしょく": ["Makan di Luar"]
+    }
+  },
+  "coming-and-going": {
+    "title": "Pergi, datang, masuk, dan keluar",
+    "summary": "Kanji gerakan. 出 dan 入 adalah pasangan yang akan kamu baca di setiap pintu di Jepang: 出口 pintu keluar, 入口 pintu masuk.",
+    "words": {
+      "行く|いく": ["Pergi"],
+      "銀行|ぎんこう": ["Bank"],
+      "旅行|りょこう": ["Perjalanan", "Wisata"],
+      "行う|おこなう": ["Melakukan", "Mengadakan (acara)"],
+      "急行|きゅうこう": ["Kereta Ekspres"],
+
+      "来る|くる": ["Datang"],
+      "来週|らいしゅう": ["Minggu Depan"],
+      "出来る|できる": ["Bisa", "Mampu"],
+      "来日|らいにち": ["Kedatangan ke Jepang"],
+
+      "出る|でる": ["Keluar", "Meninggalkan"],
+      "出す|だす": ["Mengeluarkan", "Mengirim"],
+      "出口|でぐち": ["Pintu Keluar"],
+      "出かける|でかける": ["Pergi Keluar", "Berangkat"],
+      "思い出|おもいで": ["Kenangan"],
+
+      "入る|はいる": ["Masuk", "Memasuki"],
+      "入れる|いれる": ["Memasukkan", "Menyisipkan"],
+      "入口|いりぐち": ["Pintu Masuk"],
+      "入学|にゅうがく": ["Masuk Sekolah"],
+      "気に入る|きにいる": ["Menyukai"],
+
+      "車|くるま": ["Mobil"],
+      "電車|でんしゃ": ["Kereta Listrik"],
+      "自転車|じてんしゃ": ["Sepeda"],
+      "自動車|じどうしゃ": ["Kendaraan Bermotor"],
+      "車内|しゃない": ["Dalam Kendaraan"]
+    }
+  },
+  "front-back-left-right": {
+    "title": "Depan, belakang, kiri, kanan",
+    "summary": "Kata-kata posisi, yang dalam bahasa Jepang semuanya kata benda. 間 lain sendiri: あいだ untuk jarak di antara benda, かん untuk rentang waktu.",
+    "words": {
+      "前|まえ": ["Depan", "Sebelum"],
+      "前日|ぜんじつ": ["Sehari Sebelumnya"],
+      "駅前|えきまえ": ["Depan Stasiun"],
+      "前半|ぜんはん": ["Paruh Pertama"],
+
+      "後ろ|うしろ": ["Belakang", "Bagian Belakang"],
+      "後で|あとで": ["Nanti", "Setelahnya"],
+      "最後|さいご": ["Terakhir", "Akhir"],
+      "後半|こうはん": ["Paruh Kedua"],
+
+      "左|ひだり": ["Kiri"],
+      "左手|ひだりて": ["Tangan Kiri"],
+      "左側|ひだりがわ": ["Sisi Kiri"],
+      "左右|さゆう": ["Kiri dan Kanan"],
+      "左足|ひだりあし": ["Kaki Kiri", "Tungkai Kiri"],
+
+      "右|みぎ": ["Kanan"],
+      "右手|みぎて": ["Tangan Kanan"],
+      "右側|みぎがわ": ["Sisi Kanan"],
+      "右足|みぎあし": ["Kaki Kanan", "Tungkai Kanan"],
+      "右目|みぎめ": ["Mata Kanan"],
+
+      "間|あいだ": ["Antara", "Selang"],
+      "人間|にんげん": ["Manusia"],
+      "昼間|ひるま": ["Siang Hari"],
+      "一週間|いっしゅうかん": ["Seminggu"],
+      "間に合う|まにあう": ["Tepat Waktu"]
+    }
+  }
+}

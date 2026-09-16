@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 /**
- * Content guard for data/jlpt/<level>/.
+ * Content guard for data/jlpt/.
+ *
+ * Content lives in two trees, and both are checked:
+ *
+ *   data/jlpt/<level>/            The curriculum, the same in every language:
+ *                                 kanji, readings, parts, lessons and words.
+ *   data/jlpt/locales/<locale>/   What a learner reads, in one language:
+ *                                 meanings, lesson text, memory stories.
  *
  * The curriculum is kanji-spined: every lesson declares the characters it
  * teaches, and every word exists to demonstrate one of them. The checks below
@@ -14,7 +21,13 @@
  * from an earlier level, and a primitive is defined once, by the first level
  * that needs it.
  *
+ * Every language the app ships (SHIPPED) must cover every built level
+ * completely. A directory under locales/ that is not shipped yet is a
+ * translation in progress: its gaps are reported as warnings, with how far it
+ * has got, so it can be built up over many pull requests.
+ *
  * Run: npm run validate:content
+ *      npm run validate:content -- --locale fr    also list what fr still lacks
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -22,7 +35,14 @@ import { titleCase } from "./title-case.mjs";
 
 /** Study order. Keep in step with LEVELS in lib/content.ts. */
 const LEVELS = ["n5", "n4"];
+/** Languages the app offers. Keep in step with LOCALES in lib/i18n/config.ts. English comes first: it is the reference. */
+const SHIPPED = ["en", "id"];
 const DATA_ROOT = path.join(process.cwd(), "data", "jlpt");
+const LOCALE_ROOT = path.join(DATA_ROOT, "locales");
+
+const argv = process.argv.slice(2);
+/** A language whose gaps to list even though it is not shipped. */
+const focus = argv.includes("--locale") ? argv[argv.indexOf("--locale") + 1] : null;
 
 /** Minimum words per kanji. Below this, multiple readings do not get fixed. */
 const MIN_WORDS_PER_KANJI = 4;
@@ -44,19 +64,34 @@ const errors = [];
 const warnings = [];
 const notes = [];
 
-/** Meanings are shown as written, so they are written in Title Case. */
-function checkCase(where, meaning) {
-  const expected = titleCase(meaning);
-  if (meaning !== expected) errors.push(`${where}: write ${JSON.stringify(meaning)} as ${JSON.stringify(expected)}`);
+const readJson = (file) => JSON.parse(fs.readFileSync(file, "utf8"));
+
+/** Reads a file, or records why it could not be read. */
+function load(file, rel, report = errors) {
+  if (!fs.existsSync(file)) {
+    report.push(`${rel}: missing`);
+    return null;
+  }
+  try {
+    return readJson(file);
+  } catch (e) {
+    report.push(`${rel}: invalid JSON - ${e.message}`);
+    return null;
+  }
 }
 
-const readJson = (file) => JSON.parse(fs.readFileSync(file, "utf8"));
+const lessonFiles = (dir) =>
+  fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith(".json")).sort() : [];
+
+// ===========================================================================
+// The curriculum
+// ===========================================================================
 
 // Every level's characters, first, so a part can name a kanji of any level.
 const kanjiLevel = new Map();
 const kanjiLists = new Map();
 for (const level of LEVELS) {
-  const kanjiList = readJson(path.join(DATA_ROOT, level, "kanji.json"));
+  const kanjiList = load(path.join(DATA_ROOT, level, "kanji.json"), `${level}/kanji.json`) ?? [];
   kanjiLists.set(level, kanjiList);
   for (const k of kanjiList) {
     if (kanjiLevel.has(k.char)) errors.push(`${level}/kanji.json: ${k.char} is already a kanji of ${kanjiLevel.get(k.char)}`);
@@ -70,28 +105,31 @@ const usedParts = new Set();
 const slugs = new Map(); // lesson slug -> level
 const surfaces = new Map(); // word|reading -> where it is taught
 
+/** What each level's text must cover, gathered while its structure is checked. */
+const expected = new Map();
+
 for (const level of LEVELS) {
   const levelDir = path.join(DATA_ROOT, level);
   const lessonDir = path.join(levelDir, "lessons");
+  const want = { kanji: [], primitives: [], parts: new Map(), roles: new Map(), lessons: new Map() };
+  expected.set(level, want);
 
   const kanjiList = kanjiLists.get(level);
   const kanjiSet = new Set(kanjiList.map((k) => k.char));
   if (kanjiSet.size !== kanjiList.length) errors.push(`${level}/kanji.json: duplicate characters`);
+  want.kanji = [...kanjiSet];
 
   for (const k of kanjiList) {
-    if (!k.char || !Number.isInteger(k.strokes) || !k.meanings?.length) {
+    if (!k.char || !Number.isInteger(k.strokes) || !Array.isArray(k.onyomi) || !Array.isArray(k.kunyomi)) {
       errors.push(`${level}/kanji.json: incomplete entry ${JSON.stringify(k.char)}`);
     }
-    // Only what the kanji means by itself belongs here — 火 is Fire, not
-    // Tuesday, which is 火曜日. That needs judgement, so it is not checked;
-    // the casing can be.
-    for (const m of k.meanings ?? []) checkCase(`${level}/kanji.json ${k.char}`, m);
+    if ("meanings" in k) errors.push(`${level}/kanji.json: ${k.char} meanings belong in locales/<locale>/${level}/kanji.json`);
   }
 
   // Stroke data is optional, but if present it must cover every kanji.
   const strokeFile = path.join(levelDir, "strokes.json");
   if (fs.existsSync(strokeFile)) {
-    const strokes = JSON.parse(fs.readFileSync(strokeFile, "utf8"));
+    const strokes = readJson(strokeFile);
     const missing = [...kanjiSet].filter((c) => !strokes.kanji?.[c]?.strokes?.length);
     if (missing.length) {
       errors.push(`${level}/strokes.json: no stroke data for ${missing.join(" ")}`);
@@ -107,108 +145,98 @@ for (const level of LEVELS) {
     warnings.push(`${level}: no strokes.json - run npm run fetch:strokes`);
   }
 
-  // Mnemonics are optional too, but if present every kanji needs one, and
+  // Parts are optional too, but if present every kanji needs an entry, and
   // every part and radical must resolve to something the app can explain:
   // a kanji of any level, or a primitive defined here or by an earlier level.
-  const memoFile = path.join(levelDir, "mnemonics.json");
-  if (fs.existsSync(memoFile)) {
-    const rel = `${level}/mnemonics.json`;
-    const memo = JSON.parse(fs.readFileSync(memoFile, "utf8"));
-    const primitives = memo.primitives ?? {};
-    for (const [c, def] of Object.entries(primitives)) {
+  const partsFile = path.join(levelDir, "parts.json");
+  if (fs.existsSync(partsFile)) {
+    const rel = `${level}/parts.json`;
+    const parts = load(partsFile, rel) ?? {};
+    const primitives = parts.primitives ?? {};
+    for (const c of Object.keys(primitives)) {
       if (primitiveLevel.has(c)) {
-        errors.push(`${rel}: primitive ${c} is already defined by ${primitiveLevel.get(c)}/mnemonics.json`);
+        errors.push(`${rel}: primitive ${c} is already defined by ${primitiveLevel.get(c)}/parts.json`);
         continue;
       }
       primitiveLevel.set(c, level);
-      // A kanji takes its meaning from kanji.json; anything else has nowhere
-      // else to get one.
-      if (!def.meaning && !kanjiLevel.has(c)) errors.push(`${rel}: primitive ${c} has no meaning`);
-      if (def.meaning) checkCase(`${rel} primitive ${c}`, def.meaning);
+      // A kanji takes its meaning from kanji.json; anything else needs one of
+      // its own in every language.
+      if (!kanjiLevel.has(c)) want.primitives.push(c);
     }
     const defined = (c) => kanjiLevel.has(c) || primitiveLevel.has(c);
 
     for (const k of kanjiList) {
-      const m = memo.kanji?.[k.char];
+      const m = parts.kanji?.[k.char];
       if (!m) {
         errors.push(`${rel}: no entry for ${k.char}`);
         continue;
       }
-      if (!m.mnemonic?.trim()) errors.push(`${rel}: ${k.char} has no mnemonic`);
       if (!m.radical) {
         errors.push(`${rel}: ${k.char} has no radical`);
       } else {
         usedParts.add(m.radical);
         if (!defined(m.radical)) errors.push(`${rel}: ${k.char} radical ${m.radical} is not defined in primitives`);
       }
-      if (!Array.isArray(m.parts)) {
-        errors.push(`${rel}: ${k.char} parts must be an array`);
+      if (!Array.isArray(m.parts) || m.parts.some((p) => typeof p !== "string")) {
+        errors.push(`${rel}: ${k.char} parts must be a list of characters`);
         continue;
       }
-      for (const raw of m.parts) {
-        // A part is its character, or { char, as } when it plays a role
-        // here that differs from its usual meaning.
-        const p = typeof raw === "string" ? raw : raw?.char;
-        if (typeof p !== "string" || (typeof raw === "object" && !raw.as?.trim())) {
-          errors.push(`${rel}: ${k.char} has a malformed part ${JSON.stringify(raw)}`);
-          continue;
-        }
-        if (typeof raw === "object") checkCase(`${rel} ${k.char} part ${p}`, raw.as);
+      want.parts.set(k.char, m.parts);
+      for (const p of m.parts) {
         usedParts.add(p);
         if (p === k.char) errors.push(`${rel}: ${k.char} lists itself as a part`);
         if (!defined(p)) errors.push(`${rel}: ${k.char} part ${p} is neither a kanji nor in primitives`);
-        // The story is what makes a part stick. One it never mentions is a
-        // label the learner is shown and given no reason to remember.
-        if (m.mnemonic && !m.mnemonic.includes(p)) {
-          errors.push(`${rel}: ${k.char} part ${p} is not mentioned in its mnemonic`);
-        }
         // Outside the Basic Multilingual Plane most Japanese fonts have no
         // glyph, and the part renders as a box.
         if (p.codePointAt(0) > 0xffff) warnings.push(`${rel}: ${k.char} part ${p} may not render`);
       }
+      const roles = m.roles ?? [];
+      for (const r of roles) {
+        if (!m.parts.includes(r)) errors.push(`${rel}: ${k.char} role ${r} is not one of its parts`);
+      }
+      want.roles.set(k.char, roles);
     }
 
-    for (const c of Object.keys(memo.kanji ?? {})) {
+    for (const c of Object.keys(parts.kanji ?? {})) {
       if (!kanjiSet.has(c)) errors.push(`${rel}: entry for ${c}, which is not in kanji.json`);
     }
 
-    notes.push(
-      `${level}: mnemonics for ${Object.keys(memo.kanji ?? {}).length} kanji, ` +
-        `${Object.keys(primitives).length} parts defined`,
-    );
+    notes.push(`${level}: parts for ${Object.keys(parts.kanji ?? {}).length} kanji, ${Object.keys(primitives).length} primitives defined`);
   } else {
-    warnings.push(`${level}: no mnemonics.json - new kanji are taught without parts or stories`);
+    warnings.push(`${level}: no parts.json - new kanji are taught without parts or stories`);
   }
 
-  const files = fs.readdirSync(lessonDir).filter((f) => f.endsWith(".json")).sort();
   const triples = new Map();
   const taughtBy = new Map(); // kanji -> lesson slug
   const wordsPerKanji = new Map();
   let wordCount = 0;
   let lessonCount = 0;
 
-  for (const file of files) {
+  for (const file of lessonFiles(lessonDir)) {
     const rel = `${level}/lessons/${file}`;
-    let lessons;
-    try {
-      lessons = JSON.parse(fs.readFileSync(path.join(lessonDir, file), "utf8"));
-    } catch (e) {
-      errors.push(`${rel}: invalid JSON - ${e.message}`);
-      continue;
-    }
+    const lessons = load(path.join(lessonDir, file), rel);
+    if (!lessons) continue;
     if (!Array.isArray(lessons)) {
       errors.push(`${rel}: expected an array of lessons`);
       continue;
     }
+    const fileLessons = [];
+    want.lessons.set(file, fileLessons);
 
     for (const lesson of lessons) {
       lessonCount++;
-      for (const field of ["slug", "title", "summary"]) {
-        if (!lesson[field]) errors.push(`${rel}: lesson missing ${field}`);
+      if (!lesson.slug) {
+        errors.push(`${rel}: lesson missing slug`);
+        continue;
+      }
+      if ("title" in lesson || "summary" in lesson) {
+        errors.push(`${rel} ${lesson.slug}: title and summary belong in locales/<locale>/${level}/lessons/${file}`);
       }
       // A lesson's address is /lessons/<slug>, with no level in it.
       if (slugs.has(lesson.slug)) errors.push(`${rel}: lesson slug ${lesson.slug} is already used in ${slugs.get(lesson.slug)}`);
       slugs.set(lesson.slug, level);
+      const keys = [];
+      fileLessons.push({ slug: lesson.slug, words: keys });
 
       if (!Array.isArray(lesson.kanji) || lesson.kanji.length === 0) {
         errors.push(`${rel}: lesson ${lesson.slug} declares no kanji`);
@@ -236,12 +264,9 @@ for (const level of LEVELS) {
 
         if (!w.word) errors.push(`${where}: missing word`);
         if (!w.reading) errors.push(`${where}: missing reading`);
-        if (!Array.isArray(w.meanings) || w.meanings.length === 0) {
-          errors.push(`${where}: missing meanings`);
-        } else {
-          for (const m of w.meanings) checkCase(where, m);
-        }
+        if ("meanings" in w) errors.push(`${where}: meanings belong in locales/<locale>/${level}/lessons/${file}`);
         if (!POS.has(w.pos)) errors.push(`${where}: unknown pos ${JSON.stringify(w.pos)}`);
+        keys.push(`${w.word}|${w.reading}`);
 
         // Catches stray Latin left in a surface form, which renders as a word
         // no learner will ever see written that way.
@@ -304,7 +329,133 @@ for (const level of LEVELS) {
 
 // Only now: an N5 primitive may be used by nothing until N4.
 for (const [c, level] of primitiveLevel) {
-  if (!usedParts.has(c) && !kanjiLevel.has(c)) warnings.push(`${level}/mnemonics.json: primitive ${c} is never used`);
+  if (!usedParts.has(c) && !kanjiLevel.has(c)) warnings.push(`${level}/parts.json: primitive ${c} is never used`);
+}
+
+// ===========================================================================
+// The text, per language
+// ===========================================================================
+
+const onDisk = fs.existsSync(LOCALE_ROOT)
+  ? fs.readdirSync(LOCALE_ROOT, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name)
+  : [];
+for (const locale of SHIPPED) {
+  if (!onDisk.includes(locale)) errors.push(`locales/${locale}: missing - the app offers this language`);
+}
+const roadmap = load(path.join(DATA_ROOT, "levels.json"), "levels.json")?.levels ?? [];
+
+// English first, so a draft can be measured against it.
+const reference = {};
+let referenceTotal = 0;
+
+for (const locale of [...SHIPPED.filter((l) => onDisk.includes(l)), ...onDisk.filter((l) => !SHIPPED.includes(l)).sort()]) {
+  const shipped = SHIPPED.includes(locale);
+  // A language still being written reports problems without failing the
+  // build, and lists what it has not translated yet only when asked to.
+  const report = shipped ? errors : warnings;
+  const gaps = shipped || locale === focus ? report : [];
+  const root = path.join(LOCALE_ROOT, locale);
+  let done = 0;
+  let total = 0;
+  const need = (ok, message) => {
+    total++;
+    if (ok) done++;
+    else gaps.push(message);
+    return ok;
+  };
+  const extras = (where, keys, known) => {
+    for (const k of keys) if (!known.has(k)) report.push(`${where}: ${k} is not in the curriculum`);
+  };
+  const cased = (where, text) => {
+    const want = titleCase(text, locale);
+    if (text !== want) report.push(`${where}: write ${JSON.stringify(text)} as ${JSON.stringify(want)}`);
+  };
+  const meanings = (where, list) => {
+    const ok = Array.isArray(list) && list.length > 0 && list.every((m) => typeof m === "string" && m.trim());
+    if (need(ok, `${where}: needs a list of meanings`)) for (const m of list) cased(where, m);
+  };
+  const text = (value) => typeof value === "string" && value.trim() !== "";
+
+  // levels.json: { "N5": { title, blurb, canDo } } for every level on the roadmap
+  const levels = load(path.join(root, "levels.json"), `locales/${locale}/levels.json`, gaps) ?? {};
+  for (const { level } of roadmap) {
+    for (const field of ["title", "blurb", "canDo"]) {
+      need(text(levels[level]?.[field]), `locales/${locale}/levels.json: ${level} has no ${field}`);
+    }
+  }
+
+  for (const level of LEVELS) {
+    const want = expected.get(level);
+    const rel = `locales/${locale}/${level}`;
+    const dir = path.join(root, level);
+    if (!fs.existsSync(dir)) {
+      gaps.push(`${rel}: missing - every built level needs its ${locale} text`);
+      continue;
+    }
+
+    // kanji.json: { char: [meanings] }
+    const kanji = load(path.join(dir, "kanji.json"), `${rel}/kanji.json`, gaps) ?? {};
+    for (const c of want.kanji) meanings(`${rel}/kanji.json ${c}`, kanji[c]);
+    extras(`${rel}/kanji.json`, Object.keys(kanji), new Set(want.kanji));
+
+    // mnemonics.json: { primitives: { char: { meaning, note? } }, kanji: { char: { mnemonic, roles? } } }
+    if (want.parts.size) {
+      const where = `${rel}/mnemonics.json`;
+      const memo = load(path.join(dir, "mnemonics.json"), where, gaps) ?? {};
+      const prims = memo.primitives ?? {};
+      const en = reference[level]?.primitives ?? {};
+      for (const c of want.primitives) {
+        if (need(text(prims[c]?.meaning), `${where}: primitive ${c} has no meaning`)) cased(`${where} primitive ${c}`, prims[c].meaning);
+      }
+      for (const [c, def] of Object.entries(en)) {
+        // Notes are optional in English; a translation carries the ones it has.
+        if (def.note && !text(prims[c]?.note)) gaps.push(`${where}: primitive ${c} has no note`);
+      }
+      extras(`${where} primitives`, Object.keys(prims), new Set(primitiveLevel.keys()));
+
+      for (const [c, parts] of want.parts) {
+        const entry = memo.kanji?.[c];
+        if (!need(text(entry?.mnemonic), `${where}: ${c} has no mnemonic`)) continue;
+        // A part the story never names is a label with no reason to remember it.
+        for (const p of parts) {
+          if (!entry.mnemonic.includes(p)) report.push(`${where}: ${c} part ${p} is not mentioned in its mnemonic`);
+        }
+        const roles = want.roles.get(c) ?? [];
+        for (const r of roles) {
+          if (need(text(entry.roles?.[r]), `${where}: ${c} part ${r} has no role`)) cased(`${where} ${c} part ${r}`, entry.roles[r]);
+        }
+        extras(`${where} ${c} roles`, Object.keys(entry.roles ?? {}), new Set(roles));
+      }
+      extras(`${where} kanji`, Object.keys(memo.kanji ?? {}), new Set(want.parts.keys()));
+      if (locale === "en") reference[level] = { primitives: prims };
+    }
+
+    // lessons/<file>: { slug: { title, summary, words: { "word|reading": [meanings] } } }
+    for (const [file, lessons] of want.lessons) {
+      const where = `${rel}/lessons/${file}`;
+      const overlay = load(path.join(dir, "lessons", file), where, gaps) ?? {};
+      for (const { slug, words } of lessons) {
+        const t = overlay[slug];
+        need(text(t?.title), `${where} ${slug}: no title`);
+        need(text(t?.summary), `${where} ${slug}: no summary`);
+        for (const key of words) meanings(`${where} ${slug} ${key}`, t?.words?.[key]);
+        extras(`${where} ${slug} words`, Object.keys(t?.words ?? {}), new Set(words));
+      }
+      extras(where, Object.keys(overlay), new Set(lessons.map((l) => l.slug)));
+    }
+    for (const file of lessonFiles(path.join(dir, "lessons"))) {
+      if (!want.lessons.has(file)) report.push(`${rel}/lessons/${file}: no such lesson file in ${level}/lessons`);
+    }
+  }
+
+  // Whatever a draft has not started still counts against it.
+  if (locale === "en") referenceTotal = total;
+  total = Math.max(total, referenceTotal);
+  const percent = total ? Math.floor((done / total) * 1000) / 10 : 0;
+  notes.push(
+    `${locale}: ${done}/${total} texts (${percent}%)` +
+      (shipped || locale === focus ? "" : ` - in progress; --locale ${locale} lists what is left`),
+  );
 }
 
 for (const n of notes) console.log(n);

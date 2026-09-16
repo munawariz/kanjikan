@@ -8,6 +8,10 @@ import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import { DailyQuiz } from "@/components/app/DailyQuiz";
 import { DailyResults } from "@/components/app/DailyResults";
+import { getLocale, getT } from "@/lib/i18n/server";
+import { INTL_TAG } from "@/lib/i18n/format";
+import type { Locale } from "@/lib/i18n/config";
+import type { Messages } from "@/lib/i18n/messages";
 
 export const dynamic = "force-dynamic";
 
@@ -16,12 +20,13 @@ const HISTORY_DAYS = 7;
 export default async function DailyQuizPage() {
   const user = await getUser();
   if (!user) redirect("/login");
+  const [t, locale] = await Promise.all([getT(), getLocale()]);
 
   const timeZone = requestTimeZone();
   const today = localDate(timeZone);
   const since = shiftDate(today, -(HISTORY_DAYS - 1));
   const [quiz, history] = await Promise.all([
-    getDailyQuiz(user.id, today, timeZone),
+    getDailyQuiz(user.id, today, timeZone, locale),
     getDailyHistory(user.id, since),
   ]);
 
@@ -33,7 +38,7 @@ export default async function DailyQuizPage() {
             <div className="row" style={{ gap: 10 }}>
               <Sparkle size={16} color="var(--on-tint-heading)" />
               <span className="eyebrow" style={{ color: "var(--on-tint-heading)" }}>
-                Daily quiz
+                {t.daily.eyebrow}
               </span>
             </div>
             <h1
@@ -44,17 +49,15 @@ export default async function DailyQuizPage() {
                 lineHeight: "var(--leading-display)",
               }}
             >
-              Learn {DAILY_QUIZ_SIZE} kanji to unlock the daily quiz.
+              {t.daily.lockedHeading(DAILY_QUIZ_SIZE)}
             </h1>
             <p style={{ margin: 0, color: "var(--on-tint-body)", maxWidth: 460 }}>
-              Each day asks {DAILY_QUIZ_SIZE} questions about kanji you have already learned. You
-              have {quiz.learned} so far. A character joins the quiz the day after you first study
-              it, so today&rsquo;s lesson counts from tomorrow.
+              {t.daily.lockedBody(DAILY_QUIZ_SIZE, quiz.learned)}
             </p>
             <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
               <Link href="/lessons" className="reset-link">
                 <Button variant="primary" size="lg" icon="chevron-right">
-                  Browse Lessons
+                  {t.daily.browseLessons}
                 </Button>
               </Link>
             </div>
@@ -74,7 +77,7 @@ export default async function DailyQuizPage() {
         <DailyQuiz date={today} questions={quiz.questions} answered={quiz.answers} />
       )}
 
-      {finished && <History today={today} history={history} />}
+      {finished && <History today={today} history={history} t={t} locale={locale} />}
     </div>
   );
 }
@@ -83,28 +86,32 @@ export default async function DailyQuizPage() {
 function History({
   today,
   history,
+  t,
+  locale,
 }: {
   today: string;
   history: Map<string, { answered: number; correct: number }>;
+  t: Messages;
+  locale: Locale;
 }) {
   const days = Array.from({ length: HISTORY_DAYS }, (_, i) => shiftDate(today, i - (HISTORY_DAYS - 1)));
 
   return (
     <section className="stack" style={{ gap: 16 }}>
       <p className="eyebrow" style={{ margin: 0 }}>
-        Past week
+        {t.daily.pastWeek}
       </p>
       <div style={{ display: "grid", gridTemplateColumns: `repeat(${HISTORY_DAYS}, minmax(0, 1fr))`, gap: 8 }}>
         {days.map((day) => {
           const h = history.get(day);
-          const weekday = new Date(`${day}T00:00:00Z`).toLocaleDateString("en-GB", {
+          const weekday = new Date(`${day}T00:00:00Z`).toLocaleDateString(locale === "en" ? "en-GB" : INTL_TAG[locale], {
             weekday: "short",
             timeZone: "UTC",
           });
           return (
             <div
               key={day}
-              title={h ? `${day}: ${h.correct} of ${h.answered} correct` : `${day}: not taken`}
+              title={h ? t.daily.dayScore(day, h.correct, h.answered) : t.daily.dayNotTaken(day)}
               className="stack"
               style={{
                 gap: 6,

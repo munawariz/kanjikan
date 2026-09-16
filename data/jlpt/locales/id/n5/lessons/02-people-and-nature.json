@@ -1,0 +1,135 @@
+{
+  "people": {
+    "title": "Orang",
+    "summary": "人 adalah kanji paling umum dalam bahasa Jepang sekaligus yang paling sulit ditebak: ひと saat berdiri sendiri, にん saat menghitung, じん untuk kebangsaan.",
+    "words": {
+      "人|ひと": ["Orang"],
+      "日本人|にほんじん": ["Orang Jepang"],
+      "外国人|がいこくじん": ["Orang Asing"],
+      "大人|おとな": ["Orang Dewasa"],
+      "何人|なんにん": ["Berapa Orang"],
+
+      "男|おとこ": ["Laki-Laki", "Pria"],
+      "男の子|おとこのこ": ["Anak Laki-Laki"],
+      "男の人|おとこのひと": ["Pria"],
+      "男子|だんし": ["Laki-Laki Muda", "Siswa Laki-Laki"],
+      "長男|ちょうなん": ["Putra Sulung"],
+
+      "女|おんな": ["Perempuan", "Wanita"],
+      "女の子|おんなのこ": ["Anak Perempuan"],
+      "女の人|おんなのひと": ["Wanita"],
+      "女子|じょし": ["Perempuan Muda", "Siswi"],
+      "少女|しょうじょ": ["Gadis Kecil"],
+
+      "子|こ": ["Anak"],
+      "子ども|こども": ["Anak Kecil"],
+      "帽子|ぼうし": ["Topi", "Topi Pet"],
+      "椅子|いす": ["Kursi"],
+      "息子|むすこ": ["Putra"],
+
+      "名前|なまえ": ["Nama"],
+      "有名|ゆうめい": ["Terkenal"],
+      "名字|みょうじ": ["Nama Keluarga"],
+      "名人|めいじん": ["Ahli", "Maestro"],
+      "地名|ちめい": ["Nama Tempat"]
+    }
+  },
+  "family-and-teachers": {
+    "title": "Keluarga dan guru",
+    "summary": "生 adalah kanji dengan arti paling luas di level ini — hidup, lahir, mentah, dan murid. Kenali ia lewat empat kata majemuk, dan ragam artinya tidak akan terasa acak lagi.",
+    "words": {
+      "父|ちち": ["Ayah Saya"],
+      "お父さん|おとうさん": ["Ayah (sopan)"],
+      "父親|ちちおや": ["Ayah"],
+      "父母|ふぼ": ["Ayah dan Ibu", "Orang Tua"],
+
+      "母|はは": ["Ibu Saya"],
+      "お母さん|おかあさん": ["Ibu (sopan)"],
+      "母親|ははおや": ["Ibu"],
+      "母国|ぼこく": ["Tanah Air"],
+      "母の日|ははのひ": ["Hari Ibu"],
+
+      "友だち|ともだち": ["Teman"],
+      "友|とも": ["Kawan"],
+      "友人|ゆうじん": ["Teman (formal)"],
+      "親友|しんゆう": ["Sahabat"],
+
+      "先生|せんせい": ["Guru", "Dokter"],
+      "先|さき": ["Depan", "Ujung", "Sebelumnya"],
+      "先週|せんしゅう": ["Minggu Lalu"],
+      "先日|せんじつ": ["Beberapa Hari yang Lalu"],
+      "先に|さきに": ["Terlebih Dahulu", "Duluan"],
+
+      "学生|がくせい": ["Pelajar"],
+      "生まれる|うまれる": ["Lahir"],
+      "生きる|いきる": ["Hidup"],
+      "生|なま": ["Mentah", "Segar"],
+      "生活|せいかつ": ["Kehidupan Sehari-Hari"]
+    }
+  },
+  "weather-and-land": {
+    "title": "Cuaca dan daratan",
+    "summary": "気 hampir tidak pernah berdiri sendiri, tetapi muncul di mana-mana — cuaca, kesehatan, suasana hati, listrik. Pelajari kanji ini lewat kata majemuknya.",
+    "words": {
+      "天気|てんき": ["Cuaca"],
+      "天|てん": ["Langit", "Surga"],
+      "天国|てんごく": ["Surga", "Firdaus"],
+      "雨天|うてん": ["Cuaca Hujan"],
+
+      "元気|げんき": ["Sehat", "Bersemangat"],
+      "病気|びょうき": ["Penyakit"],
+      "気持ち|きもち": ["Perasaan", "Suasana Hati"],
+      "空気|くうき": ["Udara", "Suasana"],
+      "人気|にんき": ["Popularitas"],
+
+      "雨|あめ": ["Hujan"],
+      "大雨|おおあめ": ["Hujan Lebat"],
+      "小雨|こさめ": ["Hujan Ringan", "Gerimis"],
+      "雨水|あまみず": ["Air Hujan"],
+
+      "山|やま": ["Gunung"],
+      "火山|かざん": ["Gunung Api"],
+      "富士山|ふじさん": ["Gunung Fuji"],
+      "山道|やまみち": ["Jalan Gunung"],
+      "登山|とざん": ["Pendakian Gunung"],
+
+      "川|かわ": ["Sungai"],
+      "小川|おがわ": ["Sungai Kecil", "Anak Sungai"],
+      "川上|かわかみ": ["Hulu Sungai"],
+      "川下|かわしも": ["Hilir Sungai"],
+      "河川|かせん": ["Sungai (istilah resmi)"]
+    }
+  },
+  "five-elements": {
+    "title": "Api, air, kayu, logam, tanah",
+    "summary": "Lima unsur, yang juga menjadi nama lima dari tujuh hari dalam seminggu. Pelajari 火水木金土 di sini, dan 火曜日 sampai 土曜日 akan kamu dapatkan dengan sendirinya.",
+    "words": {
+      "火|ひ": ["Api"],
+      "火曜日|かようび": ["Hari Selasa"],
+      "花火|はなび": ["Kembang Api"],
+      "火事|かじ": ["Kebakaran", "Kobaran Api"],
+
+      "水|みず": ["Air"],
+      "水曜日|すいようび": ["Hari Rabu"],
+      "水泳|すいえい": ["Renang"],
+      "お水|おみず": ["Air (sopan)"],
+      "水道|すいどう": ["Saluran Air", "Air Keran"],
+
+      "木|き": ["Pohon", "Kayu"],
+      "木曜日|もくようび": ["Hari Kamis"],
+      "大木|たいぼく": ["Pohon Besar"],
+      "木々|きぎ": ["Pepohonan"],
+
+      "金|かね": ["Duit", "Logam"],
+      "金曜日|きんようび": ["Hari Jumat"],
+      "お金|おかね": ["Uang"],
+      "料金|りょうきん": ["Biaya", "Tarif"],
+      "金魚|きんぎょ": ["Ikan Mas Koki"],
+
+      "土|つち": ["Tanah", "Bumi"],
+      "土曜日|どようび": ["Hari Sabtu"],
+      "土地|とち": ["Lahan", "Sebidang Tanah"],
+      "国土|こくど": ["Wilayah Negara"]
+    }
+  }
+}

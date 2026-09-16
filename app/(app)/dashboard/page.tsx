@@ -10,7 +10,7 @@ import {
 } from "@/lib/progress";
 import { getAllWords, getLevelPath } from "@/lib/content";
 import { DAILY_QUIZ_SIZE, localDate, requestTimeZone } from "@/lib/daily";
-import { BAND_LABEL, type MasteryBand } from "@/lib/srs";
+import type { MasteryBand } from "@/lib/srs";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
@@ -18,6 +18,8 @@ import { Icon } from "@/components/atlas/core/Icon.jsx";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import { BarChart } from "@/components/atlas/data/BarChart.jsx";
 import { WritingSetting } from "@/components/app/StudySettings";
+import { getLocale, getT } from "@/lib/i18n/server";
+import type { Messages } from "@/lib/i18n/messages";
 
 export const dynamic = "force-dynamic";
 
@@ -28,33 +30,28 @@ const BAND_COLOUR: Record<MasteryBand, string> = {
   mastered: "var(--band-mastered)",
 };
 
-/** "N5", "N5 and N4", "N3, N2 and N1". */
-function listLevels(entries: { level: string }[]) {
-  const names = entries.map((e) => e.level);
-  return names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0];
-}
+/** The bands in order, from not started to mastered. */
+const BANDS = Object.keys(BAND_COLOUR) as MasteryBand[];
 
 /**
  * Today's quiz in one line: locked, waiting, half done, or done with a score.
  * Home is where a day starts, so this is where the quiz is found — it has no
  * tab of its own, since five already only just fit on a phone.
  */
-function DailyQuizCard({ quiz }: { quiz: DailyQuiz }) {
+function DailyQuizCard({ quiz, t }: { quiz: DailyQuiz; t: Messages }) {
+  const m = t.dashboard;
   const locked = quiz.questions.length === 0;
   const answered = quiz.answers.length;
   const finished = !locked && answered >= quiz.questions.length;
   const correct = quiz.answers.filter((a) => a.correct).length;
 
   const [title, body] = locked
-    ? [
-        "Daily quiz",
-        `Unlocks once you have learned ${DAILY_QUIZ_SIZE} kanji — you have ${quiz.learned}. A character joins the day after you first study it.`,
-      ]
+    ? [m.dailyQuiz, m.quizLocked(DAILY_QUIZ_SIZE, quiz.learned)]
     : finished
-      ? [`Today’s quiz: ${correct} of ${answered} correct`, "Five new questions tomorrow."]
+      ? [m.quizDone(correct, answered), m.quizTomorrow]
       : answered > 0
-        ? [`Daily quiz: ${answered} of ${quiz.questions.length} answered`, "Finish today’s questions."]
-        : ["Daily quiz", `${DAILY_QUIZ_SIZE} questions on kanji you have already learned. One try each.`];
+        ? [m.quizProgress(answered, quiz.questions.length), m.quizFinish]
+        : [m.dailyQuiz, m.quizIntro(DAILY_QUIZ_SIZE)];
 
   return (
     <Card tone="sage" pad="md" radius="lg">
@@ -87,7 +84,7 @@ function DailyQuizCard({ quiz }: { quiz: DailyQuiz }) {
         {!locked && (
           <Link href="/daily-quiz" className="reset-link">
             <Button variant={finished ? "outline" : "primary"} size="md" icon="chevron-right">
-              {finished ? "See Results" : answered > 0 ? "Continue Quiz" : "Take Today’s Quiz"}
+              {finished ? m.seeResults : answered > 0 ? m.continueQuiz : m.takeQuiz}
             </Button>
           </Link>
         )}
@@ -106,14 +103,17 @@ function ContinueCard({
   dueNow,
   resume,
   level,
+  t,
 }: {
   dueNow: number;
   resume: LessonSummary | null;
   /** The level being worked through, whose kanji the figure counts. */
   level: LevelProgress;
+  t: Messages;
 }) {
+  const m = t.dashboard;
   const percent = Math.round((level.kanjiKnown / Math.max(level.totalKanji, 1)) * 100);
-  const lessonLabel = resume?.status === "learning" ? "Continue Lesson" : "Start Lesson";
+  const lessonLabel = resume?.status === "learning" ? m.continueLesson : m.startLesson;
 
   return (
     <Card tone="forest" pad="lg" radius="lg">
@@ -125,7 +125,7 @@ function ContinueCard({
           <div className="row" style={{ gap: 10 }}>
             <Sparkle size={16} color="var(--lime-500)" />
             <span className="eyebrow" style={{ color: "var(--lime-500)" }}>
-              {dueNow > 0 ? "Next: reviews" : resume ? `Next: lesson ${resume.order}` : "All caught up"}
+              {dueNow > 0 ? m.nextReviews : resume ? m.nextLesson(resume.order) : m.allCaughtUp}
             </span>
           </div>
 
@@ -139,39 +139,39 @@ function ContinueCard({
             }}
           >
             {dueNow > 0
-              ? `${dueNow} ${dueNow === 1 ? "review is" : "reviews are"} ready.`
+              ? m.reviewsReady(dueNow)
               : resume
                 ? resume.title
-                : "Every lesson is done."}
+                : m.allDone}
           </h2>
 
           <p style={{ margin: 0, color: "var(--forest-200)" }}>
             {dueNow > 0
-              ? `Clear these first, then ${resume ? `carry on with ${resume.title}` : "you are done for now"}. Reviews are what turn a word you have met into one you know.`
+              ? m.clearFirst(resume?.title ?? null)
               : resume
                 ? resume.summary
-                : "Nothing is due right now. Come back later for reviews, or practise any kanji you like."}
+                : m.nothingDue}
           </p>
 
           <div className="row" style={{ gap: 12, flexWrap: "wrap", marginTop: 8 }}>
             {dueNow > 0 && (
               <Link href="/review" className="reset-link">
                 <Button variant="accent" size="lg" icon="zap" iconPosition="left">
-                  Continue: Review
+                  {m.continueReview}
                 </Button>
               </Link>
             )}
             {resume && (
               <Link href={`/lessons/${resume.slug}/study`} className="reset-link">
                 <Button variant={dueNow > 0 ? "outline-inverse" : "accent"} size="lg" icon="chevron-right">
-                  {dueNow > 0 ? lessonLabel : `Continue: ${lessonLabel}`}
+                  {dueNow > 0 ? lessonLabel : m.continueWith(lessonLabel)}
                 </Button>
               </Link>
             )}
             {dueNow === 0 && !resume && (
               <Link href="/practice" className="reset-link">
                 <Button variant="accent" size="lg" icon="chevron-right">
-                  Practise
+                  {m.practise}
                 </Button>
               </Link>
             )}
@@ -191,13 +191,13 @@ function ContinueCard({
             {percent}%
           </div>
           <div className="eyebrow" style={{ color: "var(--forest-200)" }}>
-            {level.level} kanji known
+            {m.levelKanjiKnown(level.level)}
           </div>
           <div className="meter" style={{ background: "rgba(255,255,255,.16)", marginTop: 10, width: 200 }}>
             <span style={{ width: `${percent}%`, background: "var(--lime-500)" }} />
           </div>
           <div className="body-sm" style={{ color: "var(--forest-200)", marginTop: 6 }}>
-            {level.kanjiKnown} of {level.totalKanji} kanji
+            {m.kanjiOf(level.kanjiKnown, level.totalKanji)}
           </div>
         </div>
       </div>
@@ -211,7 +211,7 @@ function ContinueCard({
  * back if they slip, so the path shows where the work is, not just what has
  * been started.
  */
-function LessonPath({ lessons, next }: { lessons: LessonSummary[]; next: string | null }) {
+function LessonPath({ lessons, next, t }: { lessons: LessonSummary[]; next: string | null; t: Messages }) {
   return (
     <Card tone="white" pad="none" radius="lg" bordered>
       <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
@@ -246,7 +246,7 @@ function LessonPath({ lessons, next }: { lessons: LessonSummary[]; next: string 
                     {lesson.kanji.map((char, k) => (
                       <span
                         key={char}
-                        title={`${char}: ${BAND_LABEL[lesson.bands[k]]}`}
+                        title={`${char}: ${t.common.band[lesson.bands[k]]}`}
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
@@ -281,13 +281,13 @@ function LessonPath({ lessons, next }: { lessons: LessonSummary[]; next: string 
                 </div>
 
                 <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
-                  {isNext && <Badge tone="accent">Next</Badge>}
-                  {lesson.due > 0 && <Badge tone="warning">{lesson.due} due</Badge>}
+                  {isNext && <Badge tone="accent">{t.dashboard.next}</Badge>}
+                  {lesson.due > 0 && <Badge tone="warning">{t.dashboard.due(lesson.due)}</Badge>}
                   <span
                     className="body-sm"
                     style={{ fontFamily: "var(--font-mono)", color: "var(--text-body)", minWidth: 96, textAlign: "right" }}
                   >
-                    {lesson.wordsKnown}/{lesson.words} words
+                    {t.dashboard.wordsOf(lesson.wordsKnown, lesson.words)}
                   </span>
                 </div>
               </Link>
@@ -303,13 +303,15 @@ export default async function HomePage() {
   const user = await getUser();
   if (!user) redirect("/login");
 
+  const [t, locale] = await Promise.all([getT(), getLocale()]);
+  const m = t.dashboard;
   const timeZone = requestTimeZone();
   const [data, daily] = await Promise.all([
-    getDashboard(user.id),
-    getDailyQuiz(user.id, localDate(timeZone), timeZone),
+    getDashboard(user.id, locale),
+    getDailyQuiz(user.id, localDate(timeZone), timeZone, locale),
   ]);
   const lessons = data.lessons;
-  const levels = getLevelPath();
+  const levels = getLevelPath(locale);
   const built = levels.filter((l) => l.available);
   const unbuilt = levels.filter((l) => !l.available);
 
@@ -328,7 +330,7 @@ export default async function HomePage() {
   const accuracy = attempts ? Math.round((correct / attempts) * 100) : 0;
 
   // The words getting missed most often — the honest part of a progress page.
-  const words = getAllWords();
+  const words = getAllWords(undefined, locale);
   const trouble = [...progress.values()]
     .filter((p) => p.incorrect_count > 0)
     .sort((a, b) => b.incorrect_count - a.incorrect_count)
@@ -337,14 +339,14 @@ export default async function HomePage() {
     .filter((x) => x.word);
 
   const stats = [
-    { label: "Words known", value: data.wordsKnown, sub: `of ${data.totalWords}`, icon: "file-text" },
+    { label: m.wordsKnown, value: data.wordsKnown, sub: m.of(data.totalWords), icon: "file-text" },
     data.studyWriting
-      ? { label: "Can write", value: data.kanjiWritten, sub: "from memory", icon: "pen-line" }
-      : { label: "Kanji started", value: data.kanjiStarted, sub: `of ${data.totalKanji}`, icon: "grid-2x2" },
-    { label: "Answered today", value: data.reviewedToday, sub: `goal ${data.profile.daily_goal}`, icon: "check" },
-    { label: "Day streak", value: data.streak, sub: "consecutive days", icon: "star" },
-    { label: "Accuracy", value: `${accuracy}%`, sub: `${attempts} answers, all time`, icon: "chart-line" },
-    { label: "Due now", value: data.dueNow, sub: "waiting for review", icon: "zap" },
+      ? { label: m.canWrite, value: data.kanjiWritten, sub: m.fromMemory, icon: "pen-line" }
+      : { label: m.kanjiStarted, value: data.kanjiStarted, sub: m.of(data.totalKanji), icon: "grid-2x2" },
+    { label: m.answeredToday, value: data.reviewedToday, sub: m.goal(data.profile.daily_goal), icon: "check" },
+    { label: m.dayStreak, value: data.streak, sub: m.consecutiveDays, icon: "star" },
+    { label: m.accuracy, value: `${accuracy}%`, sub: m.answersAllTime(attempts), icon: "chart-line" },
+    { label: m.dueNow, value: data.dueNow, sub: m.waitingForReview, icon: "zap" },
   ];
 
   return (
@@ -362,12 +364,12 @@ export default async function HomePage() {
                 lineHeight: "var(--leading-display)",
               }}
             >
-              Good to see you, {name}.
+              {m.greeting(name)}
             </h1>
           </div>
           {data.streak > 0 && (
             <Badge tone="soft" icon="zap">
-              {data.streak} day streak
+              {m.streak(data.streak)}
             </Badge>
           )}
         </div>
@@ -379,10 +381,9 @@ export default async function HomePage() {
           <Card tone="cream" pad="md" radius="lg">
             <div className="stack" style={{ gap: 16 }}>
               <div className="stack" style={{ gap: 6 }}>
-                <h2 style={{ margin: 0, fontSize: "var(--text-heading-3)" }}>What are you learning for?</h2>
+                <h2 style={{ margin: 0, fontSize: "var(--text-heading-3)" }}>{m.writingTitle}</h2>
                 <p className="body-sm" style={{ margin: 0, color: "var(--on-tint-body)", maxWidth: 560 }}>
-                  Reading is enough for travel and for most everyday Japanese. Choose writing too if you
-                  want to draw each kanji from memory. You can change this at any time in Settings.
+                  {m.writingBody}
                 </p>
               </div>
               <WritingSetting initial={null} />
@@ -390,28 +391,27 @@ export default async function HomePage() {
           </Card>
         )}
 
-        <ContinueCard dueNow={data.dueNow} resume={resume} level={current} />
-        <DailyQuizCard quiz={daily} />
+        <ContinueCard dueNow={data.dueNow} resume={resume} level={current} t={t} />
+        <DailyQuizCard quiz={daily} t={t} />
       </section>
 
       {/* ---- The path ---------------------------------------------------- */}
       <section className="stack" style={{ gap: 20 }}>
         <div className="row" style={{ justifyContent: "space-between", gap: 16, flexWrap: "wrap", alignItems: "flex-end" }}>
           <div>
-            <p className="eyebrow">Your path</p>
+            <p className="eyebrow">{m.yourPath}</p>
             <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-1)" }}>
-              {lessons.length} lessons, {data.totalKanji} kanji
+              {m.pathTitle(lessons.length, data.totalKanji)}
             </h2>
             <p className="body-sm muted" style={{ margin: "8px 0 0", maxWidth: 560 }}>
-              The line under each kanji shows how well you know it. Take them in order, or open any
-              lesson: nothing is locked.
+              {m.pathBody}
             </p>
           </div>
           <div className="row" style={{ gap: 14, flexWrap: "wrap" }}>
-            {(Object.keys(BAND_LABEL) as MasteryBand[]).map((band) => (
+            {BANDS.map((band) => (
               <span key={band} className="row body-sm" style={{ gap: 6 }}>
                 <span style={{ width: 10, height: 10, borderRadius: "var(--radius-full)", background: BAND_COLOUR[band] }} />
-                {BAND_LABEL[band]}
+                {t.common.band[band]}
               </span>
             ))}
           </div>
@@ -424,10 +424,10 @@ export default async function HomePage() {
                 {level.level} · {built.find((l) => l.level === level.level)?.title}
               </h3>
               <span className="body-sm" style={{ fontFamily: "var(--font-mono)", color: "var(--text-body)" }}>
-                {level.kanjiKnown}/{level.totalKanji} kanji known
+                {m.levelKnown(level.kanjiKnown, level.totalKanji)}
               </span>
             </div>
-            <LessonPath lessons={lessons.filter((l) => l.level === level.level)} next={resume?.slug ?? null} />
+            <LessonPath lessons={lessons.filter((l) => l.level === level.level)} next={resume?.slug ?? null} t={t} />
           </div>
         ))}
       </section>
@@ -476,9 +476,9 @@ export default async function HomePage() {
         <Card tone="cream" pad="lg" radius="lg">
           <div className="stack" style={{ gap: 24 }}>
             <div>
-              <p className="eyebrow">Last 14 days</p>
+              <p className="eyebrow">{m.last14Days}</p>
               <h3 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-3)" }}>
-                Cards answered
+                {m.cardsAnswered}
               </h3>
             </div>
             <BarChart data={data.activity} height={160} highlight="alternate" />
@@ -488,16 +488,15 @@ export default async function HomePage() {
         <Card tone="white" pad="lg" radius="lg" bordered>
           <div className="stack" style={{ gap: 24 }}>
             <div>
-              <p className="eyebrow">Where your kanji sit</p>
-              <h3 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-3)" }}>Kanji mastery</h3>
+              <p className="eyebrow">{m.masteryEyebrow}</p>
+              <h3 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-3)" }}>{m.masteryTitle}</h3>
               <p className="body-sm muted" style={{ margin: "8px 0 0" }}>
-                A kanji counts as known once most of its words are known — each has survived a
-                week-long gap, or you marked it as one you already knew.
+                {m.masteryBody}
               </p>
             </div>
 
             <div style={{ display: "flex", height: 12, borderRadius: "var(--radius-full)", overflow: "hidden" }}>
-              {(Object.keys(BAND_LABEL) as MasteryBand[]).map((band) => (
+              {BANDS.map((band) => (
                 <span
                   key={band}
                   style={{
@@ -509,7 +508,7 @@ export default async function HomePage() {
             </div>
 
             <div className="stack" style={{ gap: 12 }}>
-              {(Object.keys(BAND_LABEL) as MasteryBand[]).map((band) => (
+              {BANDS.map((band) => (
                 <div key={band} className="row" style={{ justifyContent: "space-between", gap: 12 }}>
                   <div className="row" style={{ gap: 10 }}>
                     <span
@@ -520,7 +519,7 @@ export default async function HomePage() {
                         background: BAND_COLOUR[band],
                       }}
                     />
-                    <span className="body-sm">{BAND_LABEL[band]}</span>
+                    <span className="body-sm">{t.common.band[band]}</span>
                   </div>
                   <span
                     className="body-sm"
@@ -539,9 +538,9 @@ export default async function HomePage() {
       {trouble.length > 0 && (
         <section className="stack" style={{ gap: 20 }}>
           <div>
-            <p className="eyebrow">Needs another look</p>
+            <p className="eyebrow">{m.troubleEyebrow}</p>
             <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-1)" }}>
-              The words tripping you up
+              {m.troubleTitle}
             </h2>
           </div>
 
@@ -559,7 +558,7 @@ export default async function HomePage() {
                     {word!.meanings[0]}
                   </div>
                   <Badge tone="negative">
-                    {row.incorrect_count} {row.incorrect_count === 1 ? "miss" : "misses"}
+                    {m.misses(row.incorrect_count)}
                   </Badge>
                 </div>
               </Card>
@@ -571,12 +570,13 @@ export default async function HomePage() {
       {/* ---- The road ahead ---------------------------------------------- */}
       <section className="stack" style={{ gap: 16 }}>
         <div>
-          <p className="eyebrow">Beyond {built[built.length - 1].level}</p>
-          <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-2)" }}>The road ahead</h2>
+          <p className="eyebrow">{m.beyond(built[built.length - 1].level)}</p>
+          <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-2)" }}>{m.roadTitle}</h2>
           <p className="body-sm muted" style={{ margin: "8px 0 0", maxWidth: 620 }}>
-            {listLevels(built)} {built.length === 1 ? "is" : "are"} built.
-            {unbuilt.length > 0 &&
-              ` ${listLevels(unbuilt)} ${unbuilt.length === 1 ? "is" : "are"} mapped but not written yet. Their counts are community estimates, because the JLPT has published no official kanji list since 2010.`}
+            {m.roadBody(
+              built.map((l) => l.level),
+              unbuilt.map((l) => l.level),
+            )}
           </p>
         </div>
         <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
@@ -594,11 +594,11 @@ export default async function HomePage() {
                       color: entry.available ? "var(--on-tint-body)" : "var(--text-muted)",
                     }}
                   >
-                    {entry.available ? `${entry.kanji} kanji` : `~${entry.kanjiTarget} kanji`}
+                    {entry.available ? m.kanjiCount(entry.kanji) : m.kanjiTarget(entry.kanjiTarget)}
                   </span>
                 </div>
                 <span className="body-sm" style={{ color: entry.available ? "var(--on-tint-body)" : "var(--text-muted)" }}>
-                  {entry.available ? "Available now" : "Not written yet"}
+                  {entry.available ? m.availableNow : m.notWrittenYet}
                 </span>
               </div>
             </Card>

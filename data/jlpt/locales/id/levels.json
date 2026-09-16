@@ -1,0 +1,27 @@
+{
+  "N5": {
+    "title": "Fondasi",
+    "blurb": "Angka, hari, orang, lima unsur, arah dan posisi. Kanji yang kamu jumpai di peron stasiun sebelum kamu menemuinya di buku pelajaran.",
+    "canDo": "Membaca hiragana, katakana, dan kanji dasar. Memahami percakapan pendek dan lambat tentang topik sehari-hari."
+  },
+  "N4": {
+    "title": "Bekal sehari-hari",
+    "blurb": "Kata kerja untuk berbuat dan merasakan, tubuh, cuaca, pekerjaan, dan perjalanan. Kanji yang membuat kalimat tak lagi butuh furigana.",
+    "canDo": "Membaca teks tentang topik sehari-hari yang sudah akrab. Memahami percakapan sehari-hari yang diucapkan dengan kecepatan hampir alami."
+  },
+  "N3": {
+    "title": "Jembatan",
+    "blurb": "Tahap yang paling sulit bagi kebanyakan pelajar: kata benda abstrak, kata kerja majemuk, dan kanji yang mengisi judul berita surat kabar.",
+    "canDo": "Membaca bacaan sehari-hari yang lebih mendalam. Memahami percakapan dengan kecepatan alami di sebagian besar situasi yang akrab."
+  },
+  "N2": {
+    "title": "Membaca lebih luas",
+    "blurb": "Berita, bisnis, dan tulisan resmi. Kanji yang jarang berdiri sendiri dan hampir selalu muncul dalam gabungan dua kanji.",
+    "canDo": "Membaca surat kabar dan ulasan umum. Memahami berita dan diskusi dengan kecepatan alami."
+  },
+  "N1": {
+    "title": "Semua sisanya",
+    "blurb": "Ekor panjangnya: kanji sastra, teknis, dan resmi, termasuk banyak yang hanya akan kamu temui di media cetak.",
+    "canDo": "Membaca tulisan abstrak dengan logika yang rumit tentang topik apa pun. Memahaminya saat diucapkan dengan kecepatan penuh."
+  }
+}

@@ -79,13 +79,6 @@ export function bandFor(stage: number | undefined): MasteryBand {
   return "learning";
 }
 
-export const BAND_LABEL: Record<MasteryBand, string> = {
-  new: "Not started",
-  learning: "Learning",
-  known: "Known",
-  mastered: "Mastered",
-};
-
 export type KanjiReading = {
   /** The stage most of its words have reached. */
   stage: number;

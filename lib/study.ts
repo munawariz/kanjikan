@@ -59,10 +59,15 @@ const wordLabel = {
   "word-reading": (w: Word) => w.reading,
 } as const;
 
-/** Carry no meaning on their own, so sharing one says nothing about two words. */
+/**
+ * Carry no meaning on their own, so sharing one says nothing about two words.
+ * Glosses are in whichever language the learner reads, so both are listed.
+ */
 const GLOSS_STOPWORDS = new Set([
   "a", "an", "the", "of", "to", "in", "on", "at", "for", "and", "or", "with",
   "it", "is", "be", "this", "that", "from", "by", "as", "up",
+  "yang", "di", "ke", "dari", "dan", "atau", "untuk", "dengan", "pada", "oleh",
+  "dalam", "sebagai", "ini", "itu",
 ]);
 
 function glossTokens(word: Word): Set<string> {
@@ -357,10 +362,3 @@ export function buildPracticeQueue(
 
   return [...writing, ...shuffle(reading, rand)];
 }
-
-export const PROMPT: Record<Exclude<CardKind, "kanji-teach" | "kanji-write" | "word-teach">, string> = {
-  "kanji-meaning": "What does this character mean?",
-  "word-meaning": "What does this word mean?",
-  "word-reading": "How is this read?",
-  "word-recall": "Which word is this?",
-};

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
+import { getT } from "@/lib/i18n/server";
 import { getKanjiChar } from "@/lib/content";
 import { recordWritingAnswer } from "@/lib/progress";
 
@@ -13,8 +14,8 @@ import { recordWritingAnswer } from "@/lib/progress";
  * the tab mid-session keeps everything already answered.
  */
 export async function POST(request: Request) {
-  const user = await getUser();
-  if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const [user, t] = await Promise.all([getUser(), getT()]);
+  if (!user) return NextResponse.json({ error: t.api.notSignedIn }, { status: 401 });
 
   const body = await request.json().catch(() => null);
   const char = body?.char;
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
   // Resolved against file content, so a forged character cannot write a row
   // for something outside the curriculum.
   const kanji = getKanjiChar(char);
-  if (!kanji) return NextResponse.json({ error: "Unknown kanji" }, { status: 404 });
+  if (!kanji) return NextResponse.json({ error: t.api.unknownKanji }, { status: 404 });
 
   try {
     const next = await recordWritingAnswer(user.id, kanji, correct);

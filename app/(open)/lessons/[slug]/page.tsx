@@ -10,7 +10,8 @@ import {
   wordMarkState,
   writingMarkState,
 } from "@/lib/progress";
-import { bandFor, BAND_LABEL, KNOWN_STAGE, type MasteryBand } from "@/lib/srs";
+import { bandFor, KNOWN_STAGE, type MasteryBand } from "@/lib/srs";
+import { getLocale, getT } from "@/lib/i18n/server";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
@@ -28,10 +29,12 @@ const BAND_TONE: Record<MasteryBand, "sage" | "soft" | "accent" | "forest"> = {
 };
 
 export default async function LessonPage({ params }: { params: { slug: string } }) {
-  const lesson = getLesson(params.slug);
+  const lesson = getLesson(params.slug, await getLocale());
   if (!lesson) notFound();
 
   const user = await getUser();
+  const t = await getT();
+  const tl = t.lessons;
   const [{ words: wordRows, kanji: kanjiRows, lessons: lessonRows }, profile] = await Promise.all([
     getProgress(user),
     user ? getProfile(user.id) : null,
@@ -55,16 +58,16 @@ export default async function LessonPage({ params }: { params: { slug: string } 
     <div className="stack" style={{ gap: 40 }}>
       <div>
         <Link href="/lessons" className="body-sm" style={{ textDecoration: "none" }}>
-          ← All lessons
+          {tl.allLessons}
         </Link>
       </div>
 
       <header className="stack" style={{ gap: 20 }}>
         <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
           <Badge tone="sage" uppercase>
-            {lesson.level} · Lesson {String(lesson.order).padStart(2, "0")}
+            {tl.lessonBadge(lesson.level, String(lesson.order).padStart(2, "0"))}
           </Badge>
-          {row?.status === "completed" && <Badge tone="accent">Completed</Badge>}
+          {row?.status === "completed" && <Badge tone="accent">{tl.completed}</Badge>}
         </div>
 
         <h1
@@ -84,7 +87,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
         <div className="row" style={{ gap: 12, flexWrap: "wrap", marginTop: 8 }}>
           <Link href={`/lessons/${lesson.slug}/study`} className="reset-link">
             <Button variant="primary" size="lg" icon="chevron-right">
-              {!started ? "Start Lesson" : row?.status === "completed" ? "Practise Again" : "Continue Lesson"}
+              {!started ? tl.start : row?.status === "completed" ? tl.again : tl.continue}
             </Button>
           </Link>
         </div>
@@ -92,17 +95,16 @@ export default async function LessonPage({ params }: { params: { slug: string } 
         {canMark && (
           <div className="stack" style={{ gap: 8 }}>
             <p className="body-sm muted" style={{ margin: 0, maxWidth: 560 }}>
-              Learned these somewhere else? Mark them as known and the lesson skips them. They come
-              back once, in about a week, to check.
+              {tl.markIntro}
             </p>
             <MarkControl
               scope="lesson"
               id={lesson.slug}
               skill="reading"
               state={wordMarkState(lesson.words, wordRows)}
-              markLabel="I Know This Lesson"
-              markedLabel="Words marked as known"
-              title="Mark every word in this lesson as known"
+              markLabel={tl.markLesson}
+              markedLabel={tl.markLessonDone}
+              title={tl.markLessonTitle}
             />
             {writing && (
               <MarkControl
@@ -110,9 +112,9 @@ export default async function LessonPage({ params }: { params: { slug: string } 
                 id={lesson.slug}
                 skill="writing"
                 state={writingMarkState(chars, kanjiRows)}
-                markLabel="I Can Write These Kanji"
-                markedLabel="Writing marked as known"
-                title={`Mark all ${chars.length} kanji as ones you can write`}
+                markLabel={tl.markLessonWriting}
+                markedLabel={tl.writingMarked}
+                title={tl.markLessonWritingTitle(chars.length)}
               />
             )}
           </div>
@@ -123,7 +125,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
         <div className="stack" style={{ gap: 14 }}>
           <div className="row" style={{ justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
             <span className="eyebrow" style={{ color: "var(--on-tint-body)" }}>
-              {known} of {lesson.kanji.length} kanji known · {lesson.words.length} words
+              {tl.progress(known, lesson.kanji.length, lesson.words.length)}
             </span>
             <span
               style={{
@@ -144,9 +146,9 @@ export default async function LessonPage({ params }: { params: { slug: string } 
       {/* ---- The characters ------------------------------------------------ */}
       <section className="stack" style={{ gap: 24 }}>
         <div>
-          <p className="eyebrow">The characters</p>
+          <p className="eyebrow">{tl.charactersEyebrow}</p>
           <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-1)" }}>
-            {lesson.kanji.length} kanji, {lesson.words.length} words to fix them
+            {tl.charactersHeading(lesson.kanji.length, lesson.words.length)}
           </h2>
         </div>
 
@@ -171,20 +173,20 @@ export default async function LessonPage({ params }: { params: { slug: string } 
                       <span style={{ fontSize: "var(--text-heading-3)", color: "var(--text-heading)" }}>
                         {k.meanings.join(", ")}
                       </span>
-                      <Badge tone={BAND_TONE[band]}>{BAND_LABEL[band]}</Badge>
-                      {writing && (p?.writing_stage ?? 0) >= KNOWN_STAGE && <Badge tone="accent">Can write</Badge>}
+                      <Badge tone={BAND_TONE[band]}>{t.common.band[band]}</Badge>
+                      {writing && (p?.writing_stage ?? 0) >= KNOWN_STAGE && <Badge tone="accent">{tl.canWrite}</Badge>}
                     </div>
 
                     <div className="row body-sm" style={{ gap: 18, flexWrap: "wrap" }}>
                       {user && reading && (
                         <span style={{ color: "var(--text-heading)" }}>
-                          {reading.known} of {reading.total} words known
+                          {tl.wordsKnown(reading.known, reading.total)}
                         </span>
                       )}
-                      <span className="muted">{k.strokes} strokes</span>
+                      <span className="muted">{tl.strokes(k.strokes)}</span>
                       {k.radicalPart && (
                         <span className="muted">
-                          radical <span className="jp">{k.radicalPart.char}</span> {k.radicalPart.meaning}
+                          {tl.radical} <span className="jp">{k.radicalPart.char}</span> {k.radicalPart.meaning}
                         </span>
                       )}
                       <span className="jp" style={{ color: "var(--text-body)" }}>
@@ -223,9 +225,9 @@ export default async function LessonPage({ params }: { params: { slug: string } 
                           id={k.char}
                           skill="reading"
                           state={wordMarkState(words, wordRows)}
-                          markLabel={`I Know ${k.char}`}
-                          markedLabel="Marked as known"
-                          title={`Mark the words for ${k.char} as known`}
+                          markLabel={tl.markKanji(k.char)}
+                          markedLabel={tl.markedKnown}
+                          title={tl.markKanjiTitle(k.char)}
                         />
                         {writing && (
                           <MarkControl
@@ -233,8 +235,8 @@ export default async function LessonPage({ params }: { params: { slug: string } 
                             id={k.char}
                             skill="writing"
                             state={writingMarkState([k.char], kanjiRows)}
-                            markLabel={`I Can Write ${k.char}`}
-                            markedLabel="Writing marked as known"
+                            markLabel={tl.markKanjiWriting(k.char)}
+                            markedLabel={tl.writingMarked}
                           />
                         )}
                       </div>
@@ -250,9 +252,9 @@ export default async function LessonPage({ params }: { params: { slug: string } 
       {/* ---- Full word list ------------------------------------------------ */}
       <section className="stack" style={{ gap: 20 }}>
         <div>
-          <p className="eyebrow">Word list</p>
+          <p className="eyebrow">{tl.wordListEyebrow}</p>
           <h2 style={{ margin: "8px 0 0", fontSize: "var(--text-heading-2)" }}>
-            {lesson.words.length} words
+            {tl.wordCount(lesson.words.length)}
           </h2>
         </div>
 
@@ -298,7 +300,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
 
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ color: "var(--text-heading)" }}>{word.meanings.join(", ")}</div>
-                    <div className="body-sm muted">{word.pos}</div>
+                    <div className="body-sm muted">{t.common.pos[word.pos] ?? word.pos}</div>
                   </div>
                 </div>
 
@@ -309,10 +311,10 @@ export default async function LessonPage({ params }: { params: { slug: string } 
                       id={word.id}
                       skill="reading"
                       state={wordMarkState([word], wordRows)}
-                      markLabel="I Know It"
+                      markLabel={tl.markWord}
                     />
                   )}
-                  <Badge tone={BAND_TONE[band]}>{marked ? "Marked known" : BAND_LABEL[band]}</Badge>
+                  <Badge tone={BAND_TONE[band]}>{marked ? tl.markedKnownBadge : t.common.band[band]}</Badge>
                 </div>
               </div>
             );

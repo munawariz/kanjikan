@@ -6,6 +6,7 @@ import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
 import { Icon } from "@/components/atlas/core/Icon.jsx";
 import { isPracticeType, PRACTICE_TYPES, type PracticeType } from "@/lib/study";
+import { useT } from "@/lib/i18n/client";
 
 /** One JLPT level as the practice page offers it. */
 export type PracticeLevel = {
@@ -17,30 +18,14 @@ export type PracticeLevel = {
   kanji: { char: string; meaning: string }[];
 };
 
+/** Each type's label and description are in the practice messages. */
 const TYPE_OPTIONS: {
   type: PracticeType | "hearing";
-  label: string;
-  body: string;
   icon: string;
 }[] = [
-  {
-    type: "reading",
-    label: "Reading",
-    body: "What each kanji means, and how the words it teaches are read.",
-    icon: "book-open",
-  },
-  {
-    type: "writing",
-    label: "Writing",
-    body: "Write each kanji from memory. Every stroke is checked.",
-    icon: "pen-line",
-  },
-  {
-    type: "hearing",
-    label: "Hearing",
-    body: "Pick the word you hear.",
-    icon: "volume-2",
-  },
+  { type: "reading", icon: "book-open" },
+  { type: "writing", icon: "pen-line" },
+  { type: "hearing", icon: "volume-2" },
 ];
 
 /**
@@ -63,6 +48,7 @@ export function PracticeSetup({
   initialTypes: string;
 }) {
   const router = useRouter();
+  const t = useT().practice;
   const available = levels.filter((l) => l.available);
 
   const [picks, setPicks] = useState<Set<string>>(() => {
@@ -109,7 +95,7 @@ export function PracticeSetup({
     });
   }
 
-  const chosenTypes = PRACTICE_TYPES.filter((t) => types.has(t));
+  const chosenTypes = PRACTICE_TYPES.filter((type) => types.has(type));
   const ready = picks.size > 0 && chosenTypes.length > 0;
 
   /**
@@ -133,18 +119,18 @@ export function PracticeSetup({
 
   const summary =
     picks.size === 0
-      ? "Pick at least one kanji."
+      ? t.pickKanji
       : chosenTypes.length === 0
-        ? "Choose what to practise."
-        : `${picks.size} kanji · ${chosenTypes.map((t) => t[0].toUpperCase() + t.slice(1)).join(" and ")}`;
+        ? t.pickType
+        : t.summary(picks.size, chosenTypes.map((type) => t.types[type].label));
 
   return (
     <div className="stack" style={{ gap: 36 }}>
       <section className="stack" style={{ gap: 18 }} aria-labelledby="practice-kanji">
-        <StepHeading n={1} id="practice-kanji" title="Choose kanji" />
+        <StepHeading n={1} id="practice-kanji" title={t.chooseKanji} />
 
         <div className="stack" style={{ gap: 10 }}>
-          <span className="body-sm muted">A whole level</span>
+          <span className="body-sm muted">{t.wholeLevel}</span>
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
             {levels.map((l) => {
               const picked = l.kanji.filter((k) => picks.has(k.char)).length;
@@ -156,7 +142,7 @@ export function PracticeSetup({
                   onClick={() => toggleLevel(l)}
                   disabled={!l.available}
                   aria-pressed={l.available ? all : undefined}
-                  title={l.available ? `${l.title}: ${l.kanji.length} kanji` : `${l.level} is coming later`}
+                  title={l.available ? t.levelTitle(l.title, l.kanji.length) : t.levelLater(l.level)}
                   className="stack"
                   style={{
                     gap: 2,
@@ -179,10 +165,10 @@ export function PracticeSetup({
                   </span>
                   <span className="body-sm" style={{ color: all ? "var(--text-inverse-muted)" : "var(--text-muted)" }}>
                     {!l.available
-                      ? "Coming later"
+                      ? t.comingLater
                       : picked > 0 && !all
-                        ? `${picked} of ${l.kanji.length}`
-                        : `${l.kanji.length} kanji`}
+                        ? t.pickedOf(picked, l.kanji.length)
+                        : t.kanjiCount(l.kanji.length)}
                   </span>
                 </button>
               );
@@ -192,7 +178,7 @@ export function PracticeSetup({
 
         {available.map((l) => (
           <div key={l.level} className="stack" style={{ gap: 10 }}>
-            <span className="body-sm muted">Or single kanji from {l.level}</span>
+            <span className="body-sm muted">{t.singles(l.level)}</span>
             <div
               style={{
                 display: "grid",
@@ -256,7 +242,7 @@ export function PracticeSetup({
       </section>
 
       <section className="stack" style={{ gap: 18 }} aria-labelledby="practice-types">
-        <StepHeading n={2} id="practice-types" title="Choose what to practise" note="Pick one or more." />
+        <StepHeading n={2} id="practice-types" title={t.chooseType} note={t.chooseTypeNote} />
         <div
           style={{
             display: "grid",
@@ -290,10 +276,10 @@ export function PracticeSetup({
                 <span className="row" style={{ justifyContent: "space-between", gap: 8, width: "100%" }}>
                   <span className="row" style={{ gap: 8, fontWeight: "var(--weight-semibold)" }}>
                     <Icon name={option.icon} size={18} />
-                    {option.label}
+                    {t.types[option.type].label}
                   </span>
                   {soon ? (
-                    <Badge tone="sage">Coming later</Badge>
+                    <Badge tone="sage">{t.comingLater}</Badge>
                   ) : (
                     // A checkbox's look, since more than one can be on.
                     <span
@@ -315,7 +301,7 @@ export function PracticeSetup({
                   )}
                 </span>
                 <span className="body-sm" style={{ color: soon ? "var(--text-muted)" : "var(--text-body)" }}>
-                  {option.body}
+                  {t.types[option.type].body}
                 </span>
               </button>
             );
@@ -352,11 +338,11 @@ export function PracticeSetup({
         <div className="row" style={{ gap: 8 }}>
           {picks.size > 0 && (
             <Button variant="ghost" size="sm" onClick={() => setPicks(new Set())}>
-              Clear
+              {t.clear}
             </Button>
           )}
           <Button variant="primary" size="sm" icon="chevron-right" disabled={!ready} onClick={start}>
-            Start Practice
+            {t.start}
           </Button>
         </div>
       </div>

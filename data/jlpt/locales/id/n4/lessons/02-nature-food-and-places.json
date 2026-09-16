@@ -1,0 +1,285 @@
+{
+  "animals": {
+    "title": "Hewan dan daging",
+    "summary": "Nama hewan memakai cara baca aslinya saat berdiri sendiri — いぬ, うし, さかな, とり — dan beralih ke cara baca on dalam kata majemuk: 牛肉 ぎゅうにく, 人魚 にんぎょ, 白鳥 はくちょう. 肉 sama sekali tidak punya cara baca asli: にく adalah cara baca on.",
+    "words": {
+      "犬|いぬ": ["Anjing"],
+      "子犬|こいぬ": ["Anak Anjing"],
+      "愛犬|あいけん": ["Anjing Peliharaan", "Anjing Kesayangan"],
+      "名犬|めいけん": ["Anjing Unggul", "Anjing Terkenal"],
+      "犬かき|いぬかき": ["Renang Gaya Anjing"],
+
+      "牛|うし": ["Sapi", "Ternak Sapi"],
+      "牛肉|ぎゅうにく": ["Daging Sapi"],
+      "牛乳|ぎゅうにゅう": ["Susu Sapi"],
+      "子牛|こうし": ["Anak Sapi"],
+      "水牛|すいぎゅう": ["Kerbau"],
+
+      "魚|さかな": ["Ikan"],
+      "生魚|なまざかな": ["Ikan Mentah"],
+      "小魚|こざかな": ["Ikan Kecil"],
+      "川魚|かわざかな": ["Ikan Sungai", "Ikan Air Tawar"],
+      "人魚|にんぎょ": ["Putri Duyung"],
+
+      "鳥|とり": ["Burung"],
+      "焼き鳥|やきとり": ["Sate Ayam Jepang", "Yakitori"],
+      "白鳥|はくちょう": ["Angsa"],
+      "水鳥|みずどり": ["Burung Air"],
+      "親鳥|おやどり": ["Induk Burung"],
+
+      "肉|にく": ["Daging"],
+      "豚肉|ぶたにく": ["Daging Babi"],
+      "ひき肉|ひきにく": ["Daging Giling"],
+      "肉食|にくしょく": ["Pemakan Daging", "Karnivora"],
+      "肉体|にくたい": ["Tubuh Jasmani", "Raga"]
+    }
+  },
+  "food-and-drink": {
+    "title": "Makanan dan minuman",
+    "summary": "ご飯 berarti nasi sekaligus makanan, jadi 朝ご飯, 昼ご飯, dan 晩ご飯 cukup berarti sarapan, makan siang, dan makan malam. 料 sama seringnya berarti biaya seperti bahan: 無料 artinya gratis, dan 給料 adalah uang yang kamu terima sebagai gaji.",
+    "words": {
+      "飲む|のむ": ["Minum", "Minum (obat)"],
+      "飲み水|のみみず": ["Air Minum"],
+      "飲食|いんしょく": ["Makan dan Minum"],
+      "飲料|いんりょう": ["Minuman"],
+      "飲み込む|のみこむ": ["Menelan", "Memahami (gagasan)"],
+
+      "ご飯|ごはん": ["Nasi", "Makanan"],
+      "朝ご飯|あさごはん": ["Sarapan"],
+      "昼ご飯|ひるごはん": ["Makan Siang"],
+      "晩ご飯|ばんごはん": ["Makan Malam"],
+      "夕飯|ゆうはん": ["Santapan Malam", "Makan Petang"],
+      "飯|めし": ["Makanan (kasual)", "Nasi (kasual)"],
+
+      "無料|むりょう": ["Gratis"],
+      "給料|きゅうりょう": ["Gaji", "Upah"],
+      "食料|しょくりょう": ["Bahan Makanan", "Perbekalan"],
+      "手料理|てりょうり": ["Masakan Rumahan"],
+      "日本料理|にほんりょうり": ["Masakan Jepang"],
+
+      "料理|りょうり": ["Memasak", "Masakan", "Hidangan"],
+      "理由|りゆう": ["Alasan"],
+      "無理|むり": ["Mustahil", "Tidak Masuk Akal", "Berlebihan"],
+      "心理|しんり": ["Psikologi", "Kondisi Batin"],
+      "代理|だいり": ["Pengganti", "Wakil"],
+
+      "味|あじ": ["Rasa", "Cita Rasa"],
+      "味わう|あじわう": ["Menikmati", "Mencicipi"],
+      "意味|いみ": ["Arti"],
+      "趣味|しゅみ": ["Hobi", "Selera"],
+      "味見|あじみ": ["Pencicipan", "Mencoba Rasa"]
+    }
+  },
+  "land-sea-and-sky": {
+    "title": "Darat, laut, dan langit",
+    "summary": "空 butuh tiga cara baca: そら untuk langit, あく untuk kursi atau kamar yang menjadi kosong, から untuk hampa (空っぽ, 空手). 地 tidak punya cara baca asli, tetapi punya dua cara baca on — ち dalam 地下 dan 地理, じ dalam 地震 dan 地味.",
+    "words": {
+      "地下|ちか": ["Bawah Tanah", "Di Bawah Permukaan"],
+      "地理|ちり": ["Geografi"],
+      "地上|ちじょう": ["Atas Tanah", "Permukaan Tanah"],
+      "地震|じしん": ["Gempa Bumi"],
+      "地味|じみ": ["Sederhana", "Kalem", "Tidak Mencolok"],
+      "空き地|あきち": ["Tanah Kosong"],
+
+      "海|うみ": ["Laut", "Samudra"],
+      "海岸|かいがん": ["Pantai", "Pesisir"],
+      "海水|かいすい": ["Air Laut"],
+      "海風|うみかぜ": ["Angin Laut"],
+      "海の日|うみのひ": ["Hari Laut"],
+
+      "空|そら": ["Langit"],
+      "青空|あおぞら": ["Langit Biru"],
+      "空港|くうこう": ["Bandara"],
+      "空く|あく": ["Menjadi Kosong", "Tersedia (tempat)"],
+      "空っぽ|からっぽ": ["Kosong"],
+      "空手|からて": ["Karate"],
+
+      "野菜|やさい": ["Sayuran"],
+      "野外|やがい": ["Luar Ruangan", "Alam Terbuka"],
+      "野生|やせい": ["Liar", "Di Alam Liar"],
+      "野球|やきゅう": ["Bisbol"],
+      "分野|ぶんや": ["Bidang (ilmu)", "Ranah"],
+      "野山|のやま": ["Bukit dan Padang"],
+
+      "花|はな": ["Bunga"],
+      "花びら|はなびら": ["Kelopak Bunga"],
+      "生け花|いけばな": ["Merangkai Bunga", "Ikebana"],
+      "花瓶|かびん": ["Vas Bunga"]
+    }
+  },
+  "fields-to-the-world": {
+    "title": "Dari sawah ke dunia",
+    "summary": "町 dan 界 sama-sama berdiri di atas sawah (田) dan mengambil bunyinya dari separuh yang lain: 丁 チョウ, 介 カイ. 世界 adalah dunia di peta; 世の中 adalah dunia manusia, yaitu masyarakat.",
+    "words": {
+      "田|た": ["Sawah"],
+      "田んぼ|たんぼ": ["Petak Sawah"],
+      "田舎|いなか": ["Pedesaan", "Kampung Halaman"],
+      "水田|すいでん": ["Sawah Basah"],
+
+      "町|まち": ["Kota Kecil"],
+      "下町|したまち": ["Kawasan Kota Lama"],
+      "町外れ|まちはずれ": ["Pinggir Kota", "Pinggiran"],
+      "町長|ちょうちょう": ["Kepala Kota Kecil"],
+      "町内|ちょうない": ["Lingkungan Sekitar", "Dalam Kota"],
+
+      "京都|きょうと": ["Kyoto"],
+      "上京|じょうきょう": ["Pindah ke Tokyo", "Pergi ke Ibu Kota"],
+      "京料理|きょうりょうり": ["Masakan Kyoto"],
+      "京風|きょうふう": ["Gaya Kyoto"],
+
+      "世の中|よのなか": ["Masyarakat", "Dunia Manusia"],
+      "世話|せわ": ["Perawatan", "Mengurus"],
+      "世代|せだい": ["Generasi"],
+      "世紀|せいき": ["Abad"],
+      "出世|しゅっせ": ["Kenaikan Jabatan", "Sukses dalam Hidup"],
+      "世間|せけん": ["Publik", "Orang-Orang"],
+
+      "世界|せかい": ["Dunia"],
+      "世界中|せかいじゅう": ["Seluruh Dunia"],
+      "世界一|せかいいち": ["Terbaik di Dunia"],
+      "限界|げんかい": ["Batas"]
+    }
+  },
+  "around-town": {
+    "title": "Keliling kota",
+    "summary": "道 juga berarti jalan sebuah seni: 書道 adalah jalan kuas, 茶道 jalan teh. 図 dibaca ず dalam 地図 tetapi と dalam 図書, と yang ada di 図書館.",
+    "words": {
+      "道|みち": ["Jalan", "Cara"],
+      "道具|どうぐ": ["Alat"],
+      "書道|しょどう": ["Kaligrafi"],
+      "茶道|さどう": ["Upacara Minum Teh"],
+      "国道|こくどう": ["Jalan Raya Nasional"],
+
+      "地図|ちず": ["Peta"],
+      "図|ず": ["Diagram", "Gambar"],
+      "図書|としょ": ["Buku-Buku"],
+      "合図|あいず": ["Sinyal", "Isyarat"],
+      "天気図|てんきず": ["Peta Cuaca"],
+
+      "駅|えき": ["Stasiun"],
+      "駅長|えきちょう": ["Kepala Stasiun"],
+      "駅名|えきめい": ["Nama Stasiun"],
+      "駅弁|えきべん": ["Kotak Bekal Stasiun"],
+      "駅ビル|えきビル": ["Gedung Stasiun"],
+
+      "水族館|すいぞくかん": ["Akuarium"],
+      "美術館|びじゅつかん": ["Museum Seni"],
+      "本館|ほんかん": ["Gedung Utama"],
+      "館長|かんちょう": ["Kepala (museum atau perpustakaan)"],
+
+      "店|みせ": ["Toko", "Kedai"],
+      "喫茶店|きっさてん": ["Kedai Kopi", "Kafe"],
+      "店長|てんちょう": ["Manajer Toko"],
+      "書店|しょてん": ["Toko Buku"],
+      "飲食店|いんしょくてん": ["Restoran", "Rumah Makan"]
+    }
+  },
+  "rooms-and-buildings": {
+    "title": "Ruangan dan bangunan",
+    "summary": "屋 di akhir kata berarti tokonya, atau orang yang menjalankannya: 花屋, 魚屋. 部屋 adalah kata sehari-hari untuk kamar; 室 adalah ruangan dengan fungsi tertentu, seperti 図書室 dan 和室.",
+    "words": {
+      "部屋|へや": ["Kamar"],
+      "屋上|おくじょう": ["Atap Gedung"],
+      "花屋|はなや": ["Penjual Bunga"],
+      "魚屋|さかなや": ["Penjual Ikan"],
+      "屋台|やたい": ["Warung Tenda"],
+      "小屋|こや": ["Pondok", "Gudang Kecil"],
+
+      "図書室|としょしつ": ["Ruang Perpustakaan", "Ruang Baca"],
+      "和室|わしつ": ["Ruangan Gaya Jepang"],
+      "地下室|ちかしつ": ["Ruang Bawah Tanah"],
+      "空室|くうしつ": ["Kamar Kosong", "Kamar Tersedia"],
+      "茶室|ちゃしつ": ["Ruang Minum Teh"],
+
+      "住む|すむ": ["Tinggal", "Bermukim"],
+      "住所|じゅうしょ": ["Alamat"],
+      "住まい|すまい": ["Rumah", "Tempat Tinggal"],
+      "住人|じゅうにん": ["Penghuni", "Penduduk"],
+
+      "台|だい": ["Dudukan", "Landasan"],
+      "一台|いちだい": ["Satu Mesin", "Satu Kendaraan"],
+      "台所|だいどころ": ["Dapur"],
+      "台風|たいふう": ["Topan"],
+      "土台|どだい": ["Fondasi", "Dasar"],
+
+      "講堂|こうどう": ["Auditorium", "Aula Kuliah"],
+      "本堂|ほんどう": ["Aula Utama (kuil)"],
+      "食堂車|しょくどうしゃ": ["Gerbong Makan"],
+      "堂々|どうどう": ["Penuh Percaya Diri", "Bermartabat"]
+    }
+  },
+  "standing-and-building": {
+    "title": "Berdiri, membangun, tempat",
+    "summary": "立てる dan 建てる sama-sama dibaca たてる: 立てる menegakkan sesuatu, 建てる mendirikan bangunan. 場 dibaca じょう dalam 工場 dan 入場, tetapi ば saat berdiri sendiri dan dalam 場所 serta 立場.",
+    "words": {
+      "立つ|たつ": ["Berdiri"],
+      "立てる|たてる": ["Menegakkan (sesuatu)", "Memasang"],
+      "目立つ|めだつ": ["Menonjol"],
+      "役に立つ|やくにたつ": ["Berguna"],
+      "国立|こくりつ": ["Negeri", "Dikelola Negara"],
+      "私立|しりつ": ["Swasta", "Dikelola Swasta"],
+
+      "建てる|たてる": ["Membangun"],
+      "建つ|たつ": ["Dibangun"],
+      "建国|けんこく": ["Pendirian Negara"],
+      "建設|けんせつ": ["Pembangunan"],
+      "建前|たてまえ": ["Sikap di Depan Umum", "Posisi Resmi"],
+
+      "場|ば": ["Tempat", "Adegan", "Kesempatan"],
+      "場所|ばしょ": ["Lokasi", "Tempat"],
+      "立場|たちば": ["Sudut Pandang", "Posisi"],
+      "入場|にゅうじょう": ["Izin Masuk", "Memasuki Tempat"],
+      "出場|しゅつじょう": ["Ikut Serta", "Tampil (dalam lomba)"],
+      "場合|ばあい": ["Kasus", "Situasi", "Saat"],
+
+      "工場|こうじょう": ["Pabrik"],
+      "大工|だいく": ["Tukang Kayu"],
+      "人工|じんこう": ["Buatan", "Buatan Manusia"],
+      "工学|こうがく": ["Ilmu Teknik"],
+      "工夫|くふう": ["Kecerdikan", "Akal Cerdik"],
+      "図工|ずこう": ["Seni dan Kerajinan"],
+
+      "公園|こうえん": ["Taman"],
+      "公立|こうりつ": ["Dikelola Pemerintah", "Publik"],
+      "主人公|しゅじんこう": ["Tokoh Utama", "Protagonis"],
+      "公|おおやけ": ["Umum", "Resmi"]
+    }
+  },
+  "work": {
+    "title": "Pekerjaan dan perusahaan",
+    "summary": "会 berarti bertemu dan 社 berarti kuil atau firma: 会社 adalah perusahaan, dan dua kanji yang sama bila dibalik, 社会, berarti masyarakat. 員 di akhir kata menunjukkan anggota dari sesuatu: 会社員, 店員, 駅員.",
+    "words": {
+      "仕事|しごと": ["Pekerjaan", "Kerja"],
+      "仕上げる|しあげる": ["Menyelesaikan (sesuatu)", "Merampungkan"],
+      "仕上がる|しあがる": ["Selesai", "Jadi (hasilnya)"],
+      "仕える|つかえる": ["Mengabdi"],
+      "仕組み|しくみ": ["Mekanisme", "Cara Kerja"],
+
+      "事|こと": ["Hal", "Perkara"],
+      "大事|だいじ": ["Penting", "Berharga"],
+      "返事|へんじ": ["Balasan", "Jawaban"],
+      "工事|こうじ": ["Pekerjaan Konstruksi"],
+      "家事|かじ": ["Pekerjaan Rumah Tangga"],
+      "出来事|できごと": ["Peristiwa", "Kejadian"],
+
+      "会う|あう": ["Bertemu"],
+      "出会う|であう": ["Menjumpai", "Bertemu Secara Kebetulan"],
+      "会社|かいしゃ": ["Perusahaan", "Firma"],
+      "会議|かいぎ": ["Rapat", "Konferensi"],
+      "大会|たいかい": ["Turnamen", "Kongres"],
+      "会場|かいじょう": ["Tempat Acara", "Aula"],
+
+      "社会|しゃかい": ["Masyarakat"],
+      "社員|しゃいん": ["Karyawan", "Staf"],
+      "入社|にゅうしゃ": ["Masuk Perusahaan"],
+      "本社|ほんしゃ": ["Kantor Pusat"],
+      "神社|じんじゃ": ["Kuil Shinto"],
+
+      "会社員|かいしゃいん": ["Pegawai Kantor", "Karyawan Perusahaan"],
+      "店員|てんいん": ["Pramuniaga", "Pelayan Toko"],
+      "駅員|えきいん": ["Petugas Stasiun"],
+      "会員|かいいん": ["Anggota"],
+      "全員|ぜんいん": ["Semua Orang", "Seluruh Anggota"]
+    }
+  }
+}

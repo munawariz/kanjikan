@@ -1,0 +1,285 @@
+{
+  "animals": {
+    "title": "Animals and meat",
+    "summary": "The animals keep their native names on their own — いぬ, うし, さかな, とり — and switch to on readings in compounds: 牛肉 ぎゅうにく, 人魚 にんぎょ, 白鳥 はくちょう. 肉 has no native reading at all: にく is on.",
+    "words": {
+      "犬|いぬ": ["Dog"],
+      "子犬|こいぬ": ["Puppy"],
+      "愛犬|あいけん": ["Pet Dog", "Beloved Dog"],
+      "名犬|めいけん": ["Fine Dog", "Famous Dog"],
+      "犬かき|いぬかき": ["Dog Paddle"],
+
+      "牛|うし": ["Cow", "Cattle"],
+      "牛肉|ぎゅうにく": ["Beef"],
+      "牛乳|ぎゅうにゅう": ["Milk"],
+      "子牛|こうし": ["Calf"],
+      "水牛|すいぎゅう": ["Water Buffalo"],
+
+      "魚|さかな": ["Fish"],
+      "生魚|なまざかな": ["Raw Fish"],
+      "小魚|こざかな": ["Small Fish"],
+      "川魚|かわざかな": ["River Fish", "Freshwater Fish"],
+      "人魚|にんぎょ": ["Mermaid"],
+
+      "鳥|とり": ["Bird"],
+      "焼き鳥|やきとり": ["Grilled Chicken Skewers", "Yakitori"],
+      "白鳥|はくちょう": ["Swan"],
+      "水鳥|みずどり": ["Waterbird"],
+      "親鳥|おやどり": ["Parent Bird"],
+
+      "肉|にく": ["Meat"],
+      "豚肉|ぶたにく": ["Pork"],
+      "ひき肉|ひきにく": ["Minced Meat"],
+      "肉食|にくしょく": ["Meat-Eating", "Carnivorous"],
+      "肉体|にくたい": ["Physical Body", "Flesh"]
+    }
+  },
+  "food-and-drink": {
+    "title": "Food and drink",
+    "summary": "ご飯 is both cooked rice and a meal, so 朝ご飯, 昼ご飯 and 晩ご飯 are simply breakfast, lunch and dinner. 料 is a fee as often as an ingredient: 無料 is free of charge, and 給料 is what you are paid.",
+    "words": {
+      "飲む|のむ": ["To Drink", "To Take (medicine)"],
+      "飲み水|のみみず": ["Drinking Water"],
+      "飲食|いんしょく": ["Eating and Drinking"],
+      "飲料|いんりょう": ["Beverage"],
+      "飲み込む|のみこむ": ["To Swallow", "To Grasp (an idea)"],
+
+      "ご飯|ごはん": ["Cooked Rice", "Meal"],
+      "朝ご飯|あさごはん": ["Breakfast"],
+      "昼ご飯|ひるごはん": ["Lunch"],
+      "晩ご飯|ばんごはん": ["Dinner"],
+      "夕飯|ゆうはん": ["Evening Meal", "Supper"],
+      "飯|めし": ["Meal (casual)", "Rice (casual)"],
+
+      "無料|むりょう": ["Free of Charge"],
+      "給料|きゅうりょう": ["Salary", "Pay"],
+      "食料|しょくりょう": ["Food", "Provisions"],
+      "手料理|てりょうり": ["Home Cooking"],
+      "日本料理|にほんりょうり": ["Japanese Cuisine"],
+
+      "料理|りょうり": ["Cooking", "Cuisine", "Dish"],
+      "理由|りゆう": ["Reason"],
+      "無理|むり": ["Impossible", "Unreasonable", "Too Much"],
+      "心理|しんり": ["Psychology", "State of Mind"],
+      "代理|だいり": ["Substitute", "Proxy"],
+
+      "味|あじ": ["Taste", "Flavour"],
+      "味わう|あじわう": ["To Savour", "To Taste"],
+      "意味|いみ": ["Meaning"],
+      "趣味|しゅみ": ["Hobby", "Taste (in things)"],
+      "味見|あじみ": ["Tasting", "Sampling"]
+    }
+  },
+  "land-sea-and-sky": {
+    "title": "Land, sea and sky",
+    "summary": "空 needs three readings: そら for the sky, あく for a seat or room coming free, から for empty (空っぽ, 空手). 地 has no native reading but two on readings — ち in 地下 and 地理, じ in 地震 and 地味.",
+    "words": {
+      "地下|ちか": ["Underground", "Below Ground"],
+      "地理|ちり": ["Geography"],
+      "地上|ちじょう": ["Above Ground", "Ground Level"],
+      "地震|じしん": ["Earthquake"],
+      "地味|じみ": ["Plain", "Sober", "Unshowy"],
+      "空き地|あきち": ["Vacant Lot"],
+
+      "海|うみ": ["Sea", "Ocean"],
+      "海岸|かいがん": ["Coast", "Seashore"],
+      "海水|かいすい": ["Seawater"],
+      "海風|うみかぜ": ["Sea Breeze"],
+      "海の日|うみのひ": ["Marine Day"],
+
+      "空|そら": ["Sky"],
+      "青空|あおぞら": ["Blue Sky"],
+      "空港|くうこう": ["Airport"],
+      "空く|あく": ["To Become Vacant", "To Free Up"],
+      "空っぽ|からっぽ": ["Empty"],
+      "空手|からて": ["Karate"],
+
+      "野菜|やさい": ["Vegetable"],
+      "野外|やがい": ["Outdoors", "Open Air"],
+      "野生|やせい": ["Wild", "In the Wild"],
+      "野球|やきゅう": ["Baseball"],
+      "分野|ぶんや": ["Field (of study)", "Area"],
+      "野山|のやま": ["Hills and Fields"],
+
+      "花|はな": ["Flower"],
+      "花びら|はなびら": ["Petal"],
+      "生け花|いけばな": ["Flower Arranging", "Ikebana"],
+      "花瓶|かびん": ["Vase"]
+    }
+  },
+  "fields-to-the-world": {
+    "title": "From the fields to the world",
+    "summary": "町 and 界 both stand on a rice field (田) and take their sound from the other half: 丁 チョウ, 介 カイ. 世界 is the world on a map; 世の中 is the world of people, society.",
+    "words": {
+      "田|た": ["Rice Field"],
+      "田んぼ|たんぼ": ["Rice Paddy"],
+      "田舎|いなか": ["Countryside", "Home Town"],
+      "水田|すいでん": ["Paddy Field"],
+
+      "町|まち": ["Town"],
+      "下町|したまち": ["Old Downtown"],
+      "町外れ|まちはずれ": ["Edge of Town", "Outskirts"],
+      "町長|ちょうちょう": ["Town Mayor"],
+      "町内|ちょうない": ["Neighbourhood", "Within the Town"],
+
+      "京都|きょうと": ["Kyoto"],
+      "上京|じょうきょう": ["Moving to Tokyo", "Going to the Capital"],
+      "京料理|きょうりょうり": ["Kyoto Cuisine"],
+      "京風|きょうふう": ["Kyoto Style"],
+
+      "世の中|よのなか": ["Society", "The World"],
+      "世話|せわ": ["Care", "Looking After"],
+      "世代|せだい": ["Generation"],
+      "世紀|せいき": ["Century"],
+      "出世|しゅっせ": ["Getting Ahead", "Success in Life"],
+      "世間|せけん": ["The Public", "People"],
+
+      "世界|せかい": ["World"],
+      "世界中|せかいじゅう": ["All Over the World"],
+      "世界一|せかいいち": ["Best in the World"],
+      "限界|げんかい": ["Limit"]
+    }
+  },
+  "around-town": {
+    "title": "Around town",
+    "summary": "道 is also the way of an art: 書道 is the way of the brush, 茶道 the way of tea. 図 is ず in 地図 but と in 図書, the と of 図書館.",
+    "words": {
+      "道|みち": ["Road", "Way"],
+      "道具|どうぐ": ["Tool"],
+      "書道|しょどう": ["Calligraphy"],
+      "茶道|さどう": ["Tea Ceremony"],
+      "国道|こくどう": ["National Highway"],
+
+      "地図|ちず": ["Map"],
+      "図|ず": ["Diagram", "Figure"],
+      "図書|としょ": ["Books"],
+      "合図|あいず": ["Signal", "Sign"],
+      "天気図|てんきず": ["Weather Map"],
+
+      "駅|えき": ["Station"],
+      "駅長|えきちょう": ["Stationmaster"],
+      "駅名|えきめい": ["Station Name"],
+      "駅弁|えきべん": ["Station Lunch Box"],
+      "駅ビル|えきビル": ["Station Building"],
+
+      "水族館|すいぞくかん": ["Aquarium"],
+      "美術館|びじゅつかん": ["Art Museum"],
+      "本館|ほんかん": ["Main Building"],
+      "館長|かんちょう": ["Director (of a museum or library)"],
+
+      "店|みせ": ["Shop", "Store"],
+      "喫茶店|きっさてん": ["Coffee Shop", "Café"],
+      "店長|てんちょう": ["Store Manager"],
+      "書店|しょてん": ["Bookshop"],
+      "飲食店|いんしょくてん": ["Restaurant", "Eatery"]
+    }
+  },
+  "rooms-and-buildings": {
+    "title": "Rooms and buildings",
+    "summary": "屋 on the end of a word is the shop, or the person who runs it: 花屋, 魚屋. 部屋 is the everyday word for a room; 室 is a room with a purpose, as in 図書室 and 和室.",
+    "words": {
+      "部屋|へや": ["Room"],
+      "屋上|おくじょう": ["Rooftop"],
+      "花屋|はなや": ["Florist"],
+      "魚屋|さかなや": ["Fishmonger"],
+      "屋台|やたい": ["Food Stall"],
+      "小屋|こや": ["Hut", "Shed"],
+
+      "図書室|としょしつ": ["Library Room", "Reading Room"],
+      "和室|わしつ": ["Japanese-Style Room"],
+      "地下室|ちかしつ": ["Basement"],
+      "空室|くうしつ": ["Vacant Room", "Vacancy"],
+      "茶室|ちゃしつ": ["Tea Room"],
+
+      "住む|すむ": ["To Live", "To Reside"],
+      "住所|じゅうしょ": ["Address"],
+      "住まい|すまい": ["Home", "Residence"],
+      "住人|じゅうにん": ["Resident", "Inhabitant"],
+
+      "台|だい": ["Stand", "Platform"],
+      "一台|いちだい": ["One Machine", "One Vehicle"],
+      "台所|だいどころ": ["Kitchen"],
+      "台風|たいふう": ["Typhoon"],
+      "土台|どだい": ["Foundation", "Base"],
+
+      "講堂|こうどう": ["Auditorium", "Lecture Hall"],
+      "本堂|ほんどう": ["Main Hall (of a temple)"],
+      "食堂車|しょくどうしゃ": ["Dining Car"],
+      "堂々|どうどう": ["Confidently", "With Dignity"]
+    }
+  },
+  "standing-and-building": {
+    "title": "Standing, building, places",
+    "summary": "立てる and 建てる are both たてる: 立てる stands something up, 建てる puts up a building. 場 is じょう in 工場 and 入場 but ば on its own and in 場所 and 立場.",
+    "words": {
+      "立つ|たつ": ["To Stand"],
+      "立てる|たてる": ["To Stand (something) Up", "To Set Up"],
+      "目立つ|めだつ": ["To Stand Out"],
+      "役に立つ|やくにたつ": ["To Be Useful"],
+      "国立|こくりつ": ["National", "State-Run"],
+      "私立|しりつ": ["Private", "Privately Run"],
+
+      "建てる|たてる": ["To Build"],
+      "建つ|たつ": ["To Be Built"],
+      "建国|けんこく": ["Founding of a Nation"],
+      "建設|けんせつ": ["Construction"],
+      "建前|たてまえ": ["Public Stance", "Official Position"],
+
+      "場|ば": ["Spot", "Scene", "Occasion"],
+      "場所|ばしょ": ["Place", "Location"],
+      "立場|たちば": ["Standpoint", "Position"],
+      "入場|にゅうじょう": ["Admission", "Entrance"],
+      "出場|しゅつじょう": ["Taking Part", "Appearance (in a contest)"],
+      "場合|ばあい": ["Case", "Situation", "When"],
+
+      "工場|こうじょう": ["Factory"],
+      "大工|だいく": ["Carpenter"],
+      "人工|じんこう": ["Artificial", "Man-Made"],
+      "工学|こうがく": ["Engineering"],
+      "工夫|くふう": ["Ingenuity", "A Clever Idea"],
+      "図工|ずこう": ["Arts and Crafts"],
+
+      "公園|こうえん": ["Park"],
+      "公立|こうりつ": ["Publicly Run", "Public"],
+      "主人公|しゅじんこう": ["Main Character", "Protagonist"],
+      "公|おおやけ": ["Public", "Official"]
+    }
+  },
+  "work": {
+    "title": "Work and the company",
+    "summary": "会 is meet and 社 a shrine or firm: 会社 is a company, and the same two turned round, 社会, is society. 員 on the end makes a member of something: 会社員, 店員, 駅員.",
+    "words": {
+      "仕事|しごと": ["Work", "Job"],
+      "仕上げる|しあげる": ["To Finish (something) Off", "To Complete"],
+      "仕上がる|しあがる": ["To Be Finished", "To Turn Out"],
+      "仕える|つかえる": ["To Serve"],
+      "仕組み|しくみ": ["Mechanism", "How Something Works"],
+
+      "事|こと": ["Thing", "Matter"],
+      "大事|だいじ": ["Important", "Precious"],
+      "返事|へんじ": ["Reply", "Answer"],
+      "工事|こうじ": ["Construction Work"],
+      "家事|かじ": ["Housework"],
+      "出来事|できごと": ["Event", "Incident"],
+
+      "会う|あう": ["To Meet"],
+      "出会う|であう": ["To Come Across", "To Meet by Chance"],
+      "会社|かいしゃ": ["Company", "Firm"],
+      "会議|かいぎ": ["Meeting", "Conference"],
+      "大会|たいかい": ["Tournament", "Convention"],
+      "会場|かいじょう": ["Venue", "Hall"],
+
+      "社会|しゃかい": ["Society"],
+      "社員|しゃいん": ["Employee", "Staff Member"],
+      "入社|にゅうしゃ": ["Joining a Company"],
+      "本社|ほんしゃ": ["Head Office"],
+      "神社|じんじゃ": ["Shinto Shrine"],
+
+      "会社員|かいしゃいん": ["Office Worker", "Company Employee"],
+      "店員|てんいん": ["Shop Assistant", "Clerk"],
+      "駅員|えきいん": ["Station Staff"],
+      "会員|かいいん": ["Member"],
+      "全員|ぜんいん": ["Everyone", "All Members"]
+    }
+  }
+}

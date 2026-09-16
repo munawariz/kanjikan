@@ -533,26 +533,21 @@ function measure(stroke: Stroke, m: Stroke, frame: Frame, pair: Pair): Measure {
   return { pair, len, offset, shape, angle, straight: straightness(pts, len), score };
 }
 
-/** The way a model stroke runs, in words. */
-function describe(m: Stroke): string {
+/** The way a model stroke runs. */
+function describe(m: Stroke): Direction {
   const dx = m.pts[N - 1].x - m.pts[0].x;
   const dy = m.pts[N - 1].y - m.pts[0].y;
-  if (Math.abs(dx) > 2.5 * Math.abs(dy)) return dx > 0 ? "from left to right" : "from right to left";
-  if (Math.abs(dy) > 2.5 * Math.abs(dx)) return dy > 0 ? "from top to bottom" : "from bottom to top";
-  return `${dy > 0 ? "down" : "up"} and to the ${dx > 0 ? "right" : "left"}`;
+  if (Math.abs(dx) > 2.5 * Math.abs(dy)) return dx > 0 ? "right" : "left";
+  if (Math.abs(dy) > 2.5 * Math.abs(dx)) return dy > 0 ? "down" : "up";
+  return dy > 0 ? (dx > 0 ? "downRight" : "downLeft") : dx > 0 ? "upRight" : "upLeft";
 }
 
-function where(o: Point): string {
-  const h = Math.abs(o.x) >= 7 ? (o.x > 0 ? "far right" : "far left") : null;
-  const v = Math.abs(o.y) >= 7 ? (o.y > 0 ? "low" : "high") : null;
-  if (h && v) return `${v} and too ${h}`;
-  return h ?? v ?? "far from its place";
-}
-
-function ordinal(n: number): string {
-  const teen = n % 100 >= 11 && n % 100 <= 13;
-  const suffix = teen ? "th" : ["th", "st", "nd", "rd"][n % 10] ?? "th";
-  return `${n}${suffix}`;
+/** Which way a stroke is out of place. Neither set: out of place, but not clearly one way. */
+function where(o: Point): Offset {
+  return {
+    h: Math.abs(o.x) >= 7 ? (o.x > 0 ? "right" : "left") : null,
+    v: Math.abs(o.y) >= 7 ? (o.y > 0 ? "low" : "high") : null,
+  };
 }
 
 type Partner = { n: number; me: Measure; m: Stroke };
@@ -573,17 +568,17 @@ function lookIssue(
   m: Stroke,
   partner: Partner | null,
   framed: boolean,
-): { text: string; flip: boolean } | null {
+): { note: Note; flip: boolean } | null {
   const long = m.len >= SHORT;
   const modelStraight = straightness(m.pts, m.len);
-  const say = (text: string, flip = false) => ({ text, flip });
+  const say = (note: Note, flip = false) => ({ note, flip });
 
   if (long && modelStraight < 0.8 && me.straight > modelStraight + 0.12) {
-    return say(`Stroke ${n} should bend or hook, not run straight.`);
+    return say({ code: "shouldBend", n });
   }
-  if (long && modelStraight > 0.95 && me.straight < 0.87) return say(`Stroke ${n} should be a straight line.`);
-  if (long && me.angle > 25) return say(`Stroke ${n} is at the wrong angle: it runs ${describe(m)}.`);
-  if (long && me.shape > 0.22) return say(`Stroke ${n} is the wrong shape.`);
+  if (long && modelStraight > 0.95 && me.straight < 0.87) return say({ code: "shouldBeStraight", n });
+  if (long && me.angle > 25) return say({ code: "wrongAngle", n, runs: describe(m) });
+  if (long && me.shape > 0.22) return say({ code: "wrongShape", n });
 
   if (partner && long && partner.m.len >= SHORT) {
     const drawn = Math.max(me.len, 1) / Math.max(partner.me.len, 1);
@@ -593,22 +588,22 @@ function lookIssue(
     // Getting the relation backwards is the mistake that turns one kanji
     // into another, so it is called out at a smaller error than a stroke
     // that is merely longer or shorter than it should be.
-    if (off > 0.35 && model > 1.25 && drawn < 0.95) return say(`Stroke ${n} should be longer than stroke ${p}.`, true);
-    if (off > 0.35 && model < 0.8 && drawn > 1.05) return say(`Stroke ${n} should be shorter than stroke ${p}.`, true);
+    if (off > 0.35 && model > 1.25 && drawn < 0.95) return say({ code: "shouldBeLonger", n, than: p }, true);
+    if (off > 0.35 && model < 0.8 && drawn > 1.05) return say({ code: "shouldBeShorter", n, than: p }, true);
     // When the partner is the stroke that is off, it gets its own message
     // below; blaming this one as well would send the learner to fix the
     // wrong stroke.
     const partnerWorse =
       framed && Math.abs(Math.log(partner.me.len / partner.m.len)) > Math.abs(Math.log(me.len / m.len));
     if (off > 0.6 && !partnerWorse) {
-      return say(drawn > model ? `Stroke ${n} is too long next to stroke ${p}.` : `Stroke ${n} is too short next to stroke ${p}.`);
+      return say({ code: drawn > model ? "tooLongNextTo" : "tooShortNextTo", n, than: p });
     }
   }
 
-  if (framed && Math.hypot(me.offset.x, me.offset.y) > 13) return say(`Stroke ${n} sits too ${where(me.offset)}.`);
+  if (framed && Math.hypot(me.offset.x, me.offset.y) > 13) return say({ code: "misplaced", n, offset: where(me.offset) });
   if (framed && long) {
     const ratio = me.len / m.len;
-    if (Math.abs(Math.log(ratio)) > 0.5) return say(`Stroke ${n} is too ${ratio > 1 ? "long" : "short"}.`);
+    if (Math.abs(Math.log(ratio)) > 0.5) return say({ code: ratio > 1 ? "tooLong" : "tooShort", n });
   }
   return null;
 }
@@ -694,16 +689,47 @@ function outOfOrder(pairs: Pair[]): Set<number> {
   return new Set(seq.filter((p) => !keep.has(p.ink)).map((p) => p.ink));
 }
 
+/** The way a stroke runs: left to right, top to bottom, or diagonally. */
+export type Direction = "right" | "left" | "down" | "up" | "downRight" | "downLeft" | "upRight" | "upLeft";
+
+/** Which way a stroke sits away from its place, on each axis where it clearly does. */
+export type Offset = { h: "right" | "left" | null; v: "low" | "high" | null };
+
+/**
+ * Something the check has to say, as a code and the values it needs. The
+ * words belong to the interface (see lib/i18n/messages/kanji), so this file
+ * stays free of any language. Strokes are numbered from 1.
+ */
+export type Note =
+  | { code: "lookalike"; char: string; other: string }
+  | { code: "extra"; char: string; count: number }
+  | { code: "missing"; n: number }
+  | { code: "reversed"; n: number; runs: Direction }
+  | { code: "outOfOrder"; n: number; drawnAt: number }
+  | { code: "shouldBend"; n: number }
+  | { code: "shouldBeStraight"; n: number }
+  | { code: "wrongAngle"; n: number; runs: Direction }
+  | { code: "wrongShape"; n: number }
+  | { code: "shouldBeLonger" | "shouldBeShorter"; n: number; than: number }
+  | { code: "tooLongNextTo" | "tooShortNextTo"; n: number; than: number }
+  | { code: "misplaced"; n: number; offset: Offset }
+  | { code: "tooLong" | "tooShort"; n: number }
+  | { code: "tooManyStrokes"; total: number }
+  | { code: "looksLikeLater"; n: number; later: number }
+  | { code: "looksRight"; n: number };
+
 export type Issue = {
   /** The model stroke it concerns, 1-based, or null for the character as a whole. */
   stroke: number | null;
-  text: string;
+  note: Note;
 };
+
+export type Verdict = "clear" | "readable" | "hard" | "unreadable";
 
 export type Assessment = {
   /** 0–100. */
   score: number;
-  verdict: string;
+  verdict: Verdict;
   /** Whether the check would call it right. Advice only: the learner grades. */
   pass: boolean;
   issues: Issue[];
@@ -715,11 +741,11 @@ export type Assessment = {
   lookalike: string | null;
 };
 
-function verdictFor(score: number): string {
-  if (score >= 85) return "Clear";
-  if (score >= PASS_SCORE) return "Readable";
-  if (score >= 45) return "Hard to read";
-  return "Not readable yet";
+function verdictFor(score: number): Verdict {
+  if (score >= 85) return "clear";
+  if (score >= PASS_SCORE) return "readable";
+  if (score >= 45) return "hard";
+  return "unreadable";
 }
 
 /**
@@ -762,9 +788,8 @@ export function assess(
   const issues: Issue[] = [];
   const flagged = new Set<number>(ev.extra);
 
-  if (lookalike) issues.push({ stroke: null, text: `This reads more like ${lookalike} than ${char}.` });
-  if (ev.extra.length === 1) issues.push({ stroke: null, text: `One stroke does not match any stroke of ${char}.` });
-  if (ev.extra.length > 1) issues.push({ stroke: null, text: `${ev.extra.length} strokes do not match any stroke of ${char}.` });
+  if (lookalike) issues.push({ stroke: null, note: { code: "lookalike", char, other: lookalike } });
+  if (ev.extra.length > 0) issues.push({ stroke: null, note: { code: "extra", char, count: ev.extra.length } });
 
   const late = outOfOrder(ev.pairs.map((me) => me.pair));
   let habits = 0;
@@ -774,22 +799,22 @@ export function assess(
     const n = j + 1;
     const me = ev.byModel[j];
     if (!me) {
-      issues.push({ stroke: n, text: `Stroke ${n} is missing.` });
+      issues.push({ stroke: n, note: { code: "missing", n } });
       return;
     }
-    const said: string[] = [];
-    if (isReversed(me, m)) said.push(`Stroke ${n} goes the wrong way: it runs ${describe(m)}.`);
-    if (late.has(me.pair.ink)) said.push(`Stroke ${n} is out of order: you wrote it ${ordinal(me.pair.ink + 1)}.`);
+    const said: Note[] = [];
+    if (isReversed(me, m)) said.push({ code: "reversed", n, runs: describe(m) });
+    if (late.has(me.pair.ink)) said.push({ code: "outOfOrder", n, drawnAt: me.pair.ink + 1 });
     habits += said.length;
     const p = partnerOf(j, target);
     const partnerMe = ev.byModel[p];
     const look = lookIssue(n, me, m, partnerMe ? { n: p + 1, me: partnerMe, m: target[p] } : null, true);
     if (look) {
-      said.push(look.text);
+      said.push(look.note);
       if (look.flip) flips++;
     }
     if (said.length) flagged.add(me.pair.ink);
-    for (const text of said) issues.push({ stroke: n, text });
+    for (const note of said) issues.push({ stroke: n, note });
   });
 
   let score = ev.readability * 100 - Math.min(HABIT_CAP, HABIT_COST * habits) - PROPORTION_COST * flips;
@@ -821,7 +846,7 @@ export type Hint = {
   /** The drawn stroke this is about, 0-based. */
   stroke: number;
   ok: boolean;
-  text: string;
+  note: Note;
   /** The model stroke to trace instead, placed on the pad. Only when something is wrong. */
   guide: Point[] | null;
 };
@@ -841,7 +866,7 @@ export function hint(paths: readonly string[], ink: Ink): Hint | null {
   const k = ink.length - 1;
   if (k < 0 || target.length === 0 || ink[k].length === 0) return null;
   if (k >= target.length) {
-    return { stroke: k, ok: false, text: `This kanji has only ${target.length} strokes.`, guide: null };
+    return { stroke: k, ok: false, note: { code: "tooManyStrokes", total: target.length }, guide: null };
   }
 
   const drawn = ink.map((s) => (s.length ? toStroke(s) : toStroke([{ x: 0, y: 0 }])));
@@ -872,7 +897,7 @@ export function hint(paths: readonly string[], ink: Ink): Hint | null {
     }
   }
   if (later >= 0 && ownCost > 8 && laterCost < ownCost * 0.6) {
-    return { stroke: k, ok: false, text: `That looks like stroke ${later + 1}. Stroke ${k + 1} comes first.`, guide };
+    return { stroke: k, ok: false, note: { code: "looksLikeLater", n: k + 1, later: later + 1 }, guide };
   }
 
   const at = (i: number) => {
@@ -881,13 +906,13 @@ export function hint(paths: readonly string[], ink: Ink): Hint | null {
   };
   const me = at(k);
   if (isReversed(me, target[k])) {
-    return { stroke: k, ok: false, text: `Stroke ${k + 1} goes the wrong way: it runs ${describe(target[k])}.`, guide };
+    return { stroke: k, ok: false, note: { code: "reversed", n: k + 1, runs: describe(target[k]) }, guide };
   }
 
   const p = partnerOf(k, target);
   const partner = p >= 0 ? { n: p + 1, me: at(p), m: target[p] } : null;
   const look = lookIssue(k + 1, me, target[k], partner, framed);
-  if (look) return { stroke: k, ok: false, text: look.text, guide };
+  if (look) return { stroke: k, ok: false, note: look.note, guide };
 
-  return { stroke: k, ok: true, text: `Stroke ${k + 1} looks right.`, guide: null };
+  return { stroke: k, ok: true, note: { code: "looksRight", n: k + 1 }, guide: null };
 }

@@ -1,0 +1,286 @@
+{
+  "the-body": {
+    "title": "Tubuh",
+    "summary": "Sebagai kata tunggal, nama-nama bagian tubuh adalah kata asli Jepang — くち, め, て, あし, からだ — tetapi dalam banyak kata majemuk berganti ke cara baca on: 人口 じんこう, 目的 もくてき, 手話 しゅわ. 足 juga muncul dalam kata kerja: 足りる, cukup, dan 足す, menambahkan.",
+    "words": {
+      "口|くち": ["Mulut"],
+      "一口|ひとくち": ["Satu Suap", "Segigit"],
+      "人口|じんこう": ["Jumlah Penduduk"],
+      "出入り口|でいりぐち": ["Pintu Keluar-Masuk", "Pintu Masuk dan Keluar"],
+      "窓口|まどぐち": ["Loket", "Konter Layanan"],
+
+      "目|め": ["Mata"],
+      "目的|もくてき": ["Tujuan", "Maksud"],
+      "見た目|みため": ["Penampilan", "Rupa"],
+      "二つ目|ふたつめ": ["Yang Kedua", "Kedua"],
+      "目の前|めのまえ": ["Di Depan Mata", "Tepat di Depan"],
+      "目上|めうえ": ["Atasan", "Senior"],
+
+      "手|て": ["Tangan"],
+      "手伝う|てつだう": ["Membantu", "Menolong"],
+      "手前|てまえ": ["Sisi Sebelah Sini", "Tepat Sebelum"],
+      "手本|てほん": ["Contoh (untuk ditiru)", "Teladan"],
+      "手話|しゅわ": ["Bahasa Isyarat"],
+
+      "足|あし": ["Kaki", "Tungkai"],
+      "足りる|たりる": ["Cukup", "Memadai"],
+      "足す|たす": ["Menambahkan"],
+      "一足|いっそく": ["Sepasang (sepatu)"],
+      "手足|てあし": ["Tangan dan Kaki", "Anggota Badan"],
+
+      "体|からだ": ["Tubuh", "Kesehatan"],
+      "大体|だいたい": ["Sebagian Besar", "Kira-Kira", "Sekitar"],
+      "体育|たいいく": ["Pendidikan Jasmani", "Penjas"],
+      "体中|からだじゅう": ["Seluruh Tubuh"],
+      "一体|いったい": ["Sebenarnya (dalam pertanyaan)", "Gerangan"]
+    }
+  },
+  "heart-and-mind": {
+    "title": "Hati dan pikiran",
+    "summary": "思う dan 考える sama-sama berarti berpikir: 思う adalah apa yang kamu rasakan atau yakini, sedangkan 考える adalah memikirkan sesuatu sampai tuntas. 心, hati, ada di bawah 思 dan juga 意 — dalam kanji-kanji ini, di sanalah pikiran bekerja.",
+    "words": {
+      "心|こころ": ["Hati", "Pikiran"],
+      "心配|しんぱい": ["Kekhawatiran", "Kecemasan"],
+      "中心|ちゅうしん": ["Pusat", "Inti"],
+      "心から|こころから": ["Dengan Tulus", "Dari Lubuk Hati"],
+      "本心|ほんしん": ["Perasaan Sebenarnya", "Niat Sesungguhnya"],
+
+      "思う|おもう": ["Berpikir", "Merasa", "Yakin"],
+      "思い出す|おもいだす": ["Teringat", "Mengingat Kembali"],
+      "思い|おもい": ["Perasaan", "Pikiran", "Harapan"],
+      "思いつく|おもいつく": ["Mendapat (ide)", "Terpikir"],
+      "思わず|おもわず": ["Tanpa Berpikir", "Tanpa Sengaja"],
+
+      "考える|かんがえる": ["Mempertimbangkan", "Memikirkan"],
+      "考え|かんがえ": ["Gagasan", "Cara Berpikir"],
+      "考え出す|かんがえだす": ["Mencetuskan", "Menemukan (ide)"],
+      "参考|さんこう": ["Referensi"],
+      "思考|しこう": ["Pemikiran", "Proses Berpikir"],
+
+      "知る|しる": ["Tahu", "Jadi Tahu"],
+      "知らせる|しらせる": ["Memberi Tahu", "Mengabari"],
+      "お知らせ|おしらせ": ["Pemberitahuan", "Pengumuman"],
+      "知人|ちじん": ["Kenalan"],
+      "知識|ちしき": ["Pengetahuan"],
+
+      "意見|いけん": ["Pendapat"],
+      "意外|いがい": ["Tak Terduga", "Mengejutkan"],
+      "意思|いし": ["Niat", "Kehendak"],
+      "得意|とくい": ["Mahir", "Kelebihan"]
+    }
+  },
+  "self-and-others": {
+    "title": "Diri sendiri dan orang lain",
+    "summary": "私 dibaca わたし dalam percakapan dan わたくし saat kamu perlu terdengar formal: satu kanji, dua kata. 者 juga berarti orang, tetapi nuansanya merendah atau kaku dan biasanya muncul dalam kata majemuk seperti 学者 dan 読者; kata sehari-hari untuk orang tetap 人.",
+    "words": {
+      "私|わたし": ["Saya", "Aku"],
+      "私|わたくし": ["Saya (formal)", "Saya"],
+      "私たち|わたしたち": ["Kami", "Kita"],
+      "私鉄|してつ": ["Kereta Api Swasta"],
+      "私大|しだい": ["Universitas Swasta"],
+
+      "自由|じゆう": ["Kebebasan", "Sesuka Hati"],
+      "自ら|みずから": ["Secara Pribadi", "Sendiri", "Diri Sendiri"],
+      "自体|じたい": ["Itu Sendiri", "Hal Itu Sendiri"],
+      "自国|じこく": ["Negeri Sendiri"],
+      "自然|しぜん": ["Alam", "Alami"],
+
+      "者|もの": ["Orang (merendah)"],
+      "学者|がくしゃ": ["Cendekiawan"],
+      "読者|どくしゃ": ["Pembaca"],
+      "若者|わかもの": ["Anak Muda", "Kaum Muda"],
+      "何者|なにもの": ["Orang Macam Apa", "Siapa"],
+
+      "主に|おもに": ["Terutama", "Sebagian Besar"],
+      "主人|しゅじん": ["Suami Saya", "Kepala Rumah Tangga", "Pemilik"],
+      "ご主人|ごしゅじん": ["Suami (sopan)", "Suami (orang lain)"],
+      "主婦|しゅふ": ["Ibu Rumah Tangga"],
+      "主語|しゅご": ["Subjek (tata bahasa)"],
+      "主食|しゅしょく": ["Makanan Pokok"],
+
+      "親|おや": ["Orang Tua", "Ayah atau Ibu"],
+      "両親|りょうしん": ["Kedua Orang Tua", "Orang Tua"],
+      "親しい|したしい": ["Akrab", "Ramah", "Dekat"],
+      "親しみ|したしみ": ["Rasa Sayang", "Keakraban"],
+      "親子|おやこ": ["Orang Tua dan Anak"]
+    }
+  },
+  "family": {
+    "title": "Keluarga",
+    "summary": "Kata-kata keluarga datang berpasangan: 兄 dan 姉 yang polos saat kamu membicarakan keluargamu sendiri kepada orang lain, お兄さん dan お姉さん yang sopan untuk keluarga orang lain — atau saat kamu menyapa keluargamu sendiri. 兄弟 ditulis dengan kanji saudara laki-laki, tetapi juga mencakup saudara perempuan: inilah kata sehari-hari untuk saudara kandung.",
+    "words": {
+      "家|いえ": ["Rumah", "Tempat Tinggal"],
+      "家|うち": ["Rumah Sendiri", "Rumah", "Keluarga Sendiri"],
+      "家内|かない": ["Istri Saya"],
+      "大家|おおや": ["Pemilik Rumah Sewa", "Induk Semang"],
+      "家出|いえで": ["Kabur dari Rumah"],
+
+      "家族|かぞく": ["Keluarga"],
+      "ご家族|ごかぞく": ["Keluarga (sopan)", "Keluarga (orang lain)"],
+      "大家族|だいかぞく": ["Keluarga Besar", "Keluarga Beranggota Banyak"],
+      "親族|しんぞく": ["Kerabat", "Sanak Saudara"],
+      "民族|みんぞく": ["Suku Bangsa", "Bangsa"],
+
+      "兄|あに": ["Kakak Laki-Laki Saya"],
+      "お兄さん|おにいさん": ["Kakak Laki-Laki (sopan)", "Pemuda"],
+      "兄さん|にいさん": ["Kakak Laki-Laki (akrab)", "Abang"],
+      "兄貴|あにき": ["Abang (kasual)", "Senior yang Dihormati"],
+      "父兄|ふけい": ["Orang Tua dan Wali Murid"],
+
+      "弟|おとうと": ["Adik Laki-Laki Saya"],
+      "弟さん|おとうとさん": ["Adik Laki-Laki (sopan)"],
+      "兄弟|きょうだい": ["Saudara Kandung", "Saudara Laki-Laki"],
+      "弟子|でし": ["Murid", "Pengikut"],
+
+      "姉|あね": ["Kakak Perempuan Saya"],
+      "お姉さん|おねえさん": ["Kakak Perempuan (sopan)", "Wanita Muda"],
+      "姉さん|ねえさん": ["Kakak Perempuan (akrab)", "Kakak (perempuan)"],
+      "姉貴|あねき": ["Kakak Perempuan (kasual)", "Wanita Senior yang Dihormati"],
+
+      "妹|いもうと": ["Adik Perempuan Saya"],
+      "妹さん|いもうとさん": ["Adik Perempuan (sopan)"],
+      "姉妹|しまい": ["Saudara Perempuan"],
+      "兄弟姉妹|きょうだいしまい": ["Saudara Laki-Laki dan Perempuan", "Saudara Kandung"]
+    }
+  },
+  "morning-to-night": {
+    "title": "Dari pagi sampai malam",
+    "summary": "Setiap waktu dalam sehari punya cara baca asli saat berdiri sendiri dan cara baca on dalam kata majemuk: あさ dan ちょう, ひる dan ちゅう, よる dan や. 夕べ ditulis dengan kanji senja, tetapi dalam percakapan biasanya berarti tadi malam.",
+    "words": {
+      "朝|あさ": ["Pagi"],
+      "朝日|あさひ": ["Matahari Pagi", "Matahari Terbit"],
+      "早朝|そうちょう": ["Pagi Buta"],
+      "朝夕|あさゆう": ["Pagi dan Sore", "Senantiasa"],
+      "朝刊|ちょうかん": ["Koran Pagi", "Edisi Pagi"],
+
+      "昼|ひる": ["Siang", "Siang Hari", "Makan Siang"],
+      "お昼|おひる": ["Makan Siang", "Tengah Hari"],
+      "昼食|ちゅうしょく": ["Santap Siang", "Makan Siang"],
+      "昼寝|ひるね": ["Tidur Siang", "Tidur Sebentar"],
+      "昼前|ひるまえ": ["Menjelang Siang", "Sebelum Tengah Hari"],
+
+      "夕べ|ゆうべ": ["Tadi Malam", "Petang"],
+      "夕日|ゆうひ": ["Matahari Terbenam", "Matahari Sore"],
+      "七夕|たなばた": ["Festival Bintang", "Tanabata"],
+      "夕焼け|ゆうやけ": ["Cahaya Senja", "Langit Merah Senja"],
+
+      "夜|よる": ["Malam"],
+      "夜中|よなか": ["Tengah Malam"],
+      "夜食|やしょく": ["Camilan Larut Malam"],
+      "夜間|やかん": ["Waktu Malam", "Pada Malam Hari"],
+      "深夜|しんや": ["Larut Malam", "Malam Buta"],
+
+      "早い|はやい": ["Awal", "Cepat", "Tidak Lama Lagi"],
+      "早く|はやく": ["Dengan Cepat", "Lebih Awal", "Segera"],
+      "早口|はやくち": ["Bicara Cepat", "Ucapan Cepat"],
+      "早速|さっそく": ["Segera", "Langsung"],
+      "早める|はやめる": ["Memajukan (waktu)", "Mempercepat"]
+    }
+  },
+  "weeks-and-clocks": {
+    "title": "Minggu, jam, dan waktu",
+    "summary": "度 menghitung kali sekaligus derajat: 一度 berarti sekali, dan dalam prakiraan cuaca 三十度 berarti tiga puluh derajat. 代 bisa berarti pengganti, zaman, atau tagihan — 時代 adalah suatu masa dalam sejarah, 電気代 adalah biaya yang kamu bayar untuk listrik.",
+    "words": {
+      "曜日|ようび": ["Hari dalam Seminggu"],
+      "日曜|にちよう": ["Hari Minggu"],
+      "月曜|げつよう": ["Hari Senin"],
+      "金曜|きんよう": ["Hari Jumat"],
+      "土曜|どよう": ["Hari Sabtu"],
+
+      "週|しゅう": ["Minggu (pekan)"],
+      "週末|しゅうまつ": ["Akhir Pekan"],
+      "先々週|せんせんしゅう": ["Dua Minggu yang Lalu"],
+      "何週間|なんしゅうかん": ["Berapa Minggu"],
+      "二週間|にしゅうかん": ["Dua Minggu"],
+
+      "度|ど": ["Derajat", "Kali"],
+      "一度|いちど": ["Sekali", "Satu Kali"],
+      "二度と|にどと": ["Tak Pernah Lagi (dengan bentuk negatif)"],
+      "温度|おんど": ["Suhu"],
+      "度々|たびたび": ["Sering", "Berulang Kali"],
+      "年度|ねんど": ["Tahun Anggaran", "Tahun Ajaran"],
+
+      "代わる|かわる": ["Menggantikan", "Digantikan"],
+      "代わり|かわり": ["Pengganti", "Sebagai Gantinya"],
+      "お代わり|おかわり": ["Tambah Porsi", "Isi Ulang"],
+      "時代|じだい": ["Zaman", "Periode", "Masa"],
+      "電気代|でんきだい": ["Tagihan Listrik"],
+      "十代|じゅうだい": ["Usia Belasan Tahun"],
+
+      "計る|はかる": ["Mengukur", "Menghitung Waktu"],
+      "計算|けいさん": ["Perhitungan"],
+      "家計|かけい": ["Anggaran Rumah Tangga", "Keuangan Keluarga"],
+      "小計|しょうけい": ["Subtotal"],
+      "日時計|ひどけい": ["Jam Matahari"]
+    }
+  },
+  "the-seasons": {
+    "title": "Empat musim",
+    "summary": "Setiap musim adalah kata asli Jepang saat berdiri sendiri — はる, なつ, あき, ふゆ — dan keempat cara baca on-nya berjajar dalam 春夏秋冬, しゅんかしゅうとう. 風 dan 風邪 sama-sama dibaca かぜ: yang satu angin, yang lain pilek.",
+    "words": {
+      "春|はる": ["Musim Semi"],
+      "春休み|はるやすみ": ["Libur Musim Semi", "Liburan Musim Semi"],
+      "春分|しゅんぶん": ["Ekuinoks Musim Semi"],
+      "春雨|はるさめ": ["Hujan Musim Semi", "Soun"],
+      "春先|はるさき": ["Awal Musim Semi"],
+
+      "夏|なつ": ["Musim Panas"],
+      "夏祭り|なつまつり": ["Festival Musim Panas"],
+      "夏時間|なつじかん": ["Waktu Musim Panas", "Penyesuaian Jam Musim Panas"],
+      "夏日|なつび": ["Hari Panas (25°C ke atas)", "Hari Musim Panas"],
+      "春夏秋冬|しゅんかしゅうとう": ["Empat Musim", "Sepanjang Tahun"],
+
+      "秋|あき": ["Musim Gugur"],
+      "秋分|しゅうぶん": ["Ekuinoks Musim Gugur"],
+      "秋風|あきかぜ": ["Angin Musim Gugur"],
+      "秋晴れ|あきばれ": ["Cuaca Cerah Musim Gugur"],
+      "秋雨|あきさめ": ["Hujan Musim Gugur"],
+
+      "冬|ふゆ": ["Musim Dingin"],
+      "冬休み|ふゆやすみ": ["Libur Musim Dingin", "Liburan Musim Dingin"],
+      "冬眠|とうみん": ["Hibernasi"],
+      "冬日|ふゆび": ["Hari Beku (di bawah 0°C)", "Hari Musim Dingin"],
+
+      "風|かぜ": ["Angin", "Angin Sepoi-Sepoi"],
+      "風邪|かぜ": ["Pilek", "Selesma"],
+      "風車|ふうしゃ": ["Kincir Angin"],
+      "春風|はるかぜ": ["Angin Musim Semi"],
+      "お風呂|おふろ": ["Bak Mandi (berendam)"]
+    }
+  },
+  "colours": {
+    "title": "Warna",
+    "summary": "Kata warna yang paling tua — 赤い, 青い, 黒い, dan 白い dari N5 — adalah kata sifat-i; kebanyakan warna lainnya adalah kata benda yang dibentuk dengan 色, seperti 茶色 dan 水色. 青 mencakup hijau selain biru, itulah sebabnya lampu lalu lintas hijau disebut 青.",
+    "words": {
+      "色|いろ": ["Warna"],
+      "色々|いろいろ": ["Bermacam-Macam", "Segala Macam"],
+      "黄色|きいろ": ["Kuning"],
+      "水色|みずいろ": ["Biru Muda", "Biru Langit"],
+      "金色|きんいろ": ["Emas (warna)", "Keemasan"],
+      "景色|けしき": ["Pemandangan", "Panorama"],
+
+      "赤い|あかい": ["Merah"],
+      "赤|あか": ["Warna Merah", "Merah"],
+      "赤ちゃん|あかちゃん": ["Bayi"],
+      "赤ん坊|あかんぼう": ["Orok", "Bayi"],
+      "赤ワイン|あかワイン": ["Anggur Merah"],
+
+      "青い|あおい": ["Biru", "Hijau", "Pucat"],
+      "青|あお": ["Warna Biru", "Biru", "Hijau (lampu lalu lintas)"],
+      "青春|せいしゅん": ["Masa Muda", "Musim Semi Kehidupan"],
+      "青年|せいねん": ["Pemuda", "Anak Muda"],
+      "青白い|あおじろい": ["Pucat Pasi", "Pucat"],
+
+      "黒い|くろい": ["Hitam", "Gelap"],
+      "黒|くろ": ["Warna Hitam", "Hitam"],
+      "黒板|こくばん": ["Papan Tulis"],
+      "黒目|くろめ": ["Iris (mata)", "Mata Hitam"],
+
+      "お茶|おちゃ": ["Teh", "Teh Hijau"],
+      "紅茶|こうちゃ": ["Teh Hitam"],
+      "茶色|ちゃいろ": ["Cokelat (warna)"],
+      "日本茶|にほんちゃ": ["Teh Jepang", "Teh Hijau"],
+      "茶わん|ちゃわん": ["Mangkuk Nasi", "Cangkir Teh"]
+    }
+  }
+}

@@ -24,6 +24,8 @@ import {
 } from "@/lib/srs";
 import { buildDailyQuiz, type KanjiQuizCard } from "@/lib/study";
 import { DAILY_QUIZ_SIZE, dailySeed, localDate } from "@/lib/daily";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/config";
+import { INTL_TAG } from "@/lib/i18n/format";
 
 export type WordProgressRow = {
   word_id: string;
@@ -72,6 +74,8 @@ export type Profile = {
   study_writing: boolean | null;
   /** Due reviews at which starting a lesson warns first. Null never warns. */
   review_warning: number | null;
+  /** Null until the learner has chosen. See getLocale in lib/i18n/server. */
+  locale: Locale | null;
 };
 
 /**
@@ -120,14 +124,16 @@ export async function getProfile(userId: string): Promise<Profile> {
     daily_goal: 20,
     study_writing: null,
     review_warning: 20,
+    locale: null,
   };
   return read("getProfile", userId, fallback, async (db) => {
     const { rows } = await db.query<Profile>(
-      `select id, display_name, current_level, current_lesson_slug, daily_goal, study_writing, review_warning
+      `select id, display_name, current_level, current_lesson_slug, daily_goal, study_writing, review_warning, locale
          from public.profiles where id = $1`,
       [userId],
     );
-    return rows[0] ?? fallback;
+    const row = rows[0];
+    return row ? { ...row, locale: isLocale(row.locale) ? row.locale : null } : fallback;
   });
 }
 
@@ -268,11 +274,15 @@ export type LessonSummary = {
  *
  * Every level's lessons in curriculum order, unless one is named.
  */
-export function getLessonSummaries(progress: ProgressMaps, level?: Level): LessonSummary[] {
+export function getLessonSummaries(
+  progress: ProgressMaps,
+  level?: Level,
+  locale: Locale = DEFAULT_LOCALE,
+): LessonSummary[] {
   const now = Date.now();
   const readings = getKanjiReadings(progress.words, level);
 
-  return getLessons(level).map((lesson) => {
+  return getLessons(level, locale).map((lesson) => {
     const bands = lesson.kanji.map((k) => readings.get(k.char)?.band ?? "new");
     const kanjiKnown = bands.filter((b) => b === "known" || b === "mastered").length;
 
@@ -359,7 +369,7 @@ export type DashboardData = {
   resumeLesson: LessonSummary | null;
 };
 
-export async function getDashboard(userId: string): Promise<DashboardData> {
+export async function getDashboard(userId: string, locale: Locale = DEFAULT_LOCALE): Promise<DashboardData> {
   const now = Date.now();
   const since = new Date(now - 29 * 86_400_000).toISOString();
 
@@ -375,7 +385,7 @@ export async function getDashboard(userId: string): Promise<DashboardData> {
       return rows;
     }),
   ]);
-  const lessons = getLessonSummaries(progress);
+  const lessons = getLessonSummaries(progress, undefined, locale);
   const studyWriting = studiesWriting(profile);
 
   const allKanji = getKanji();
@@ -419,7 +429,7 @@ export async function getDashboard(userId: string): Promise<DashboardData> {
   for (let i = 13; i >= 0; i--) {
     const d = new Date(now - i * 86_400_000);
     activity.push({
-      label: d.toLocaleDateString(undefined, { weekday: "narrow" }),
+      label: d.toLocaleDateString(INTL_TAG[locale], { weekday: "narrow" }),
       value: byDay.get(d.toDateString()) ?? 0,
     });
   }
@@ -457,7 +467,7 @@ export async function getDashboard(userId: string): Promise<DashboardData> {
 }
 
 /** Words due for review, most overdue first, from every level. */
-export async function getReviewQueue(userId: string, limit = 30): Promise<Word[]> {
+export async function getReviewQueue(userId: string, limit = 30, locale: Locale = DEFAULT_LOCALE): Promise<Word[]> {
   const due = await read("getReviewQueue", userId, [] as { word_id: string }[], async (db) => {
     const { rows } = await db.query<{ word_id: string }>(
       `select word_id from public.word_progress
@@ -467,11 +477,15 @@ export async function getReviewQueue(userId: string, limit = 30): Promise<Word[]
     );
     return rows;
   });
-  return due.map((r) => getWord(r.word_id)).filter((w): w is Word => w !== undefined);
+  return due.map((r) => getWord(r.word_id, locale)).filter((w): w is Word => w !== undefined);
 }
 
 /** Characters whose writing is due, most overdue first, from every level. */
-export async function getWritingReviewQueue(userId: string, limit = 10): Promise<Kanji[]> {
+export async function getWritingReviewQueue(
+  userId: string,
+  limit = 10,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<Kanji[]> {
   const due = await read("getWritingReviewQueue", userId, [] as { char: string }[], async (db) => {
     const { rows } = await db.query<{ char: string }>(
       `select char from public.kanji_progress
@@ -481,7 +495,7 @@ export async function getWritingReviewQueue(userId: string, limit = 10): Promise
     );
     return rows;
   });
-  return due.map((r) => getKanjiChar(r.char)).filter((k): k is Kanji => k !== undefined);
+  return due.map((r) => getKanjiChar(r.char, locale)).filter((k): k is Kanji => k !== undefined);
 }
 
 /**
@@ -697,7 +711,7 @@ export async function unmarkWriting(userId: string, kanji: Kanji[]) {
 
 export async function saveSettings(
   userId: string,
-  settings: { studyWriting?: boolean; reviewWarning?: number | null },
+  settings: { studyWriting?: boolean; reviewWarning?: number | null; locale?: Locale },
 ) {
   await asUser(userId, async (db) => {
     if (settings.studyWriting !== undefined) {
@@ -705,6 +719,9 @@ export async function saveSettings(
     }
     if (settings.reviewWarning !== undefined) {
       await db.query(`update public.profiles set review_warning = $2 where id = $1`, [userId, settings.reviewWarning]);
+    }
+    if (settings.locale !== undefined) {
+      await db.query(`update public.profiles set locale = $2 where id = $1`, [userId, settings.locale]);
     }
   });
 }
@@ -789,7 +806,12 @@ export type DailyQuiz = {
  * learned something in, so an N5 learner is never offered N4 meanings they
  * could rule out just for being unfamiliar.
  */
-export async function getDailyQuiz(userId: string, date: string, timeZone: string): Promise<DailyQuiz> {
+export async function getDailyQuiz(
+  userId: string,
+  date: string,
+  timeZone: string,
+  locale: Locale = DEFAULT_LOCALE,
+): Promise<DailyQuiz> {
   type Studied = { word_id: string; srs_stage: number; created_at: string };
   const [progress, answers] = await Promise.all([
     read("getDailyQuiz progress", userId, [] as Studied[], async (db) => {
@@ -825,10 +847,24 @@ export async function getDailyQuiz(userId: string, date: string, timeZone: strin
   const learned = getKanji().filter((k) => learnedChars.has(k.char));
   const levels = new Set(learned.map((k) => k.level));
   const pool = getKanji().filter((k) => levels.has(k.level));
-  const questions =
-    learned.length >= DAILY_QUIZ_SIZE
-      ? buildDailyQuiz(learned, pool, DAILY_QUIZ_SIZE, dailySeed(userId, date))
-      : [];
+  // Built from the English, which is what the choices are picked by, so the
+  // same day's quiz asks the same thing in any language — switching language
+  // halfway cannot change a question under an answer. Then shown in the
+  // learner's. A choice's id is its character, so grading never reads a label.
+  const questions = (
+    learned.length >= DAILY_QUIZ_SIZE ? buildDailyQuiz(learned, pool, DAILY_QUIZ_SIZE, dailySeed(userId, date)) : []
+  ).map((card) =>
+    locale === DEFAULT_LOCALE
+      ? card
+      : {
+          ...card,
+          kanji: getKanjiChar(card.kanji.char, locale) ?? card.kanji,
+          choices: card.choices.map((c) => ({
+            ...c,
+            label: getKanjiChar(c.id, locale)?.meanings[0] ?? c.label,
+          })),
+        },
+  );
 
   return { date, learned: learned.length, questions, answers, stages };
 }
@@ -837,7 +873,7 @@ export type DailyAnswerResult =
   | { status: "recorded"; correct: boolean }
   /** The position already had an answer. The first one stands. */
   | { status: "already-answered" }
-  | { status: "invalid"; reason: string };
+  | { status: "invalid"; reason: "no-question" | "not-an-option" };
 
 /**
  * Grades one daily quiz answer and stores it.
@@ -852,13 +888,15 @@ export async function recordDailyAnswer(
   timeZone: string,
   position: number,
   choiceId: string,
+  locale: Locale = DEFAULT_LOCALE,
 ): Promise<DailyAnswerResult> {
-  const quiz = await getDailyQuiz(userId, date, timeZone);
+  // In the learner's language, so the labels stored are the ones they saw.
+  const quiz = await getDailyQuiz(userId, date, timeZone, locale);
   const card = quiz.questions[position - 1];
-  if (!card) return { status: "invalid", reason: "No such question" };
+  if (!card) return { status: "invalid", reason: "no-question" };
 
   const chosen = card.choices.find((c) => c.id === choiceId);
-  if (!chosen) return { status: "invalid", reason: "Not one of the options" };
+  if (!chosen) return { status: "invalid", reason: "not-an-option" };
 
   const answer = card.choices.find((c) => c.id === card.answerId)!;
   const correct = chosen.id === card.answerId;

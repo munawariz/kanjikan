@@ -6,6 +6,7 @@ import type { KanjiQuizCard } from "@/lib/study";
 import type { DailyAnswerRow } from "@/lib/progress";
 import { post, QuizCard, SaveWarning } from "./StudySession";
 import { DailyResults, formatQuizDate } from "./DailyResults";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 /**
  * Today's five questions, one attempt each.
@@ -27,6 +28,8 @@ export function DailyQuiz({
   answered: DailyAnswerRow[];
 }) {
   const router = useRouter();
+  const t = useT();
+  const locale = useLocale();
 
   const [remaining] = useState(() => {
     const done = new Set(answered.map((a) => a.position));
@@ -123,7 +126,7 @@ export function DailyQuiz({
 
       <div className="stack" style={{ gap: 12 }}>
         <div className="row" style={{ justifyContent: "space-between", gap: 16 }}>
-          <span className="eyebrow">Daily quiz · {formatQuizDate(date)}</span>
+          <span className="eyebrow">{t.daily.eyebrowDate(formatQuizDate(date, locale))}</span>
           <span className="eyebrow" style={{ color: "var(--text-body)" }}>
             {current.position} / {questions.length}
           </span>

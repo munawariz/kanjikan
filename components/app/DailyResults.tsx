@@ -1,17 +1,23 @@
+"use client";
+
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import type { DailyAnswerRow } from "@/lib/progress";
+import type { Locale } from "@/lib/i18n/config";
+import { INTL_TAG } from "@/lib/i18n/format";
+import { useLocale, useT } from "@/lib/i18n/client";
 
 /**
  * A quiz date as a heading, e.g. "Saturday 12 September".
  *
  * Fixed locale and UTC: the date is already the learner's own day, and this
  * renders on the server and again in the browser, where any other choice
- * could disagree and trip a hydration mismatch.
+ * could disagree and trip a hydration mismatch. English keeps its day-month
+ * order (en-GB) rather than INTL_TAG's en-US.
  */
-export function formatQuizDate(date: string) {
-  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", {
+export function formatQuizDate(date: string, locale: Locale) {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString(locale === "en" ? "en-GB" : INTL_TAG[locale], {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -25,6 +31,8 @@ export function formatQuizDate(date: string) {
  * the same — the page's version replaces the quiz's as soon as it refreshes.
  */
 export function DailyResults({ date, rows }: { date: string; rows: DailyAnswerRow[] }) {
+  const t = useT().daily;
+  const locale = useLocale();
   const correct = rows.filter((r) => r.correct).length;
 
   return (
@@ -34,7 +42,7 @@ export function DailyResults({ date, rows }: { date: string; rows: DailyAnswerRo
           <div className="row" style={{ gap: 10 }}>
             <Sparkle size={18} color="var(--lime-500)" />
             <span className="eyebrow" style={{ color: "var(--lime-500)" }}>
-              Daily quiz · {formatQuizDate(date)}
+              {t.eyebrowDate(formatQuizDate(date, locale))}
             </span>
           </div>
 
@@ -52,11 +60,11 @@ export function DailyResults({ date, rows }: { date: string; rows: DailyAnswerRo
 
           <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
             {correct === rows.length
-              ? "Every one. "
+              ? t.allCorrect
               : correct === 0
-                ? "None today — worth a review. "
+                ? t.noneCorrect
                 : ""}
-            Five more tomorrow, drawn from every kanji you have learned by then.
+            {t.tomorrow}
           </p>
         </div>
       </Card>
@@ -83,12 +91,12 @@ export function DailyResults({ date, rows }: { date: string; rows: DailyAnswerRo
                 </div>
                 {!r.correct && (
                   <div className="body-sm" style={{ color: "var(--negative-600)" }}>
-                    You chose “{r.chosen}”
+                    {t.youChose(r.chosen)}
                   </div>
                 )}
               </div>
             </div>
-            <Badge tone={r.correct ? "accent" : "sage"}>{r.correct ? "Correct" : "Missed"}</Badge>
+            <Badge tone={r.correct ? "accent" : "sage"}>{r.correct ? t.correct : t.missed}</Badge>
           </div>
         ))}
       </Card>

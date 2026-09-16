@@ -1,0 +1,135 @@
+{
+  "seeing-and-saying": {
+    "title": "Melihat, mendengar, berbicara",
+    "summary": "Lima kanji untuk menerima dan menyampaikan sesuatu. 読 memberimu 音読み dan 訓読み — nama dua jenis cara baca yang sudah kamu pelajari selama ini.",
+    "words": {
+      "見る|みる": ["Melihat", "Menonton"],
+      "見せる|みせる": ["Memperlihatkan"],
+      "見える|みえる": ["Terlihat", "Bisa Melihat"],
+      "花見|はなみ": ["Menikmati Bunga Sakura"],
+      "見学|けんがく": ["Kunjungan Belajar", "Karyawisata"],
+
+      "聞く|きく": ["Mendengarkan", "Mendengar", "Bertanya"],
+      "聞こえる|きこえる": ["Terdengar", "Bisa Mendengar"],
+      "新聞|しんぶん": ["Koran"],
+      "新聞紙|しんぶんし": ["Kertas Koran", "Lembaran Koran"],
+
+      "話す|はなす": ["Berbicara", "Bercakap"],
+      "話|はなし": ["Pembicaraan", "Cerita"],
+      "会話|かいわ": ["Percakapan"],
+      "話し合う|はなしあう": ["Berdiskusi"],
+
+      "読む|よむ": ["Membaca"],
+      "読書|どくしょ": ["Membaca Buku"],
+      "読み方|よみかた": ["Cara Membaca", "Cara Baca"],
+      "音読み|おんよみ": ["Onyomi", "Cara Baca Asal Tiongkok"],
+      "訓読み|くんよみ": ["Kunyomi", "Cara Baca Asli Jepang"],
+
+      "書く|かく": ["Menulis"],
+      "辞書|じしょ": ["Kamus"],
+      "図書館|としょかん": ["Perpustakaan"],
+      "教科書|きょうかしょ": ["Buku Pelajaran"],
+      "書き方|かきかた": ["Cara Menulis"]
+    }
+  },
+  "school-and-language": {
+    "title": "Sekolah, buku, dan bahasa",
+    "summary": "本 berawal sebagai buku, tetapi arti lamanya adalah asal-usul — itu sebabnya 日本 berarti asal matahari, dan itu pula sebabnya 本 dipakai untuk menghitung benda yang panjang dan ramping.",
+    "words": {
+      "学校|がっこう": ["Sekolah"],
+      "学ぶ|まなぶ": ["Belajar", "Mempelajari"],
+      "学年|がくねん": ["Tahun Ajaran", "Tingkat Kelas"],
+      "科学|かがく": ["Sains"],
+      "留学生|りゅうがくせい": ["Pelajar Asing"],
+
+      "高校|こうこう": ["Sekolah Menengah Atas"],
+      "校長|こうちょう": ["Kepala Sekolah"],
+      "校庭|こうてい": ["Halaman Sekolah"],
+      "母校|ぼこう": ["Almamater"],
+
+      "日本語|にほんご": ["Bahasa Jepang"],
+      "英語|えいご": ["Bahasa Inggris"],
+      "中国語|ちゅうごくご": ["Bahasa Mandarin"],
+      "語る|かたる": ["Menceritakan", "Mengisahkan"],
+      "単語|たんご": ["Kata", "Kosakata"],
+
+      "本|ほん": ["Buku"],
+      "本屋|ほんや": ["Toko Buku"],
+      "本当|ほんとう": ["Kebenaran", "Sungguh"],
+      "一本|いっぽん": ["Satu Benda Panjang"],
+      "本人|ほんにん": ["Orang yang Bersangkutan"],
+
+      "国|くに": ["Negara"],
+      "国語|こくご": ["Bahasa Nasional", "Bahasa Jepang (mata pelajaran)"],
+      "国内|こくない": ["Dalam Negeri", "Domestik"],
+      "帰国|きこく": ["Pulang ke Tanah Air"],
+      "全国|ぜんこく": ["Seluruh Negeri", "Nasional"]
+    }
+  },
+  "eating-and-resting": {
+    "title": "Makan, istirahat, setiap hari",
+    "summary": "Irama sehari-hari. 毎 tidak pernah berdiri sendiri — ia selalu menempel pada satuan waktu, sehingga menjadi salah satu kanji paling mudah di sini.",
+    "words": {
+      "食べる|たべる": ["Makan"],
+      "食事|しょくじ": ["Santapan"],
+      "食堂|しょくどう": ["Kantin", "Ruang Makan"],
+      "朝食|ちょうしょく": ["Sarapan"],
+      "夕食|ゆうしょく": ["Makan Malam", "Santapan Malam"],
+
+      "休む|やすむ": ["Beristirahat", "Tidak Masuk (kerja/sekolah)"],
+      "休み|やすみ": ["Istirahat", "Liburan"],
+      "昼休み|ひるやすみ": ["Istirahat Siang"],
+      "夏休み|なつやすみ": ["Libur Musim Panas"],
+      "休日|きゅうじつ": ["Hari Libur", "Hari Libur Nasional"],
+
+      "毎日|まいにち": ["Setiap Hari"],
+      "毎朝|まいあさ": ["Setiap Pagi"],
+      "毎週|まいしゅう": ["Setiap Minggu"],
+      "毎月|まいつき": ["Setiap Bulan"],
+      "毎年|まいとし": ["Setiap Tahun"],
+
+      "今|いま": ["Sekarang"],
+      "今週|こんしゅう": ["Minggu Ini"],
+      "今夜|こんや": ["Malam Ini"],
+      "今度|こんど": ["Lain Kali", "Kali Ini"],
+      "今朝|けさ": ["Tadi Pagi"],
+
+      "何|なに": ["Apa"],
+      "何曜日|なんようび": ["Hari Apa"],
+      "何回|なんかい": ["Berapa Kali"],
+      "何度|なんど": ["Berapa Derajat", "Berapa Kali"],
+      "何か|なにか": ["Sesuatu", "Apa Saja"]
+    }
+  },
+  "describing-things": {
+    "title": "Tinggi, panjang, putih, siang, listrik",
+    "summary": "Lima kanji terakhir. 白 bersembunyi di dalam 面白い (menarik), yang tidak ada hubungannya dengan putih — pengingat yang baik bahwa kata majemuk adalah kata tersendiri.",
+    "words": {
+      "高い|たかい": ["Tinggi", "Jangkung", "Mahal"],
+      "高校生|こうこうせい": ["Siswa Sekolah Menengah Atas"],
+      "最高|さいこう": ["Terbaik", "Tertinggi"],
+      "高さ|たかさ": ["Ketinggian"],
+
+      "長い|ながい": ["Panjang"],
+      "社長|しゃちょう": ["Presiden Direktur"],
+      "部長|ぶちょう": ["Kepala Bagian"],
+      "長さ|ながさ": ["Ukuran Panjang"],
+      "長時間|ちょうじかん": ["Waktu yang Lama"],
+
+      "白い|しろい": ["Putih"],
+      "白|しろ": ["Warna Putih"],
+      "面白い|おもしろい": ["Menarik", "Lucu"],
+      "白黒|しろくろ": ["Hitam Putih"],
+
+      "午前|ごぜん": ["Pagi", "AM"],
+      "午後|ごご": ["Siang (setelah tengah hari)", "PM"],
+      "正午|しょうご": ["Tengah Hari", "Pukul 12 Siang"],
+      "午前中|ごぜんちゅう": ["Sepanjang Pagi"],
+
+      "電話|でんわ": ["Telepon", "Panggilan Telepon"],
+      "電気|でんき": ["Listrik", "Lampu"],
+      "電池|でんち": ["Baterai"],
+      "電子|でんし": ["Elektronik"]
+    }
+  }
+}

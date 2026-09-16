@@ -1,0 +1,135 @@
+{
+  "seeing-and-saying": {
+    "title": "Seeing, hearing, saying",
+    "summary": "The five kanji of taking things in and putting them out. 読 gives you 音読み and 訓読み — the names for the two kinds of reading you have been learning all along.",
+    "words": {
+      "見る|みる": ["To See", "To Watch"],
+      "見せる|みせる": ["To Show"],
+      "見える|みえる": ["To Be Visible", "Can See"],
+      "花見|はなみ": ["Flower Viewing"],
+      "見学|けんがく": ["A Study Visit", "Field Trip"],
+
+      "聞く|きく": ["To Listen", "To Hear", "To Ask"],
+      "聞こえる|きこえる": ["To Be Audible", "Can Hear"],
+      "新聞|しんぶん": ["Newspaper"],
+      "新聞紙|しんぶんし": ["Newsprint", "Newspaper Paper"],
+
+      "話す|はなす": ["To Speak", "To Talk"],
+      "話|はなし": ["A Talk", "A Story"],
+      "会話|かいわ": ["Conversation"],
+      "話し合う|はなしあう": ["To Discuss"],
+
+      "読む|よむ": ["To Read"],
+      "読書|どくしょ": ["Reading Books"],
+      "読み方|よみかた": ["How to Read", "Reading"],
+      "音読み|おんよみ": ["On Reading", "Chinese-Derived Reading"],
+      "訓読み|くんよみ": ["Kun Reading", "Native Japanese Reading"],
+
+      "書く|かく": ["To Write"],
+      "辞書|じしょ": ["Dictionary"],
+      "図書館|としょかん": ["Library"],
+      "教科書|きょうかしょ": ["Textbook"],
+      "書き方|かきかた": ["How to Write"]
+    }
+  },
+  "school-and-language": {
+    "title": "School, books and languages",
+    "summary": "本 starts as book, but its older meaning is origin — which is why 日本 is sun-origin, and why it counts long thin things.",
+    "words": {
+      "学校|がっこう": ["School"],
+      "学ぶ|まなぶ": ["To Learn", "To Study"],
+      "学年|がくねん": ["School Year", "Grade"],
+      "科学|かがく": ["Science"],
+      "留学生|りゅうがくせい": ["International Student"],
+
+      "高校|こうこう": ["High School"],
+      "校長|こうちょう": ["Principal", "Head Teacher"],
+      "校庭|こうてい": ["Schoolyard"],
+      "母校|ぼこう": ["Alma Mater"],
+
+      "日本語|にほんご": ["Japanese Language"],
+      "英語|えいご": ["English Language"],
+      "中国語|ちゅうごくご": ["Chinese Language"],
+      "語る|かたる": ["To Tell", "To Narrate"],
+      "単語|たんご": ["Word", "Vocabulary Item"],
+
+      "本|ほん": ["Book"],
+      "本屋|ほんや": ["Bookshop"],
+      "本当|ほんとう": ["Truth", "Really"],
+      "一本|いっぽん": ["One Long Thin Object"],
+      "本人|ほんにん": ["The Person Themselves"],
+
+      "国|くに": ["Country"],
+      "国語|こくご": ["National Language", "Japanese as a School Subject"],
+      "国内|こくない": ["Domestic", "Within the Country"],
+      "帰国|きこく": ["Returning to Your Country"],
+      "全国|ぜんこく": ["The Whole Country", "Nationwide"]
+    }
+  },
+  "eating-and-resting": {
+    "title": "Eating, resting, every day",
+    "summary": "The rhythm of a day. 毎 never stands alone — it only ever attaches to a unit of time, which makes it one of the easiest kanji here.",
+    "words": {
+      "食べる|たべる": ["To Eat"],
+      "食事|しょくじ": ["A Meal"],
+      "食堂|しょくどう": ["Cafeteria", "Dining Hall"],
+      "朝食|ちょうしょく": ["Breakfast"],
+      "夕食|ゆうしょく": ["Dinner", "Evening Meal"],
+
+      "休む|やすむ": ["To Rest", "To Take Time Off"],
+      "休み|やすみ": ["A Rest", "A Holiday"],
+      "昼休み|ひるやすみ": ["Lunch Break"],
+      "夏休み|なつやすみ": ["Summer Holiday"],
+      "休日|きゅうじつ": ["A Day Off", "Public Holiday"],
+
+      "毎日|まいにち": ["Every Day"],
+      "毎朝|まいあさ": ["Every Morning"],
+      "毎週|まいしゅう": ["Every Week"],
+      "毎月|まいつき": ["Every Month"],
+      "毎年|まいとし": ["Every Year"],
+
+      "今|いま": ["Now"],
+      "今週|こんしゅう": ["This Week"],
+      "今夜|こんや": ["Tonight"],
+      "今度|こんど": ["Next Time", "This Time"],
+      "今朝|けさ": ["This Morning"],
+
+      "何|なに": ["What"],
+      "何曜日|なんようび": ["What Day of the Week"],
+      "何回|なんかい": ["How Many Times"],
+      "何度|なんど": ["How Many Times", "How Many Degrees"],
+      "何か|なにか": ["Something", "Anything"]
+    }
+  },
+  "describing-things": {
+    "title": "Tall, long, white, noon, electric",
+    "summary": "The last five. 白 hides inside 面白い interesting, which has nothing to do with white — a good reminder that compounds are their own words.",
+    "words": {
+      "高い|たかい": ["High", "Tall", "Expensive"],
+      "高校生|こうこうせい": ["High School Student"],
+      "最高|さいこう": ["The Best", "The Highest"],
+      "高さ|たかさ": ["Height"],
+
+      "長い|ながい": ["Long"],
+      "社長|しゃちょう": ["Company President"],
+      "部長|ぶちょう": ["Department Manager"],
+      "長さ|ながさ": ["Length"],
+      "長時間|ちょうじかん": ["A Long Time"],
+
+      "白い|しろい": ["White"],
+      "白|しろ": ["White"],
+      "面白い|おもしろい": ["Interesting", "Funny"],
+      "白黒|しろくろ": ["Black and White"],
+
+      "午前|ごぜん": ["Morning", "AM"],
+      "午後|ごご": ["Afternoon", "PM"],
+      "正午|しょうご": ["Noon", "Midday"],
+      "午前中|ごぜんちゅう": ["During the Morning"],
+
+      "電話|でんわ": ["Telephone", "Phone Call"],
+      "電気|でんき": ["Electricity", "The Light"],
+      "電池|でんち": ["Battery"],
+      "電子|でんし": ["Electronic"]
+    }
+  }
+}

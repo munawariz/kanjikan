@@ -5,6 +5,7 @@ import { Button } from "@/components/atlas/core/Button.jsx";
 import { Icon } from "@/components/atlas/core/Icon.jsx";
 import type { Level } from "@/lib/content";
 import { assess, BOX, hint as strokeHint, type Assessment, type Hint, type Ink, type Point } from "@/lib/handwriting";
+import { useT } from "@/lib/i18n/client";
 import { loadStrokeBank } from "@/lib/strokeBank";
 import { StrokeDiagram } from "./StrokeDiagram";
 
@@ -35,6 +36,8 @@ export function WritingPad({
   level,
   hints,
   onGrade,
+  onMiss,
+  onContinue,
   onKnown,
   minScore,
 }: {
@@ -44,16 +47,27 @@ export function WritingPad({
   expectedStrokes: number;
   level: Level;
   hints: boolean;
+  /** The attempt was right, first time: grade it and move on. */
   onGrade: (correct: boolean) => void;
+  /**
+   * The learner chose Retry. The attempt counts as a miss, once however many
+   * retries follow, and the pad clears for another go.
+   */
+  onMiss: () => void;
+  /** Next, after a miss already recorded: move on without grading again. */
+  onContinue: () => void;
   /** Where offered: marks the writing known instead of grading an attempt. */
   onKnown?: () => void;
   /**
-   * Where given, "I Got It" stays disabled until the check scores the drawing
-   * at least this. A blank pad scores nothing. A kanji with no model to check
-   * against is left to the learner.
+   * Where given, Next stays disabled until the check scores the drawing at
+   * least this. A blank pad scores nothing. A kanji with no model to check
+   * against is left to the learner. Once a miss is recorded, Next is always
+   * open, so a character the learner cannot write never traps them.
    */
   minScore?: number;
 }) {
+  const t = useT();
+  const w = t.kanji.writing;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rowRef = useRef<HTMLDivElement | null>(null);
   const drawing = useRef(false);
@@ -70,6 +84,8 @@ export function WritingPad({
   /** Undefined until the check has run; null when there was nothing to check. */
   const [assessment, setAssessment] = useState<Assessment | null | undefined>(undefined);
   const [allIssues, setAllIssues] = useState(false);
+  /** Whether Retry has been chosen on this character, so the miss is already recorded. */
+  const [missed, setMissed] = useState(false);
 
   /**
    * The pad is square and as large as the column allows, up to 260.
@@ -233,6 +249,15 @@ export function WritingPad({
     setLiveHint(null);
   }
 
+  function retry() {
+    if (!missed) onMiss();
+    setMissed(true);
+    clear();
+    setAssessment(undefined);
+    setAllIssues(false);
+    setRevealed(false);
+  }
+
   const strokesMatch = strokeCount === expectedStrokes;
   const unit = BOX / SIZE;
   const guides: Point[][] = revealed
@@ -252,7 +277,7 @@ export function WritingPad({
   return (
     <div className="stack" style={{ gap: 20 }}>
       <div className="stack" style={{ gap: 6, textAlign: "center" }}>
-        <span className="eyebrow">Write it from memory</span>
+        <span className="eyebrow">{w.eyebrow}</span>
         <div style={{ fontSize: "var(--text-heading-2)", color: "var(--text-heading)" }}>
           {meaning}
         </div>
@@ -268,7 +293,7 @@ export function WritingPad({
             than the pad once it is revealed. Always shown, so revealing the
             model does not push the pad down either. */}
         <div className="stack" style={{ gap: 8, alignItems: "center" }}>
-          <span className="eyebrow">Your writing</span>
+          <span className="eyebrow">{w.yourWriting}</span>
           <div
             style={{
               position: "relative",
@@ -361,7 +386,7 @@ export function WritingPad({
 
         {revealed && (
           <div className="stack" style={{ gap: 8, alignItems: "center" }}>
-            <span className="eyebrow">Model</span>
+            <span className="eyebrow">{w.model}</span>
             <StrokeDiagram char={char} paths={paths} size={SIZE} mode="animate" />
           </div>
         )}
@@ -374,18 +399,18 @@ export function WritingPad({
         >
           <span className="body-sm" style={{ color: strokeCount === 0 ? "var(--text-muted)" : strokesMatch ? "var(--positive-600)" : "var(--text-body)" }}>
             {strokeCount === 0
-              ? `${expectedStrokes} strokes`
-              : `${strokeCount} of ${expectedStrokes} strokes${strokesMatch ? " — count matches" : ""}`}
+              ? t.kanji.strokes(expectedStrokes)
+              : w.progress(strokeCount, expectedStrokes, strokesMatch)}
           </span>
           {/* Both stop once the answer is shown: the check describes the
               drawing on the pad, and must not be left describing one that is
               no longer there. */}
           <div className="row" style={{ gap: 4 }}>
             <Button variant="ghost" size="sm" onClick={undo} disabled={strokeCount === 0 || revealed}>
-              Undo
+              {w.undo}
             </Button>
             <Button variant="ghost" size="sm" onClick={clear} disabled={strokeCount === 0 || revealed}>
-              Clear
+              {w.clear}
             </Button>
           </div>
         </div>
@@ -413,15 +438,15 @@ export function WritingPad({
                   style={{ marginTop: 2 }}
                 />
                 <span>
-                  {liveHint.text}
+                  {w.note(liveHint.note)}
                   {liveHint.guide &&
                     (liveHint.stroke < strokeCount
-                      ? " Undo it and follow the green guide."
-                      : " Follow the green guide.")}
+                      ? w.undoAndFollow
+                      : w.follow)}
                 </span>
               </>
             ) : (
-              <span>Hints are on: each stroke is checked as you draw it.</span>
+              <span>{w.hintsOn}</span>
             )}
           </div>
         )}
@@ -429,8 +454,13 @@ export function WritingPad({
 
       {!revealed ? (
         <div className="stack" style={{ gap: 8 }}>
+          {missed && (
+            <p className="body-sm muted" style={{ margin: 0, textAlign: "center" }}>
+              {w.retrying}
+            </p>
+          )}
           <Button variant="primary" size="lg" fullWidth onClick={() => setRevealed(true)}>
-            Show the Answer
+            {w.showAnswer}
           </Button>
           {onKnown && (
             <Button
@@ -438,9 +468,9 @@ export function WritingPad({
               size="md"
               fullWidth
               onClick={onKnown}
-              title={`Mark ${char} as one you can write, and skip it`}
+              title={w.alreadyWriteTitle(char)}
             >
-              I Can Already Write It
+              {w.alreadyWrite}
             </Button>
           )}
         </div>
@@ -448,7 +478,7 @@ export function WritingPad({
         <div className="stack" style={{ gap: 16 }}>
           {assessment === undefined && strokeCount > 0 && paths.length > 0 && (
             <p className="body-sm muted" style={{ margin: 0, textAlign: "center" }}>
-              Checking your writing…
+              {w.checking}
             </p>
           )}
 
@@ -476,7 +506,7 @@ export function WritingPad({
                   >
                     {assessment.score}
                   </span>
-                  <span className="body-sm muted">/ 100</span>
+                  <span className="body-sm muted">{w.outOf}</span>
                 </div>
                 <span
                   className="body-sm"
@@ -485,7 +515,7 @@ export function WritingPad({
                     color: assessment.pass ? "var(--text-brand)" : "var(--negative-500)",
                   }}
                 >
-                  {assessment.verdict}
+                  {w.verdict[assessment.verdict]}
                 </span>
               </div>
 
@@ -498,53 +528,52 @@ export function WritingPad({
                   <ul className="stack" style={{ gap: 6, margin: 0, paddingLeft: 18 }}>
                     {shownIssues.map((issue, i) => (
                       <li key={i} className="body-sm" style={{ color: "var(--text-body)" }}>
-                        {issue.text}
+                        {w.note(issue.note)}
                       </li>
                     ))}
                   </ul>
                   {issues.length > ISSUES_SHOWN && !allIssues && (
                     <Button variant="ghost" size="sm" onClick={() => setAllIssues(true)}>
-                      Show All {issues.length}
+                      {w.showAll(issues.length)}
                     </Button>
                   )}
                 </div>
               ) : (
                 <p className="body-sm" style={{ margin: 0, color: "var(--text-body)" }}>
-                  Nothing to fix: the strokes, their order and their direction all match.
+                  {w.nothingToFix}
                 </p>
               )}
 
               <p className="body-sm muted" style={{ margin: 0 }}>
-                Suggested grade: {assessment.pass ? "I Got It" : "Not Yet"}. This is an automatic
-                check and can be wrong, so the grade is yours.
+                {w.suggested(assessment.pass)}
               </p>
             </div>
           )}
 
           <p className="body-sm muted" style={{ margin: 0, textAlign: "center" }}>
-            {belowMin && assessment !== undefined
-              ? `Your writing needs to score at least ${minScore} to count as got. Compare it with the model and try again.`
-              : "Compare the shape and the order. Did you get it right?"}
+            {belowMin && !missed && assessment !== undefined
+              ? w.needScore(minScore ?? 0)
+              : w.compare}
           </p>
-          {/* The suggested grade is the filled button; with no check to go
-              on, "I Got It" keeps the accent it always had. */}
+          {/* The suggested choice is the filled button; with no check to go
+              on, Next keeps the accent it always had. */}
           <div className="row" style={{ gap: 12 }}>
             <Button
-              variant={suggestion === false || belowMin ? "primary" : "outline"}
+              variant={suggestion === false || (belowMin && !missed) ? "primary" : "outline"}
               size="lg"
               fullWidth
-              onClick={() => onGrade(false)}
+              onClick={retry}
             >
-              Not Yet
+              {w.retry}
             </Button>
             <Button
-              variant={suggestion === false || belowMin ? "outline" : "accent"}
+              variant={suggestion === false || (belowMin && !missed) ? "outline" : "accent"}
               size="lg"
               fullWidth
-              disabled={belowMin}
-              onClick={() => onGrade(true)}
+              disabled={belowMin && !missed}
+              onClick={() => (missed ? onContinue() : onGrade(true))}
             >
-              I Got It
+              {w.next}
             </Button>
           </div>
         </div>

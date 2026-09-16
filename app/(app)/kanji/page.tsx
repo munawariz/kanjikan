@@ -8,6 +8,7 @@ import {
   strokeViewBox,
 } from "@/lib/content";
 import { getUser } from "@/lib/auth";
+import { getLocale, getT } from "@/lib/i18n/server";
 import {
   getKanjiReadings,
   getProfile,
@@ -25,11 +26,12 @@ export default async function KanjiPage() {
   const user = await getUser();
   if (!user) redirect("/login");
 
-  const kanji = getKanji();
+  const [t, locale] = await Promise.all([getT(), getLocale()]);
+  const kanji = getKanji(undefined, locale);
   const [progress, profile] = await Promise.all([getProgress(user), getProfile(user.id)]);
   const writing = studiesWriting(profile);
   const readings = getKanjiReadings(progress.words);
-  const lessonTitles = new Map(getLessons().map((l) => [l.slug, l.title]));
+  const lessonTitles = new Map(getLessons(undefined, locale).map((l) => [l.slug, l.title]));
 
   const entries: KanjiEntry[] = kanji.map((k) => {
     const p = progress.kanji.get(k.char);
@@ -54,7 +56,7 @@ export default async function KanjiPage() {
       readingMarks: wordMarkState(getWordsTeaching(k.char), progress.words),
       canWrite: writing && (p?.writing_stage ?? 0) >= KNOWN_STAGE,
       writingMarks: writing ? writingMarkState([k.char], progress.kanji) : null,
-      words: getWordsUsingKanji(k.char).map((w) => ({
+      words: getWordsUsingKanji(k.char, locale).map((w) => ({
         id: w.id,
         word: w.word,
         reading: w.reading,
@@ -69,7 +71,7 @@ export default async function KanjiPage() {
     <div className="stack" style={{ gap: 32 }}>
       <header className="stack" style={{ gap: 16 }}>
         <p className="eyebrow">
-          All {kanji.length} kanji, {availableLevels().join(" and ")}
+          {t.kanji.page.eyebrow(kanji.length, availableLevels())}
         </p>
         <h1
           style={{
@@ -80,12 +82,10 @@ export default async function KanjiPage() {
             maxWidth: 720,
           }}
         >
-          {known} of {kanji.length} characters known.
+          {t.kanji.page.heading(known, kanji.length)}
         </h1>
         <p style={{ margin: 0, maxWidth: 560 }}>
-          {writing
-            ? "In curriculum order. A tinted tile is a character you know — most of its words are known; the dot marks one you can also write from memory. Select any character for its stroke order, readings and vocabulary."
-            : "In curriculum order. A tinted tile is a character you know — most of its words are known. Select any character for its stroke order, readings and vocabulary."}
+          {writing ? t.kanji.page.introWriting : t.kanji.page.intro}
         </p>
       </header>
 
