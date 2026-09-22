@@ -44,12 +44,12 @@ export default async function PracticeSessionPage({
   // Read only to choose how each word is asked, as a review would: a word
   // already well known is asked for its reading or recalled from English
   // rather than only translated. Nothing is written back.
-  const wordStages: Record<string, number> = {};
+  const wordStability: Record<string, number> = {};
   if (user && words.length) {
     const progress = await getWordProgress(user.id);
     for (const w of words) {
       const p = progress.get(w.id);
-      if (p) wordStages[w.id] = p.srs_stage;
+      if (p) wordStability[w.id] = p.stability;
     }
   }
 
@@ -69,7 +69,7 @@ export default async function PracticeSessionPage({
         words={words}
         pool={touched.flatMap((l) => getAllWords(l, locale))}
         kanjiPool={touched.flatMap((l) => getKanji(l, locale)).map(({ char, meanings }) => ({ char, meanings }))}
-        wordStages={wordStages}
+        wordStability={wordStability}
         seed={Date.now() % 2147483647}
       />
     </div>

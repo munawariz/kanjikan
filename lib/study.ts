@@ -193,13 +193,16 @@ function kanjiQuiz(kanji: Kanji, pool: KanjiGloss[], rand: () => number): KanjiQ
  *
  * Meaning first, because a word you cannot translate is not learned. Readings
  * come next, since fixing the reading of the character is the whole point of
- * the exercise. Production — English to Japanese — is saved for later stages,
- * where it is a fair ask.
+ * the exercise. Production — English to Japanese — is saved for a memory that
+ * lasts a few days, where it is a fair ask.
+ *
+ * The thresholds are the stabilities the old stages 2 and 4 became (see
+ * supabase/migrations/0009_fsrs.sql), so each kind starts where it used to.
  */
-function wordKind(word: Word, stage: number, rand: () => number): (typeof WORD_QUIZ_KINDS)[number] {
+function wordKind(word: Word, stability: number, rand: () => number): (typeof WORD_QUIZ_KINDS)[number] {
   const canAskReading = word.word !== word.reading;
-  if (stage <= 1) return "word-meaning";
-  if (stage <= 3) return canAskReading && rand() < 0.6 ? "word-reading" : "word-meaning";
+  if (stability < 0.33) return "word-meaning";
+  if (stability < 3) return canAskReading && rand() < 0.6 ? "word-reading" : "word-meaning";
   const roll = rand();
   if (canAskReading && roll < 0.4) return "word-reading";
   return roll < 0.75 ? "word-recall" : "word-meaning";
@@ -213,7 +216,7 @@ export function cardChar(card: StudyCard): string {
 export type LessonOptions = {
   /** Characters met before, which skip their introduction. */
   seen: ReadonlySet<string>;
-  wordStages: Record<string, number>;
+  wordStability: Record<string, number>;
   /** Words marked as already known: nothing about them is taught or asked. */
   skipWords: ReadonlySet<string>;
   /** Whether each character ends by being written from memory. */
@@ -238,7 +241,7 @@ export type LessonOptions = {
 export function buildLessonQueue(
   kanji: Kanji[],
   words: Word[],
-  { seen, wordStages, skipWords, writing, skipWriting }: LessonOptions,
+  { seen, wordStability, skipWords, writing, skipWriting }: LessonOptions,
   seed: number,
 ): StudyCard[] {
   const rand = rng(seed);
@@ -251,13 +254,13 @@ export function buildLessonQueue(
       if (!seen.has(k.char)) queue.push({ kind: "kanji-teach", kanji: k });
 
       for (const w of its) {
-        if (!wordStages[w.id]) queue.push({ kind: "word-teach", word: w });
+        if (!wordStability[w.id]) queue.push({ kind: "word-teach", word: w });
       }
 
       queue.push(kanjiQuiz(k, kanji, rand));
 
       for (const w of shuffle(its, rand)) {
-        queue.push(wordQuiz(w, words, wordKind(w, wordStages[w.id] ?? 0, rand), rand));
+        queue.push(wordQuiz(w, words, wordKind(w, wordStability[w.id] ?? 0, rand), rand));
       }
     }
 
@@ -276,7 +279,7 @@ export function buildLessonQueue(
  */
 export function buildReviewQueue(
   words: Word[],
-  wordStages: Record<string, number>,
+  wordStability: Record<string, number>,
   pool: Word[],
   seed: number,
   writing: Kanji[] = [],
@@ -285,7 +288,7 @@ export function buildReviewQueue(
   return [
     ...writing.map((k): StudyCard => ({ kind: "kanji-write", kanji: k })),
     ...words.map((w) =>
-      wordQuiz(w, pool.length >= 8 ? pool : words, wordKind(w, wordStages[w.id] ?? 0, rand), rand),
+      wordQuiz(w, pool.length >= 8 ? pool : words, wordKind(w, wordStability[w.id] ?? 0, rand), rand),
     ),
   ];
 }
@@ -342,7 +345,7 @@ export function buildPracticeQueue(
   words: Word[],
   kanjiPool: KanjiGloss[],
   wordPool: Word[],
-  wordStages: Record<string, number>,
+  wordStability: Record<string, number>,
   seed: number,
 ): StudyCard[] {
   const rand = rng(seed);
@@ -355,7 +358,7 @@ export function buildPracticeQueue(
     for (const k of kanji) {
       reading.push(kanjiQuiz(k, kanjiPool, rand));
       for (const w of words.filter((w) => w.teaches === k.char)) {
-        reading.push(wordQuiz(w, wordPool, wordKind(w, wordStages[w.id] ?? 0, rand), rand));
+        reading.push(wordQuiz(w, wordPool, wordKind(w, wordStability[w.id] ?? 0, rand), rand));
       }
     }
   }

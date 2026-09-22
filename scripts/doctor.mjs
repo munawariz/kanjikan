@@ -21,6 +21,7 @@ const TABLES = [
   "lesson_progress",
   "study_sessions",
   "daily_quiz_answers",
+  "sync_receipts",
 ];
 
 /**
@@ -30,8 +31,16 @@ const TABLES = [
  */
 const COLUMNS = {
   profiles: ["study_writing", "review_warning", "locale"],
-  word_progress: ["marked_at", "pre_mark_stage", "pre_mark_due_at"],
-  kanji_progress: ["writing_due_at", "writing_marked_at", "pre_mark_writing_stage", "pre_mark_writing_due_at"],
+  word_progress: [
+    "marked_at", "pre_mark_stage", "pre_mark_due_at",
+    "stability", "difficulty", "elapsed_days", "scheduled_days", "reps", "lapses", "state", "pre_mark_memory",
+  ],
+  kanji_progress: [
+    "writing_due_at", "writing_marked_at", "pre_mark_writing_stage", "pre_mark_writing_due_at",
+    "writing_stability", "writing_difficulty", "writing_elapsed_days", "writing_scheduled_days",
+    "writing_reps", "writing_lapses", "writing_state", "pre_mark_writing_memory",
+  ],
+  daily_quiz_answers: ["stability"],
 };
 
 /** Readable only by the server. Nothing may be granted on them to the API roles. */

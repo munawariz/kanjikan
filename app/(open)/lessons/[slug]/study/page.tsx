@@ -34,13 +34,13 @@ export default async function StudyPage({ params }: { params: { slug: string } }
   const chars = new Set(kanji.map((k) => k.char));
   const words = lesson.words.filter((w) => chars.has(w.teaches));
 
-  const wordStages: Record<string, number> = {};
+  const wordStability: Record<string, number> = {};
   const seenKanji = new Set<string>();
   const markedWords: string[] = [];
   for (const w of words) {
     const p = wordRows.get(w.id);
     if (!p) continue;
-    wordStages[w.id] = p.srs_stage;
+    wordStability[w.id] = p.stability;
     seenKanji.add(w.teaches);
     if (p.marked_at) markedWords.push(w.id);
   }
@@ -55,7 +55,7 @@ export default async function StudyPage({ params }: { params: { slug: string } }
         lessonTitle={lesson.title}
         kanji={kanji}
         words={words}
-        wordStages={wordStages}
+        wordStability={wordStability}
         seenKanji={[...seenKanji]}
         markedWords={markedWords}
         markedWriting={markedWriting}

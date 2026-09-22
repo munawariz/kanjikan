@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
@@ -22,6 +22,8 @@ import { KanjiAnatomy } from "./KanjiAnatomy";
 import { StrokeDiagram } from "./StrokeDiagram";
 import { WritingPad } from "./WritingPad";
 import { currentMessages, useT } from "@/lib/i18n/client";
+import { recordGuestProgress, recordProgress, useSyncState, whenSynced } from "@/lib/client-sync";
+import type { SyncEventInput } from "@/lib/sync-events";
 
 type Mode = "lesson" | "review" | "practice";
 
@@ -44,8 +46,8 @@ type Props = {
   practiceTypes?: PracticeType[];
   /**
    * Not signed in. The session runs exactly the same, but nothing is sent to
-   * the server — every write would only come back 401 and raise the "not
-   * being saved" alarm for something the guest already knows.
+   * the server: what a guest studies is kept on this device instead, and joins
+   * their account when they sign in (see lib/client-sync.ts).
    */
   guest?: boolean;
   lessonSlug: string | null;
@@ -57,7 +59,7 @@ type Props = {
   pool?: Word[];
   /** Every character of the levels in play, for practice distractors. */
   kanjiPool?: KanjiGloss[];
-  wordStages: Record<string, number>;
+  wordStability: Record<string, number>;
   /** Lesson only: characters met before, which skip their introduction. */
   seenKanji?: string[];
   /** Lesson only: words marked as already known, left out of the run. */
@@ -80,6 +82,9 @@ type Props = {
 };
 
 /**
+ * A direct write, for screens outside a study session: a session's progress
+ * goes through the queue in lib/client-sync.ts instead.
+ *
  * A failed write must never stall the queue, so nothing waits on this. It must
  * not be silent either: dropping the error is what makes "my progress did not
  * save" impossible to notice until much later.
@@ -146,7 +151,7 @@ export function StudySession({
   words,
   pool,
   kanjiPool,
-  wordStages,
+  wordStability,
   seenKanji,
   markedWords,
   markedWriting,
@@ -177,7 +182,7 @@ export function StudySession({
         words,
         {
           seen: new Set(seenKanji),
-          wordStages,
+          wordStability,
           skipWords: new Set(markedWords),
           writing,
           skipWriting: new Set(markedWriting),
@@ -192,11 +197,11 @@ export function StudySession({
         words,
         kanjiPool ?? kanji,
         pool ?? words,
-        wordStages,
+        wordStability,
         seed + round,
       );
     }
-    return buildReviewQueue(words, wordStages, pool ?? words, seed, kanji);
+    return buildReviewQueue(words, wordStability, pool ?? words, seed, kanji);
   }, [
     mode,
     practiceTypes,
@@ -204,7 +209,7 @@ export function StudySession({
     words,
     pool,
     kanjiPool,
-    wordStages,
+    wordStability,
     seenKanji,
     markedWords,
     markedWriting,
@@ -228,7 +233,16 @@ export function StudySession({
   const [answered, setAnswered] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [done, setDone] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const sync = useSyncState();
+
+  /** Lets a re-read of the page that waits on the queue be dropped after leaving it. */
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   /**
    * Whether the reading is shown beneath the word on a meaning card.
@@ -291,12 +305,19 @@ export function StudySession({
   const isLast = index === total - 1;
 
   /**
-   * Every write goes through here, so a guest session or a practice run can
-   * make none — not an answer, not a session in the history, not a checkpoint.
+   * Every write goes through here. None of them is waited on: each is queued
+   * on this device and sent in the background (see lib/client-sync.ts), so the
+   * next card is on screen in the same frame as the click, online or not.
+   *
+   * A guest's progress is kept for their account to take when they sign in. A
+   * practice run makes none — not an answer, not a session in the history,
+   * not a checkpoint.
    */
   const save = useCallback(
-    (url: string, body: unknown) => {
-      if (!guest && !practice) void post(url, body, setSaveError);
+    (event: SyncEventInput) => {
+      if (practice) return;
+      if (guest) recordGuestProgress(event);
+      else recordProgress(event);
     },
     [guest, practice],
   );
@@ -304,16 +325,26 @@ export function StudySession({
   const finish = useCallback(
     (right: number, asked: number) => {
       setDone(true);
-      if (asked > 0) save("/api/session", { mode, lessonSlug, total: asked, correct: right });
+      if (asked > 0) {
+        save({ type: "session", mode: mode === "review" ? "review" : "lesson", lessonSlug, total: asked, correct: right });
+      }
       if (lessonSlug) {
-        save("/api/checkpoint", {
+        save({
+          type: "checkpoint",
           lessonSlug,
           cursor: lessonLength ?? cursorOffset + kanji.length,
           completed: true,
         });
       }
-      // Picks up the progress just written. A guest or a practice run wrote none.
-      if (!guest && !practice) router.refresh();
+      // Picks up the progress just written, once it has reached the server:
+      // re-reading sooner would show the page as it was before this session.
+      // The summary is already on screen and does not wait for it. A guest or
+      // a practice run wrote nothing to the server.
+      if (!guest && !practice) {
+        void whenSynced().then(() => {
+          if (mounted.current) router.refresh();
+        });
+      }
     },
     [mode, guest, practice, save, lessonSlug, kanji.length, cursorOffset, lessonLength, router],
   );
@@ -351,7 +382,7 @@ export function StudySession({
       // nothing left to do, and so no cards, is counted as passed too.
       if (lessonSlug && cardChar(q[index]) !== cardChar(q[next])) {
         const at = kanji.findIndex((k) => k.char === cardChar(q[index]));
-        save("/api/checkpoint", { lessonSlug, cursor: cursorOffset + at + 1, completed: false });
+        save({ type: "checkpoint", lessonSlug, cursor: cursorOffset + at + 1, completed: false });
       }
       setIndex(next);
     },
@@ -373,9 +404,9 @@ export function StudySession({
       if (right) setCorrectCount((n) => n + 1);
 
       if (card.kind === "kanji-write") {
-        save("/api/kanji", { char: card.kanji.char, correct: right });
+        save({ type: "writing", char: card.kanji.char, correct: right });
       } else if ("word" in card) {
-        save("/api/answer", { wordId: card.word.id, correct: right });
+        save({ type: "answer", wordId: card.word.id, correct: right });
       }
     },
     [card, save],
@@ -384,7 +415,7 @@ export function StudySession({
   /** "I already know this" on a word being introduced: no quiz on it follows. */
   const knowWord = useCallback(
     (word: Word) => {
-      save("/api/mark", { scope: "word", id: word.id, skill: "reading" });
+      save({ type: "mark", scope: "word", target: word.id, skill: "reading" });
       const next = { ...skipped, words: new Set(skipped.words).add(word.id) };
       setSkipped(next);
       advanceIn(withoutSkipped(baseQueue, next));
@@ -395,7 +426,7 @@ export function StudySession({
   /** On a character being introduced: marks its words, and skips to its writing, if any. */
   const knowKanji = useCallback(
     (k: Kanji) => {
-      save("/api/mark", { scope: "kanji", id: k.char, skill: "reading" });
+      save({ type: "mark", scope: "kanji", target: k.char, skill: "reading" });
       const next = { ...skipped, chars: new Set(skipped.chars).add(k.char) };
       setSkipped(next);
       advanceIn(withoutSkipped(baseQueue, next));
@@ -406,7 +437,7 @@ export function StudySession({
   /** On a writing card: marks the writing known instead of grading an attempt. */
   const knowWriting = useCallback(
     (k: Kanji) => {
-      save("/api/mark", { scope: "kanji", id: k.char, skill: "writing" });
+      save({ type: "mark", scope: "kanji", target: k.char, skill: "writing" });
       advance();
     },
     [save, advance],
@@ -485,15 +516,25 @@ export function StudySession({
     return <ReviewFirst waiting={reviewsWaiting} title={lessonTitle} onStart={() => setStarted(true)} />;
   }
 
+  /**
+   * Only an account the server has stopped recognising is worth a warning.
+   * Offline, or with the server briefly failing, the queue keeps everything
+   * and sends it later on its own, which the summary says in passing.
+   */
+  const counts = !guest && !practice;
+  const signedOut = counts && sync.status === "signedOut";
+  const unsent = counts && sync.pending > 0 && sync.status !== "idle" && sync.status !== "syncing";
+
   if (done) {
     return (
       <div className="stack" style={{ gap: 20 }}>
-        {saveError && <SaveWarning detail={saveError} />}
+        {signedOut && <SaveWarning detail={t.study.save.sessionExpired} queued />}
         <Summary
           correct={correctCount}
           total={answered}
           mode={mode}
           guest={guest}
+          unsent={unsent}
           lessonSlug={lessonSlug}
           lessonTitle={lessonTitle}
           practiceHref={
@@ -532,7 +573,7 @@ export function StudySession({
 
   return (
     <div className="stack" style={{ gap: 28 }}>
-      {saveError && <SaveWarning detail={saveError} />}
+      {signedOut && <SaveWarning detail={t.study.save.sessionExpired} queued />}
 
       <div className="stack" style={{ gap: 12 }}>
         <div className="row" style={{ justifyContent: "space-between", gap: 16 }}>
@@ -683,7 +724,11 @@ function SessionToggle({
   );
 }
 
-export function SaveWarning({ detail }: { detail: string }) {
+/**
+ * `queued` for a study session, whose progress is kept on this device while
+ * it cannot be sent, rather than lost.
+ */
+export function SaveWarning({ detail, queued = false }: { detail: string; queued?: boolean }) {
   const t = useT().study.save;
   return (
     <div
@@ -701,7 +746,7 @@ export function SaveWarning({ detail }: { detail: string }) {
     >
       <Icon name="circle" size={16} color="var(--negative-600)" />
       <span>
-        <strong>{t.notSaved}</strong> {detail} {t.after}
+        <strong>{queued ? t.queued : t.notSaved}</strong> {detail} {queued ? t.queuedAfter : t.after}
       </span>
     </div>
   );
@@ -1102,6 +1147,7 @@ function Summary({
   total,
   mode,
   guest,
+  unsent,
   lessonSlug,
   lessonTitle,
   practiceHref,
@@ -1111,6 +1157,8 @@ function Summary({
   total: number;
   mode: Mode;
   guest: boolean;
+  /** Some of this session is still on this device, waiting to be sent. */
+  unsent: boolean;
   lessonSlug: string | null;
   lessonTitle: string;
   /** Back to the practice page with this run's choices, or null for a run that counts. */
@@ -1214,7 +1262,7 @@ function Summary({
         ) : (
           <>
             <p style={{ margin: 0, color: "var(--forest-200)", maxWidth: 460 }}>
-              {t.saved}
+              {unsent ? t.savedLocally : t.saved}
             </p>
 
             <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>

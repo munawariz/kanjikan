@@ -65,10 +65,10 @@ export default async function ReviewPage() {
   }
 
   const progress = await getWordProgress(user.id);
-  const wordStages: Record<string, number> = {};
+  const wordStability: Record<string, number> = {};
   for (const w of queue) {
     const p = progress.get(w.id);
-    if (p) wordStages[w.id] = p.srs_stage;
+    if (p) wordStability[w.id] = p.stability;
   }
   const levels = new Set(queue.map((w) => w.level));
 
@@ -84,7 +84,7 @@ export default async function ReviewPage() {
         // so a question is not answerable by elimination within one lesson,
         // and a learner still in N5 is not offered N4 words as options.
         pool={getAllWords(undefined, locale).filter((w) => levels.has(w.level))}
-        wordStages={wordStages}
+        wordStability={wordStability}
         seed={Date.now() % 2147483647}
       />
     </div>

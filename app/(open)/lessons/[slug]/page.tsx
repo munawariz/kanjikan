@@ -10,7 +10,7 @@ import {
   wordMarkState,
   writingMarkState,
 } from "@/lib/progress";
-import { bandFor, KNOWN_STAGE, type MasteryBand } from "@/lib/srs";
+import { bandFor, isKnown, type MasteryBand } from "@/lib/srs";
 import { getLocale, getT } from "@/lib/i18n/server";
 import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Button } from "@/components/atlas/core/Button.jsx";
@@ -174,7 +174,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
                         {k.meanings.join(", ")}
                       </span>
                       <Badge tone={BAND_TONE[band]}>{t.common.band[band]}</Badge>
-                      {writing && (p?.writing_stage ?? 0) >= KNOWN_STAGE && <Badge tone="accent">{tl.canWrite}</Badge>}
+                      {writing && isKnown(p?.writing_stability) && <Badge tone="accent">{tl.canWrite}</Badge>}
                     </div>
 
                     <div className="row body-sm" style={{ gap: 18, flexWrap: "wrap" }}>
@@ -260,7 +260,7 @@ export default async function LessonPage({ params }: { params: { slug: string } 
 
         <Card tone="white" pad="none" radius="lg" bordered>
           {lesson.words.map((word, i) => {
-            const band = bandFor(wordRows.get(word.id)?.srs_stage);
+            const band = bandFor(wordRows.get(word.id)?.stability);
             const marked = Boolean(wordRows.get(word.id)?.marked_at);
             return (
               <div

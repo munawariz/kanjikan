@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
 import { getT } from "@/lib/i18n/server";
-import { getKanjiChar, getLesson, getWord, getWordsTeaching, type Kanji, type Word } from "@/lib/content";
 import { markWordsKnown, markWritingKnown, unmarkWords, unmarkWriting } from "@/lib/progress";
+import { resolveMark } from "@/lib/sync";
 
 /**
  * "I already know this", and its undo.
@@ -11,11 +11,8 @@ import { markWordsKnown, markWritingKnown, unmarkWords, unmarkWriting } from "@/
  *   skill  reading | writing     — reading marks words; writing marks characters
  *   undo   true to take the mark back
  *
- * Reading a kanji or a lesson means reading the words that teach it, since
- * that is where reading mastery lives. Writing has no word scope.
- *
- * Everything is resolved against the content files, so a forged id cannot
- * write a row for something outside the curriculum.
+ * Writing has no word scope. What each scope covers is decided by resolveMark
+ * in lib/sync.ts, which study sessions' marks go through too.
  */
 export async function POST(request: Request) {
   const [user, t] = await Promise.all([getUser(), getT()]);
@@ -29,26 +26,11 @@ export async function POST(request: Request) {
 
   if (typeof id !== "string") return NextResponse.json({ error: "id is required" }, { status: 400 });
 
-  let words: Word[] = [];
-  let kanji: Kanji[] = [];
-  if (scope === "word") {
-    const w = getWord(id);
-    if (w) words = [w];
-  } else if (scope === "kanji") {
-    const k = getKanjiChar(id);
-    if (k) {
-      kanji = [k];
-      words = getWordsTeaching(k.char);
-    }
-  } else if (scope === "lesson") {
-    const lesson = getLesson(id);
-    if (lesson) {
-      kanji = lesson.kanji;
-      words = lesson.words;
-    }
-  } else {
+  const resolved = resolveMark(scope, id);
+  if (!resolved) {
     return NextResponse.json({ error: "scope must be word, kanji or lesson" }, { status: 400 });
   }
+  const { words, kanji } = resolved;
 
   if (skill === "reading" && words.length === 0) {
     return NextResponse.json({ error: t.api.nothingToMark }, { status: 404 });

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isRating } from "@/lib/srs";
 import { getUser } from "@/lib/auth";
 import { getT } from "@/lib/i18n/server";
 import { getKanjiChar } from "@/lib/content";
@@ -19,7 +20,8 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null);
   const char = body?.char;
-  const correct = Boolean(body?.correct);
+  // An FSRS rating, 1 (Again) to 4 (Easy), or right and wrong as before.
+  const answer = isRating(body?.rating) ? body.rating : Boolean(body?.correct);
 
   if (typeof char !== "string") {
     return NextResponse.json({ error: "char is required" }, { status: 400 });
@@ -31,8 +33,8 @@ export async function POST(request: Request) {
   if (!kanji) return NextResponse.json({ error: t.api.unknownKanji }, { status: 404 });
 
   try {
-    const next = await recordWritingAnswer(user.id, kanji, correct);
-    return NextResponse.json({ ok: true, stage: next.srs_stage, dueAt: next.due_at });
+    const next = await recordWritingAnswer(user.id, kanji, answer);
+    return NextResponse.json({ ok: true, stability: next.stability, state: next.state, dueAt: next.due_at });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }

@@ -15,7 +15,8 @@ const en = {
   signIn: "Sign In",
   signOut: "Sign out",
   guestTitle: "You are studying as a guest.",
-  guestBody: "Lessons, practice and reading work in full, but nothing you answer is saved.",
+  guestBody:
+    "Lessons, practice and reading work in full. The lessons you take are kept on this device and join your account when you sign in.",
   guestSignIn: "Sign in to keep your progress",
   theme: {
     switch: "Switch theme",
@@ -51,7 +52,8 @@ const id: typeof en = {
   signIn: "Masuk",
   signOut: "Keluar",
   guestTitle: "Kamu belajar sebagai tamu.",
-  guestBody: "Pelajaran, latihan, dan bacaan bisa dipakai sepenuhnya, tetapi jawabanmu tidak disimpan.",
+  guestBody:
+    "Pelajaran, latihan, dan bacaan bisa dipakai sepenuhnya. Pelajaran yang kamu ikuti tersimpan di perangkat ini dan masuk ke akunmu saat kamu masuk.",
   guestSignIn: "Masuk agar progresmu tersimpan",
   theme: {
     switch: "Ganti tema",

@@ -3,8 +3,8 @@ import { AppFrame } from "@/components/app/AppFrame";
 
 /**
  * Pages under (open) work with or without a session. A guest takes the same
- * lessons as anyone else; nothing they answer is written anywhere, and the
- * shell tells them so.
+ * lessons as anyone else; what they answer is kept only on their device, until
+ * they sign in and it joins their account (see lib/client-sync.ts).
  *
  * Anything that only makes sense with saved progress belongs under (app),
  * whose layout enforces sign-in.

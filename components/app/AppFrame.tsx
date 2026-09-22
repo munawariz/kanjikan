@@ -2,6 +2,7 @@ import type { SessionUser } from "@/lib/auth";
 import { getDueCounts, getProfile, reviewsDue } from "@/lib/progress";
 import { signOut } from "@/app/auth/actions";
 import { AppShell } from "./AppShell";
+import { SyncAgent } from "./SyncAgent";
 import { getT } from "@/lib/i18n/server";
 
 /**
@@ -10,7 +11,14 @@ import { getT } from "@/lib/i18n/server";
  * page looks the same whether or not anyone is signed in.
  */
 export async function AppFrame({ user, children }: { user: SessionUser | null; children: React.ReactNode }) {
-  if (!user) return <AppShell account={null}>{children}</AppShell>;
+  if (!user) {
+    return (
+      <AppShell account={null}>
+        <SyncAgent userId={null} />
+        {children}
+      </AppShell>
+    );
+  }
 
   const [profile, due, t] = await Promise.all([getProfile(user.id), getDueCounts(user.id), getT()]);
   const name = profile.display_name || user.username;
@@ -49,6 +57,7 @@ export async function AppFrame({ user, children }: { user: SessionUser | null; c
         ),
       }}
     >
+      <SyncAgent userId={user.id} />
       {children}
     </AppShell>
   );

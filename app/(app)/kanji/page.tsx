@@ -17,7 +17,7 @@ import {
   wordMarkState,
   writingMarkState,
 } from "@/lib/progress";
-import { KNOWN_STAGE, kanjiReading } from "@/lib/srs";
+import { isKnown, kanjiReading } from "@/lib/srs";
 import { KanjiExplorer, type KanjiEntry } from "@/components/app/KanjiExplorer";
 
 export const dynamic = "force-dynamic";
@@ -54,7 +54,7 @@ export default async function KanjiPage() {
       lessonTitle: lessonTitles.get(k.lessonSlug) ?? k.lessonSlug,
       reading,
       readingMarks: wordMarkState(getWordsTeaching(k.char), progress.words),
-      canWrite: writing && (p?.writing_stage ?? 0) >= KNOWN_STAGE,
+      canWrite: writing && isKnown(p?.writing_stability),
       writingMarks: writing ? writingMarkState([k.char], progress.kanji) : null,
       words: getWordsUsingKanji(k.char, locale).map((w) => ({
         id: w.id,

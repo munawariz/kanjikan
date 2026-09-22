@@ -19,6 +19,9 @@ const en = {
     /** Bold lead of the warning, followed by the detail and `after`. */
     notSaved: "Progress is not being saved.",
     after: "You can keep going, but this session will not be recorded.",
+    /** A study session's warning: its progress waits on this device. Lead, then the detail and `queuedAfter`. */
+    queued: "Progress is waiting to sync.",
+    queuedAfter: "Keep going: every answer is kept on this device and sent once you are signed in again.",
   },
 
   nothingLeftLesson: "Everything in this lesson is marked as known, so there is nothing left to study here.",
@@ -79,11 +82,13 @@ const en = {
     practiseAgain: "Practise Again",
     changePractice: "Change Practice",
     guest:
-      "None of this was saved, because you are not signed in. With an account, every answer is scheduled: what you missed comes back within minutes, and what you knew moves further out.",
+      "This is kept on this device until you sign in. Then it joins your account and every answer is scheduled: what you missed comes back within minutes, and what you knew moves further out.",
     signIn: "Sign In to Save Progress",
     browseLessons: "Browse Lessons",
     saved:
       "Everything you answered is scheduled. What you missed comes back within minutes; what you knew moves further out.",
+    savedLocally:
+      "Everything you answered is kept on this device and is scheduled as soon as it reaches your account. Closing the tab loses nothing.",
     dashboard: "Back to Dashboard",
     startReview: "Start a Review",
   },
@@ -115,6 +120,8 @@ const id: typeof en = {
     network: "Tidak dapat terhubung ke server.",
     notSaved: "Progres tidak tersimpan.",
     after: "Kamu bisa lanjut, tetapi sesi ini tidak akan dicatat.",
+    queued: "Progres menunggu disinkronkan.",
+    queuedAfter: "Lanjutkan saja: setiap jawaban disimpan di perangkat ini dan dikirim setelah kamu masuk lagi.",
   },
 
   nothingLeftLesson:
@@ -175,11 +182,13 @@ const id: typeof en = {
     practiseAgain: "Latihan Lagi",
     changePractice: "Ubah Latihan",
     guest:
-      "Tidak ada yang disimpan karena kamu belum masuk. Dengan akun, setiap jawaban dijadwalkan: yang salah muncul lagi dalam beberapa menit, dan yang sudah kamu tahu muncul lebih jarang.",
+      "Ini tersimpan di perangkat ini sampai kamu masuk. Setelah itu progresnya masuk ke akunmu dan setiap jawaban dijadwalkan: yang salah muncul lagi dalam beberapa menit, dan yang sudah kamu tahu muncul lebih jarang.",
     signIn: "Masuk untuk Menyimpan Progres",
     browseLessons: "Lihat Pelajaran",
     saved:
       "Semua jawabanmu sudah dijadwalkan. Yang salah muncul lagi dalam beberapa menit; yang sudah kamu tahu muncul lebih jarang.",
+    savedLocally:
+      "Semua jawabanmu tersimpan di perangkat ini dan dijadwalkan begitu sampai ke akunmu. Menutup tab tidak menghilangkan apa pun.",
     dashboard: "Kembali ke Dasbor",
     startReview: "Mulai Ulasan",
   },

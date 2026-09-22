@@ -12,30 +12,27 @@ import {
   type Word,
 } from "@/lib/content";
 import {
-  dueAfter,
   grade,
+  isKnown,
   kanjiReading,
-  KNOWN_STAGE,
+  KNOWN_STABILITY,
+  markKnown,
   streakFromDates,
   type KanjiReading,
   type MarkState,
   type MasteryBand,
+  type Memory,
   type Progress,
+  type Rating,
 } from "@/lib/srs";
 import { buildDailyQuiz, type KanjiQuizCard } from "@/lib/study";
 import { DAILY_QUIZ_SIZE, dailySeed, localDate } from "@/lib/daily";
 import { DEFAULT_LOCALE, isLocaleCode, type Locale } from "@/lib/i18n/config";
 import { intlTag } from "@/lib/i18n/format";
 
-export type WordProgressRow = {
+export type WordProgressRow = Progress & {
   word_id: string;
   lesson_slug: string;
-  srs_stage: number;
-  correct_count: number;
-  incorrect_count: number;
-  streak: number;
-  due_at: string;
-  last_reviewed_at: string | null;
   /**
    * Set while the word stands at known because the learner said they knew it,
    * until its first check settles the mark one way or the other.
@@ -47,15 +44,63 @@ export type WordProgressRow = {
 /**
  * A character's writing. Its reading is not stored: it comes from its words
  * (see getKanjiReadings). The table's recognition_stage and due_at columns are
- * from before that, and nothing reads them.
+ * from before that, and nothing reads them; nor does anything read the stage
+ * columns FSRS replaced.
  */
 export type KanjiProgressRow = {
   char: string;
-  writing_stage: number;
+  writing_stability: number;
+  /** 0 for a character that has never been written. See State in lib/srs.ts. */
+  writing_state: number;
   /** Null for a character that has never been written. */
   writing_due_at: string | null;
   writing_marked_at: string | null;
 };
+
+/*
+ * Where each table keeps a Memory. Words use the field names as they are.
+ * Writing's are prefixed, except last_reviewed_at, which only writing has set
+ * since a character's reading stopped being reviewed on its own. Every query
+ * that reads, writes or restores a memory is built from these, so the two
+ * tables cannot drift apart.
+ */
+type MemoryColumns = Record<keyof Memory, string>;
+
+const MEMORY_TYPES: Record<keyof Memory, string> = {
+  stability: "real",
+  difficulty: "real",
+  elapsed_days: "real",
+  scheduled_days: "real",
+  reps: "integer",
+  lapses: "integer",
+  state: "integer",
+  due_at: "timestamptz",
+  last_reviewed_at: "timestamptz",
+};
+
+const MEMORY_FIELDS = Object.keys(MEMORY_TYPES) as (keyof Memory)[];
+
+const WORD_MEMORY: MemoryColumns = Object.fromEntries(MEMORY_FIELDS.map((f) => [f, f])) as MemoryColumns;
+
+const WRITING_MEMORY: MemoryColumns = {
+  ...(Object.fromEntries(MEMORY_FIELDS.map((f) => [f, `writing_${f}`])) as MemoryColumns),
+  last_reviewed_at: "last_reviewed_at",
+};
+
+/** A select list that reads a table's memory under the Memory field names. */
+function selectMemory(cols: MemoryColumns): string {
+  return MEMORY_FIELDS.map((f) => (cols[f] === f ? f : `${cols[f]} as ${f}`)).join(", ");
+}
+
+/** A SET list that puts a memory back from a jsonb snapshot of it. */
+function restoreMemory(cols: MemoryColumns, snapshot: string): string {
+  return MEMORY_FIELDS.map((f) => `${cols[f]} = (${snapshot} ->> '${f}')::${MEMORY_TYPES[f]}`).join(", ");
+}
+
+/** Just the Memory fields of a row, for a snapshot. */
+function memoryOf(row: Memory): Memory {
+  return Object.fromEntries(MEMORY_FIELDS.map((f) => [f, row[f]])) as Memory;
+}
 
 export type LessonProgressRow = {
   lesson_slug: string;
@@ -148,7 +193,7 @@ export async function getProfile(userId: string): Promise<Profile> {
 export async function getWordProgress(userId: string): Promise<Map<string, WordProgressRow>> {
   return read("getWordProgress", userId, new Map(), async (db) => {
     const { rows } = await db.query<WordProgressRow>(
-      `select word_id, lesson_slug, srs_stage, correct_count, incorrect_count, streak, due_at, last_reviewed_at,
+      `select word_id, lesson_slug, ${selectMemory(WORD_MEMORY)}, correct_count, incorrect_count, streak,
               marked_at, created_at
          from public.word_progress where user_id = $1`,
       [userId],
@@ -160,7 +205,7 @@ export async function getWordProgress(userId: string): Promise<Map<string, WordP
 export async function getKanjiProgress(userId: string): Promise<Map<string, KanjiProgressRow>> {
   return read("getKanjiProgress", userId, new Map(), async (db) => {
     const { rows } = await db.query<KanjiProgressRow>(
-      `select char, writing_stage, writing_due_at, writing_marked_at
+      `select char, writing_stability, writing_state, writing_due_at, writing_marked_at
          from public.kanji_progress where user_id = $1`,
       [userId],
     );
@@ -207,16 +252,16 @@ export async function getProgress(user: { id: string } | null): Promise<Progress
  * named.
  */
 export function getKanjiReadings(
-  words: Map<string, Pick<WordProgressRow, "srs_stage">>,
+  words: Map<string, Pick<WordProgressRow, "stability">>,
   level?: Level,
 ): Map<string, KanjiReading> {
-  const stages = new Map<string, number[]>();
+  const stability = new Map<string, number[]>();
   for (const w of getAllWords(level)) {
-    const list = stages.get(w.teaches) ?? [];
-    list.push(words.get(w.id)?.srs_stage ?? 0);
-    stages.set(w.teaches, list);
+    const list = stability.get(w.teaches) ?? [];
+    list.push(words.get(w.id)?.stability ?? 0);
+    stability.set(w.teaches, list);
   }
-  return new Map(getKanji(level).map((k) => [k.char, kanjiReading(stages.get(k.char) ?? [])]));
+  return new Map(getKanji(level).map((k) => [k.char, kanjiReading(stability.get(k.char) ?? [])]));
 }
 
 /** What "I already know this" can do for a set of words. */
@@ -226,7 +271,7 @@ export function wordMarkState(words: Word[], rows: Map<string, WordProgressRow>)
   for (const w of words) {
     const r = rows.get(w.id);
     if (r?.marked_at) marked++;
-    else if ((r?.srs_stage ?? 0) < KNOWN_STAGE) markable++;
+    else if (!isKnown(r?.stability)) markable++;
   }
   return { markable, marked };
 }
@@ -238,7 +283,7 @@ export function writingMarkState(chars: string[], rows: Map<string, KanjiProgres
   for (const c of chars) {
     const r = rows.get(c);
     if (r?.writing_marked_at) marked++;
-    else if ((r?.writing_stage ?? 0) < KNOWN_STAGE) markable++;
+    else if (!isKnown(r?.writing_stability)) markable++;
   }
   return { markable, marked };
 }
@@ -292,7 +337,7 @@ export function getLessonSummaries(
       const p = progress.kanji.get(k.char);
       if (!p) continue;
       started++;
-      if (p.writing_stage >= KNOWN_STAGE) kanjiWritten++;
+      if (isKnown(p.writing_stability)) kanjiWritten++;
     }
 
     let wordsKnown = 0;
@@ -301,7 +346,7 @@ export function getLessonSummaries(
       const p = progress.words.get(w.id);
       if (!p) continue;
       started++;
-      if (p.srs_stage >= KNOWN_STAGE) wordsKnown++;
+      if (isKnown(p.stability)) wordsKnown++;
       if (new Date(p.due_at).getTime() <= now) due++;
     }
 
@@ -406,8 +451,8 @@ export async function getDashboard(userId: string, locale: Locale = DEFAULT_LOCA
     level.totalKanji++;
     if (band === "known" || band === "mastered") level.kanjiKnown++;
     const p = progress.kanji.get(k.char);
-    if ((p?.writing_stage ?? 0) >= KNOWN_STAGE) kanjiWritten++;
-    if (p && p.writing_stage > 0 && p.writing_due_at && new Date(p.writing_due_at).getTime() <= now) writingDue++;
+    if (isKnown(p?.writing_stability)) kanjiWritten++;
+    if (p && p.writing_state > 0 && p.writing_due_at && new Date(p.writing_due_at).getTime() <= now) writingDue++;
   }
 
   let wordsKnown = 0;
@@ -415,7 +460,7 @@ export async function getDashboard(userId: string, locale: Locale = DEFAULT_LOCA
   for (const w of allWords) {
     const p = progress.words.get(w.id);
     if (!p) continue;
-    if (p.srs_stage >= KNOWN_STAGE) wordsKnown++;
+    if (isKnown(p.stability)) wordsKnown++;
     if (new Date(p.due_at).getTime() <= now) wordsDue++;
   }
 
@@ -489,7 +534,7 @@ export async function getWritingReviewQueue(
   const due = await read("getWritingReviewQueue", userId, [] as { char: string }[], async (db) => {
     const { rows } = await db.query<{ char: string }>(
       `select char from public.kanji_progress
-        where user_id = $1 and writing_stage > 0 and writing_due_at <= now()
+        where user_id = $1 and writing_state > 0 and writing_due_at <= now()
         order by writing_due_at limit $2`,
       [userId, limit],
     );
@@ -498,215 +543,266 @@ export async function getWritingReviewQueue(
   return due.map((r) => getKanjiChar(r.char, locale)).filter((k): k is Kanji => k !== undefined);
 }
 
+/** Where one kind of mark lives: a word's reading, or a character's writing. */
+type MarkTarget = {
+  table: "word_progress" | "kanji_progress";
+  key: "word_id" | "char";
+  memory: MemoryColumns;
+  markedAt: string;
+  /** The memory before the mark, as jsonb. Null on a marked row: there was no row. */
+  snapshot: string;
+  /** The stage-era undo columns, cleared with the rest so nothing stale is left. */
+  legacy: [string, string];
+};
+
+const READING_MARK: MarkTarget = {
+  table: "word_progress",
+  key: "word_id",
+  memory: WORD_MEMORY,
+  markedAt: "marked_at",
+  snapshot: "pre_mark_memory",
+  legacy: ["pre_mark_stage", "pre_mark_due_at"],
+};
+
+const WRITING_MARK: MarkTarget = {
+  table: "kanji_progress",
+  key: "char",
+  memory: WRITING_MEMORY,
+  markedAt: "writing_marked_at",
+  snapshot: "pre_mark_writing_memory",
+  legacy: ["pre_mark_writing_stage", "pre_mark_writing_due_at"],
+};
+
+/** A SET list that settles or drops a mark. */
+function clearMark(t: MarkTarget): string {
+  return [t.markedAt, t.snapshot, ...t.legacy].map((c) => `${c} = null`).join(", ");
+}
+
 /**
  * Applies one graded answer to a word. Upserts because the first has no row;
  * the row is locked while it is read so two quick answers cannot both grade
  * the same starting state.
  *
+ * `answer` is an FSRS rating, 1 (Again) to 4 (Easy), or right and wrong from a
+ * screen that only knows those, which count as Good and Again.
+ *
  * An answer settles a mark: from here on the word is where its answers put it,
  * and there is nothing left to undo.
  */
-export async function recordAnswer(userId: string, word: Word, correct: boolean) {
-  return asUser(userId, async (db) => {
-    const { rows } = await db.query<Progress>(
-      `select srs_stage, correct_count, incorrect_count, streak, due_at, last_reviewed_at
-         from public.word_progress where user_id = $1 and word_id = $2 for update`,
-      [userId, word.id],
-    );
-    const next = grade(rows[0] ?? null, correct);
-    await db.query(
-      `insert into public.word_progress
-         (user_id, word_id, level, lesson_slug, srs_stage, correct_count, incorrect_count, streak, due_at, last_reviewed_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-       on conflict (user_id, word_id) do update set
-         level = excluded.level,
-         lesson_slug = excluded.lesson_slug,
-         srs_stage = excluded.srs_stage,
-         correct_count = excluded.correct_count,
-         incorrect_count = excluded.incorrect_count,
-         streak = excluded.streak,
-         due_at = excluded.due_at,
-         last_reviewed_at = excluded.last_reviewed_at,
-         marked_at = null,
-         pre_mark_stage = null,
-         pre_mark_due_at = null`,
-      [
-        userId,
-        word.id,
-        word.level,
-        word.lessonSlug,
-        next.srs_stage,
-        next.correct_count,
-        next.incorrect_count,
-        next.streak,
-        next.due_at,
-        next.last_reviewed_at,
-      ],
-    );
-    return next;
-  });
+export async function recordAnswer(userId: string, word: Word, answer: boolean | Rating): Promise<Progress> {
+  // Given no time, the answer is now, which no stored review can be later than.
+  return (await asUser(userId, (db) => recordAnswerIn(db, userId, word, answer)))!;
+}
+
+/**
+ * {@link recordAnswer} inside a transaction already open, for an answer given
+ * at `at` rather than now: one synced from the browser's queue, which can be
+ * long after it was given (see lib/sync.ts).
+ *
+ * Returns null, and writes nothing, for an answer no later than the word's
+ * last review. The queue sends answers in the order they were given, so this
+ * only happens when guest progress is merged into an account that has studied
+ * the word since: the account's own later answer stands, and grading an older
+ * one on top of it would schedule from the wrong moment.
+ */
+export async function recordAnswerIn(
+  db: Db,
+  userId: string,
+  word: Word,
+  answer: boolean | Rating,
+  at?: Date,
+): Promise<Progress | null> {
+  const { rows } = await db.query<Progress>(
+    `select ${selectMemory(WORD_MEMORY)}, correct_count, incorrect_count, streak
+       from public.word_progress where user_id = $1 and word_id = $2 for update`,
+    [userId, word.id],
+  );
+  if (at && reviewedSince(rows[0], at)) return null;
+  const next = grade(rows[0] ?? null, answer, at);
+
+  const cols = [...MEMORY_FIELDS.map((f) => WORD_MEMORY[f]), "correct_count", "incorrect_count", "streak"];
+  await db.query(
+    `insert into public.word_progress (user_id, word_id, level, lesson_slug, ${cols.join(", ")})
+     values ($1, $2, $3, $4, ${cols.map((_, i) => `$${i + 5}`).join(", ")})
+     on conflict (user_id, word_id) do update set
+       level = excluded.level,
+       lesson_slug = excluded.lesson_slug,
+       ${cols.map((c) => `${c} = excluded.${c}`).join(", ")},
+       ${clearMark(READING_MARK)}`,
+    [
+      userId,
+      word.id,
+      word.level,
+      word.lessonSlug,
+      ...MEMORY_FIELDS.map((f) => next[f]),
+      next.correct_count,
+      next.incorrect_count,
+      next.streak,
+    ],
+  );
+  return next;
+}
+
+/** Whether a memory was last reviewed at or after `at`. */
+function reviewedSince(row: Pick<Memory, "last_reviewed_at"> | undefined, at: Date): boolean {
+  return Boolean(row?.last_reviewed_at && new Date(row.last_reviewed_at).getTime() >= at.getTime());
 }
 
 /**
  * Applies one graded answer to a character's writing.
  *
- * Writing keeps its own stage and its own due date, apart from reading: being
+ * Writing keeps its own memory and its own due date, apart from reading: being
  * able to read 語 says nothing about being able to write it, and a learner who
  * does not study writing should never have it come due. Like a word's answer,
  * it settles any mark.
  */
-export async function recordWritingAnswer(userId: string, kanji: Kanji, correct: boolean) {
-  return asUser(userId, async (db) => {
-    const { rows } = await db.query<{
-      writing_stage: number;
-      correct_count: number;
-      incorrect_count: number;
-      writing_due_at: string | null;
-      last_reviewed_at: string | null;
-    }>(
-      `select writing_stage, correct_count, incorrect_count, writing_due_at, last_reviewed_at
-         from public.kanji_progress where user_id = $1 and char = $2 for update`,
-      [userId, kanji.char],
-    );
-    const existing = rows[0];
+export async function recordWritingAnswer(userId: string, kanji: Kanji, answer: boolean | Rating): Promise<Progress> {
+  return (await asUser(userId, (db) => recordWritingAnswerIn(db, userId, kanji, answer)))!;
+}
 
-    const next = grade(
-      existing
-        ? {
-            srs_stage: existing.writing_stage,
-            correct_count: existing.correct_count,
-            incorrect_count: existing.incorrect_count,
-            streak: 0,
-            due_at: existing.writing_due_at ?? new Date().toISOString(),
-            last_reviewed_at: existing.last_reviewed_at,
-          }
-        : null,
-      correct,
-    );
+/** {@link recordWritingAnswer} as {@link recordAnswerIn} is to recordAnswer. */
+export async function recordWritingAnswerIn(
+  db: Db,
+  userId: string,
+  kanji: Kanji,
+  answer: boolean | Rating,
+  at?: Date,
+): Promise<Progress | null> {
+  const { rows } = await db.query<Memory & { correct_count: number; incorrect_count: number }>(
+    `select ${selectMemory(WRITING_MEMORY)}, correct_count, incorrect_count
+       from public.kanji_progress where user_id = $1 and char = $2 for update`,
+    [userId, kanji.char],
+  );
+  const existing = rows[0];
+  if (at && reviewedSince(existing, at)) return null;
+  // Writing keeps no streak.
+  const next = grade(existing ? { ...existing, streak: 0 } : null, answer, at);
 
-    await db.query(
-      `insert into public.kanji_progress
-         (user_id, char, level, writing_stage, correct_count, incorrect_count, writing_due_at, last_reviewed_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8)
-       on conflict (user_id, char) do update set
-         level = excluded.level,
-         writing_stage = excluded.writing_stage,
-         correct_count = excluded.correct_count,
-         incorrect_count = excluded.incorrect_count,
-         writing_due_at = excluded.writing_due_at,
-         last_reviewed_at = excluded.last_reviewed_at,
-         writing_marked_at = null,
-         pre_mark_writing_stage = null,
-         pre_mark_writing_due_at = null`,
-      [
-        userId,
-        kanji.char,
-        kanji.level,
-        next.srs_stage,
-        next.correct_count,
-        next.incorrect_count,
-        next.due_at,
-        next.last_reviewed_at,
-      ],
-    );
-    return next;
-  });
+  const cols = [...MEMORY_FIELDS.map((f) => WRITING_MEMORY[f]), "correct_count", "incorrect_count"];
+  await db.query(
+    `insert into public.kanji_progress (user_id, char, level, ${cols.join(", ")})
+     values ($1, $2, $3, ${cols.map((_, i) => `$${i + 4}`).join(", ")})
+     on conflict (user_id, char) do update set
+       level = excluded.level,
+       ${cols.map((c) => `${c} = excluded.${c}`).join(", ")},
+       ${clearMark(WRITING_MARK)}`,
+    [userId, kanji.char, kanji.level, ...MEMORY_FIELDS.map((f) => next[f]), next.correct_count, next.incorrect_count],
+  );
+  return next;
 }
 
 /**
- * "I already know these": puts each word at the known stage, due in a week for
- * one check. Words already at known or past it, and words already marked, are
- * left as they are.
+ * Marks each item known (see markKnown in lib/srs.ts): due in about a week for
+ * one check. Items already known, and items already marked, are left as they
+ * are.
  *
- * What the word was before is kept beside the mark so it can be undone
- * exactly; a word with no row until now keeps nothing, and undoing deletes it.
- * In an update's SET list every column reads the row as it was, so the
- * pre_mark columns take the old values.
+ * The memory before the mark is kept beside it so the mark can be undone
+ * exactly; an item with no row until now keeps nothing, and undoing deletes
+ * it. The rows are locked while they are read, so the snapshot is exactly the
+ * state the mark replaces. `fixed` is the content-derived columns a new row
+ * needs, the same for every item.
  */
+async function markIn(
+  db: Db,
+  userId: string,
+  t: MarkTarget,
+  items: { id: string; fixed: Record<string, string> }[],
+  now = new Date(),
+) {
+  const { rows } = await db.query<Memory & { id: string; marked: string | null }>(
+    `select ${t.key} as id, ${selectMemory(t.memory)}, ${t.markedAt} as marked
+       from public.${t.table} where user_id = $1 and ${t.key} = any($2) for update`,
+    [userId, items.map((i) => i.id)],
+  );
+  const existing = new Map(rows.map((r) => [r.id, r]));
+  const marks = items.flatMap(({ id, fixed }) => {
+    const prev = existing.get(id);
+    if (prev && (prev.marked || isKnown(prev.stability))) return [];
+    return [{ ...fixed, id, ...markKnown(prev ?? null, now), snapshot: prev ? memoryOf(prev) : null }];
+  });
+  if (marks.length === 0) return;
+
+  const fixedCols = Object.keys(items[0].fixed);
+  const memoryCols = MEMORY_FIELDS.map((f) => t.memory[f]);
+  const recordType = [
+    "id text",
+    ...fixedCols.map((c) => `${c} text`),
+    ...MEMORY_FIELDS.map((f) => `${f} ${MEMORY_TYPES[f]}`),
+    "snapshot jsonb",
+  ].join(", ");
+  // The guard repeats the check above for a row another request inserted
+  // between the read and the write.
+  await db.query(
+    `insert into public.${t.table} as p
+       (user_id, ${t.key}, ${[...fixedCols, ...memoryCols].join(", ")}, ${t.markedAt}, ${t.snapshot})
+     select $1, m.id, ${[...fixedCols, ...MEMORY_FIELDS].map((c) => `m.${c}`).join(", ")}, now(), m.snapshot
+       from jsonb_to_recordset($2::jsonb) as m(${recordType})
+     on conflict (user_id, ${t.key}) do update set
+       ${[...memoryCols, t.markedAt, t.snapshot].map((c) => `${c} = excluded.${c}`).join(", ")}
+     where p.${t.markedAt} is null and p.${t.memory.stability} < $3`,
+    [userId, JSON.stringify(marks), KNOWN_STABILITY],
+  );
+}
+
+/**
+ * Undoes {@link markIn} for whichever of these are still marked. In an update's
+ * SET list every column reads the row as it was, so the memory is restored
+ * from the snapshot in the same statement that clears it.
+ */
+async function unmarkIn(db: Db, userId: string, t: MarkTarget, ids: string[]) {
+  await db.query(
+    `delete from public.${t.table}
+      where user_id = $1 and ${t.key} = any($2) and ${t.markedAt} is not null and ${t.snapshot} is null`,
+    [userId, ids],
+  );
+  await db.query(
+    `update public.${t.table}
+        set ${restoreMemory(t.memory, t.snapshot)}, ${clearMark(t)}
+      where user_id = $1 and ${t.key} = any($2) and ${t.markedAt} is not null`,
+    [userId, ids],
+  );
+}
+
+/** "I already know these", for the reading of words. */
 export async function markWordsKnown(userId: string, words: Word[]) {
   if (words.length === 0) return;
-  await asUser(userId, (db) =>
-    db.query(
-      `insert into public.word_progress as p (user_id, word_id, level, lesson_slug, srs_stage, due_at, marked_at)
-       select $1, w.id, w.lvl, w.slug, $5, $6, now()
-         from unnest($2::text[], $3::text[], $4::text[]) as w(id, lvl, slug)
-       on conflict (user_id, word_id) do update set
-         pre_mark_stage = p.srs_stage,
-         pre_mark_due_at = p.due_at,
-         srs_stage = excluded.srs_stage,
-         due_at = excluded.due_at,
-         marked_at = excluded.marked_at
-       where p.srs_stage < excluded.srs_stage and p.marked_at is null`,
-      [
-        userId,
-        words.map((w) => w.id),
-        words.map((w) => w.level),
-        words.map((w) => w.lessonSlug),
-        KNOWN_STAGE,
-        dueAfter(KNOWN_STAGE),
-      ],
-    ),
+  await asUser(userId, (db) => markWordsKnownIn(db, userId, words));
+}
+
+/** {@link markWordsKnown} inside a transaction already open, as made at `at`. */
+export async function markWordsKnownIn(db: Db, userId: string, words: Word[], at?: Date) {
+  if (words.length === 0) return;
+  await markIn(
+    db,
+    userId,
+    READING_MARK,
+    words.map((w) => ({ id: w.id, fixed: { level: w.level, lesson_slug: w.lessonSlug } })),
+    at,
   );
 }
 
 /** Undoes {@link markWordsKnown} for whichever of these words are still marked. */
 export async function unmarkWords(userId: string, words: Word[]) {
   if (words.length === 0) return;
-  const ids = words.map((w) => w.id);
-  await asUser(userId, async (db) => {
-    await db.query(
-      `delete from public.word_progress
-        where user_id = $1 and word_id = any($2) and marked_at is not null and pre_mark_stage is null`,
-      [userId, ids],
-    );
-    await db.query(
-      `update public.word_progress
-          set srs_stage = pre_mark_stage, due_at = pre_mark_due_at,
-              marked_at = null, pre_mark_stage = null, pre_mark_due_at = null
-        where user_id = $1 and word_id = any($2) and marked_at is not null`,
-      [userId, ids],
-    );
-  });
+  await asUser(userId, (db) => unmarkIn(db, userId, READING_MARK, words.map((w) => w.id)));
 }
 
 /** "I can already write these": the same as {@link markWordsKnown}, for writing. */
 export async function markWritingKnown(userId: string, kanji: Kanji[]) {
   if (kanji.length === 0) return;
-  await asUser(userId, (db) =>
-    db.query(
-      `insert into public.kanji_progress as p (user_id, char, level, writing_stage, writing_due_at, writing_marked_at)
-       select $1, c.ch, c.lvl, $4, $5, now()
-         from unnest($2::text[], $3::text[]) as c(ch, lvl)
-       on conflict (user_id, char) do update set
-         pre_mark_writing_stage = p.writing_stage,
-         pre_mark_writing_due_at = p.writing_due_at,
-         writing_stage = excluded.writing_stage,
-         writing_due_at = excluded.writing_due_at,
-         writing_marked_at = excluded.writing_marked_at
-       where p.writing_stage < excluded.writing_stage and p.writing_marked_at is null`,
-      [userId, kanji.map((k) => k.char), kanji.map((k) => k.level), KNOWN_STAGE, dueAfter(KNOWN_STAGE)],
-    ),
-  );
+  await asUser(userId, (db) => markWritingKnownIn(db, userId, kanji));
+}
+
+/** {@link markWritingKnown} inside a transaction already open, as made at `at`. */
+export async function markWritingKnownIn(db: Db, userId: string, kanji: Kanji[], at?: Date) {
+  if (kanji.length === 0) return;
+  await markIn(db, userId, WRITING_MARK, kanji.map((k) => ({ id: k.char, fixed: { level: k.level } })), at);
 }
 
 /** Undoes {@link markWritingKnown} for whichever of these characters are still marked. */
 export async function unmarkWriting(userId: string, kanji: Kanji[]) {
   if (kanji.length === 0) return;
-  const chars = kanji.map((k) => k.char);
-  await asUser(userId, async (db) => {
-    await db.query(
-      `delete from public.kanji_progress
-        where user_id = $1 and char = any($2) and writing_marked_at is not null and pre_mark_writing_stage is null`,
-      [userId, chars],
-    );
-    await db.query(
-      `update public.kanji_progress
-          set writing_stage = pre_mark_writing_stage, writing_due_at = pre_mark_writing_due_at,
-              writing_marked_at = null, pre_mark_writing_stage = null, pre_mark_writing_due_at = null
-        where user_id = $1 and char = any($2) and writing_marked_at is not null`,
-      [userId, chars],
-    );
-  });
+  await asUser(userId, (db) => unmarkIn(db, userId, WRITING_MARK, kanji.map((k) => k.char)));
 }
 
 export async function saveSettings(
@@ -733,22 +829,44 @@ export async function saveCheckpoint(
   cursor: number,
   completed: boolean,
 ) {
-  await asUser(userId, async (db) => {
-    await db.query(
-      `insert into public.lesson_progress (user_id, level, lesson_slug, cursor, status, completed_at)
-       values ($1, $2, $3, $4, $5, $6)
-       on conflict (user_id, level, lesson_slug) do update set
-         cursor = excluded.cursor,
-         status = excluded.status,
-         completed_at = excluded.completed_at`,
-      [userId, level, lessonSlug, cursor, completed ? "completed" : "learning", completed ? new Date().toISOString() : null],
-    );
-    await db.query(`update public.profiles set current_level = $2, current_lesson_slug = $3 where id = $1`, [
-      userId,
-      level,
-      lessonSlug,
-    ]);
-  });
+  await asUser(userId, (db) => saveCheckpointIn(db, userId, level, lessonSlug, cursor, completed));
+}
+
+/**
+ * {@link saveCheckpoint} inside a transaction already open, as saved at `at`.
+ *
+ * `merge` is for a checkpoint made as a guest and merged into an account that
+ * may already be further on: it only moves the lesson forward, so a lesson the
+ * account has finished is never set back to learning.
+ */
+export async function saveCheckpointIn(
+  db: Db,
+  userId: string,
+  level: Level,
+  lessonSlug: string,
+  cursor: number,
+  completed: boolean,
+  { at = new Date(), merge = false }: { at?: Date; merge?: boolean } = {},
+) {
+  const update = merge
+    ? `cursor = greatest(p.cursor, excluded.cursor),
+       status = case when p.status = 'completed' then p.status else excluded.status end,
+       completed_at = coalesce(p.completed_at, excluded.completed_at)`
+    : `cursor = excluded.cursor,
+       status = excluded.status,
+       completed_at = excluded.completed_at`;
+  await db.query(
+    `insert into public.lesson_progress as p (user_id, level, lesson_slug, cursor, status, completed_at)
+     values ($1, $2, $3, $4, $5, $6)
+     on conflict (user_id, level, lesson_slug) do update set
+       ${update}`,
+    [userId, level, lessonSlug, cursor, completed ? "completed" : "learning", completed ? at.toISOString() : null],
+  );
+  await db.query(`update public.profiles set current_level = $2, current_lesson_slug = $3 where id = $1`, [
+    userId,
+    level,
+    lessonSlug,
+  ]);
 }
 
 export async function recordSession(
@@ -759,12 +877,28 @@ export async function recordSession(
   total: number,
   correct: number,
 ) {
-  await asUser(userId, (db) =>
-    db.query(
-      `insert into public.study_sessions (user_id, level, mode, lesson_slug, total, correct)
-       values ($1, $2, $3, $4, $5, $6)`,
-      [userId, level, mode, lessonSlug, total, correct],
-    ),
+  await asUser(userId, (db) => recordSessionIn(db, userId, level, mode, lessonSlug, total, correct));
+}
+
+/**
+ * {@link recordSession} inside a transaction already open, for a run finished
+ * at `at`: the streak and the activity chart count it on the day it was
+ * studied, not the day it reached the server.
+ */
+export async function recordSessionIn(
+  db: Db,
+  userId: string,
+  level: Level,
+  mode: "lesson" | "review",
+  lessonSlug: string | null,
+  total: number,
+  correct: number,
+  at = new Date(),
+) {
+  await db.query(
+    `insert into public.study_sessions (user_id, level, mode, lesson_slug, total, correct, created_at)
+     values ($1, $2, $3, $4, $5, $6, $7)`,
+    [userId, level, mode, lessonSlug, total, correct, at.toISOString()],
   );
 }
 
@@ -784,8 +918,8 @@ export type DailyQuiz = {
   questions: KanjiQuizCard[];
   /** What has been answered so far, by position. */
   answers: DailyAnswerRow[];
-  /** Reading stage per learned character, for the record. */
-  stages: Map<string, number>;
+  /** Reading stability per learned character, for the record. */
+  stability: Map<string, number>;
 };
 
 /**
@@ -812,11 +946,11 @@ export async function getDailyQuiz(
   timeZone: string,
   locale: Locale = DEFAULT_LOCALE,
 ): Promise<DailyQuiz> {
-  type Studied = { word_id: string; srs_stage: number; created_at: string };
+  type Studied = { word_id: string; stability: number; created_at: string };
   const [progress, answers] = await Promise.all([
     read("getDailyQuiz progress", userId, [] as Studied[], async (db) => {
       const { rows } = await db.query<Studied>(
-        `select word_id, srs_stage, created_at from public.word_progress where user_id = $1`,
+        `select word_id, stability, created_at from public.word_progress where user_id = $1`,
         [userId],
       );
       return rows;
@@ -840,8 +974,8 @@ export async function getDailyQuiz(
   }
 
   const readings = getKanjiReadings(rows);
-  const stages = new Map<string, number>();
-  for (const c of learnedChars) stages.set(c, readings.get(c)?.stage ?? 0);
+  const stability = new Map<string, number>();
+  for (const c of learnedChars) stability.set(c, readings.get(c)?.stability ?? 0);
 
   // Curriculum order, so the shuffle has the same input on every rebuild.
   const learned = getKanji().filter((k) => learnedChars.has(k.char));
@@ -866,7 +1000,7 @@ export async function getDailyQuiz(
         },
   );
 
-  return { date, learned: learned.length, questions, answers, stages };
+  return { date, learned: learned.length, questions, answers, stability };
 }
 
 export type DailyAnswerResult =
@@ -907,7 +1041,7 @@ export async function recordDailyAnswer(
     await asUser(userId, (db) =>
       db.query(
         `insert into public.daily_quiz_answers
-           (user_id, level, quiz_date, position, kind, char, answer, chosen, options, correct, srs_stage, time_zone)
+           (user_id, level, quiz_date, position, kind, char, answer, chosen, options, correct, stability, time_zone)
          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [
           userId,
@@ -921,7 +1055,7 @@ export async function recordDailyAnswer(
           chosen.label,
           card.choices.map((c) => c.label),
           correct,
-          quiz.stages.get(card.kanji.char) ?? 0,
+          quiz.stability.get(card.kanji.char) ?? 0,
           timeZone,
         ],
       ),
@@ -969,7 +1103,7 @@ export async function getDueCounts(userId: string): Promise<{ words: number; wri
          (select count(*)::int from public.word_progress
            where user_id = $1 and due_at <= now()) as words,
          (select count(*)::int from public.kanji_progress
-           where user_id = $1 and writing_stage > 0 and writing_due_at <= now()) as writing`,
+           where user_id = $1 and writing_state > 0 and writing_due_at <= now()) as writing`,
       [userId],
     );
     return rows[0] ?? { words: 0, writing: 0 };
