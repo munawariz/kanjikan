@@ -9,12 +9,12 @@ const en = {
   // Daily quiz card
   dailyQuiz: "Daily quiz",
   quizLocked: (size: number, learned: number) =>
-    `Unlocks once you have learned ${size} kanji — you have ${learned}. A character joins the day after you first study it.`,
+    `Unlocks once you have learned ${size} words — you have ${learned}. A word joins the day after you first study it.`,
   quizDone: (correct: number, answered: number) => `Today’s quiz: ${correct} of ${answered} correct`,
   quizTomorrow: "Five new questions tomorrow.",
   quizProgress: (answered: number, total: number) => `Daily quiz: ${answered} of ${total} answered`,
   quizFinish: "Finish today’s questions.",
-  quizIntro: (size: number) => `${size} questions on kanji you have already learned. One try each.`,
+  quizIntro: (size: number) => `${size} questions on words you have already learned. One try each.`,
   seeResults: "See Results",
   continueQuiz: "Continue Quiz",
   takeQuiz: "Take Today’s Quiz",
@@ -100,12 +100,12 @@ const en = {
 const id: typeof en = {
   dailyQuiz: "Kuis harian",
   quizLocked: (size, learned) =>
-    `Terbuka setelah kamu mempelajari ${size} kanji — sejauh ini ${learned}. Sebuah kanji masuk kuis sehari setelah pertama kali kamu pelajari.`,
+    `Terbuka setelah kamu mempelajari ${size} kata — sejauh ini ${learned}. Sebuah kata masuk kuis sehari setelah pertama kali kamu pelajari.`,
   quizDone: (correct, answered) => `Kuis hari ini: ${correct} dari ${answered} benar`,
   quizTomorrow: "Lima pertanyaan baru besok.",
   quizProgress: (answered, total) => `Kuis harian: ${answered} dari ${total} terjawab`,
   quizFinish: "Selesaikan pertanyaan hari ini.",
-  quizIntro: (size) => `${size} pertanyaan tentang kanji yang sudah kamu pelajari. Masing-masing hanya sekali coba.`,
+  quizIntro: (size) => `${size} pertanyaan tentang kata yang sudah kamu pelajari. Masing-masing hanya sekali coba.`,
   seeResults: "Lihat Hasil",
   continueQuiz: "Lanjutkan Kuis",
   takeQuiz: "Ikuti Kuis Hari Ini",

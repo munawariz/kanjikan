@@ -85,7 +85,7 @@
       "千人|せんにん": ["Seribu Orang"],
       "千年|せんねん": ["Seribu Tahun"],
 
-      "万|まん": ["Sepuluh Ribu (satuan)"],
+      "万|まん": ["Sepuluh Ribu"],
       "一万|いちまん": ["Sepuluh Ribu"],
       "十万|じゅうまん": ["Seratus Ribu"],
       "百万|ひゃくまん": ["Satu Juta"],
@@ -127,8 +127,8 @@
       "去年|きょねん": ["Tahun Lalu"],
       "一年生|いちねんせい": ["Siswa Kelas Satu"],
 
-      "時|とき": ["Waktu (saat)", "Ketika"],
-      "時間|じかん": ["Waktu (lamanya)", "Jam (satuan waktu)"],
+      "時|とき": ["Ketika", "Waktu (saat)"],
+      "時間|じかん": ["Waktu", "Jam (satuan waktu)"],
       "何時|なんじ": ["Jam Berapa"],
       "時計|とけい": ["Jam (alat)", "Jam Tangan"],
       "時々|ときどき": ["Terkadang"],

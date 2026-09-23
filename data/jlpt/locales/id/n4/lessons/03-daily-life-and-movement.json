@@ -8,7 +8,7 @@
       "売り場|うりば": ["Tempat Penjualan", "Konter"],
       "売店|ばいてん": ["Kios", "Lapak"],
       "売り手|うりて": ["Penjual"],
-      "商売|しょうばい": ["Bisnis", "Perdagangan"],
+      "商売|しょうばい": ["Perdagangan", "Bisnis"],
 
       "買う|かう": ["Membeli"],
       "買い手|かいて": ["Pembeli"],
@@ -86,7 +86,7 @@
       "天使|てんし": ["Malaikat"],
 
       "用|よう": ["Urusan", "Sesuatu yang Harus Dikerjakan"],
-      "用事|ようじ": ["Keperluan", "Hal yang Harus Dilakukan"],
+      "用事|ようじ": ["Urusan", "Keperluan"],
       "用意|ようい": ["Persiapan", "Bersiap-Siap"],
       "使用|しよう": ["Penggunaan", "Pemakaian"],
       "利用|りよう": ["Pemanfaatan", "Memanfaatkan"],
@@ -176,7 +176,7 @@
       "起こす|おこす": ["Membangunkan (seseorang)", "Menyebabkan"],
       "起こる|おこる": ["Terjadi", "Timbul"],
       "早起き|はやおき": ["Bangun Pagi", "Orang yang Bangun Pagi"],
-      "起立|きりつ": ["Berdiri", "Berdiri! (aba-aba)"],
+      "起立|きりつ": ["Bangkit Berdiri", "Berdiri! (aba-aba)"],
 
       "急ぐ|いそぐ": ["Bergegas"],
       "急に|きゅうに": ["Tiba-Tiba"],

@@ -72,7 +72,7 @@ export default async function DailyQuizPage() {
   return (
     <div className="stack" style={{ gap: 40, maxWidth: 620, margin: "0 auto" }}>
       {finished ? (
-        <DailyResults date={today} rows={quiz.answers} />
+        <DailyResults date={today} rows={quiz.answers} questions={quiz.questions} />
       ) : (
         <DailyQuiz date={today} questions={quiz.questions} answered={quiz.answers} />
       )}

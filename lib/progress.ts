@@ -25,7 +25,7 @@ import {
   type Progress,
   type Rating,
 } from "@/lib/srs";
-import { buildDailyQuiz, type KanjiQuizCard } from "@/lib/study";
+import { buildDailyQuiz, type WordQuizCard } from "@/lib/study";
 import { DAILY_QUIZ_SIZE, dailySeed, localDate } from "@/lib/daily";
 import { DEFAULT_LOCALE, isLocaleCode, type Locale } from "@/lib/i18n/config";
 import { intlTag } from "@/lib/i18n/format";
@@ -904,6 +904,9 @@ export async function recordSessionIn(
 
 export type DailyAnswerRow = {
   position: number;
+  /** What was asked: a word card's kind, or kanji-meaning on rows from before words. */
+  kind: string;
+  /** The word as written, or on older rows the character asked about. */
   char: string;
   answer: string;
   chosen: string;
@@ -912,33 +915,33 @@ export type DailyAnswerRow = {
 
 export type DailyQuiz = {
   date: string;
-  /** Characters first studied before this date — the pool the quiz draws on. */
+  /** Words first studied before this date — the pool the quiz draws on. */
   learned: number;
   /** The whole day's quiz in order, answered or not. Empty until enough are learned. */
-  questions: KanjiQuizCard[];
+  questions: WordQuizCard[];
   /** What has been answered so far, by position. */
   answers: DailyAnswerRow[];
-  /** Reading stability per learned character, for the record. */
+  /** Stability per learned word, for the record. */
   stability: Map<string, number>;
 };
 
 /**
  * One learner's quiz for one day.
  *
- * Built rather than stored: the questions follow from the date and the
- * characters learned before it, so every reload shows the same five and the
- * answer route can rebuild them to grade an answer itself.
+ * Built rather than stored: the questions follow from the date and the words
+ * learned before it, so every reload shows the same five and the answer route
+ * can rebuild them to grade an answer itself.
  *
- * A character is learned from the day the first of its words was studied or
- * marked known. "Before the date", not "by": today's characters join tomorrow.
+ * A word is learned from the day it was first studied or marked known.
+ * "Before the date", not "by": today's words join tomorrow.
  * That holds the pool still for the whole day, so a half-finished quiz cannot
  * change under the learner, and it keeps the quiz from asking about something
  * taught ten minutes ago — which would measure short-term recall rather than
  * whether it stuck.
  *
  * It draws on every level. Distractors come from the levels the learner has
- * learned something in, so an N5 learner is never offered N4 meanings they
- * could rule out just for being unfamiliar.
+ * learned something in, so an N5 learner is never offered N4 words they could
+ * rule out just for being unfamiliar.
  */
 export async function getDailyQuiz(
   userId: string,
@@ -957,7 +960,7 @@ export async function getDailyQuiz(
     }),
     read("getDailyQuiz answers", userId, [] as DailyAnswerRow[], async (db) => {
       const { rows } = await db.query<DailyAnswerRow>(
-        `select position, char, answer, chosen, correct from public.daily_quiz_answers
+        `select position, kind, char, answer, chosen, correct from public.daily_quiz_answers
           where user_id = $1 and quiz_date = $2 order by position`,
         [userId, date],
       );
@@ -966,25 +969,20 @@ export async function getDailyQuiz(
   ]);
 
   const rows = new Map(progress.map((r) => [r.word_id, r]));
-  const learnedChars = new Set<string>();
-  for (const w of getAllWords()) {
-    const r = rows.get(w.id);
-    // YYYY-MM-DD compares correctly as a string.
-    if (r && localDate(timeZone, new Date(r.created_at)) < date) learnedChars.add(w.teaches);
-  }
-
-  const readings = getKanjiReadings(rows);
-  const stability = new Map<string, number>();
-  for (const c of learnedChars) stability.set(c, readings.get(c)?.stability ?? 0);
-
   // Curriculum order, so the shuffle has the same input on every rebuild.
-  const learned = getKanji().filter((k) => learnedChars.has(k.char));
-  const levels = new Set(learned.map((k) => k.level));
-  const pool = getKanji().filter((k) => levels.has(k.level));
+  // YYYY-MM-DD compares correctly as a string.
+  const learned = getAllWords().filter((w) => {
+    const r = rows.get(w.id);
+    return r && localDate(timeZone, new Date(r.created_at)) < date;
+  });
+  const stability = new Map(learned.map((w) => [w.id, rows.get(w.id)?.stability ?? 0]));
+
+  const levels = new Set(learned.map((w) => w.level));
+  const pool = getAllWords().filter((w) => levels.has(w.level));
   // Built from the English, which is what the choices are picked by, so the
   // same day's quiz asks the same thing in any language — switching language
   // halfway cannot change a question under an answer. Then shown in the
-  // learner's. A choice's id is its character, so grading never reads a label.
+  // learner's. A choice's id is its word, so grading never reads a label.
   const questions = (
     learned.length >= DAILY_QUIZ_SIZE ? buildDailyQuiz(learned, pool, DAILY_QUIZ_SIZE, dailySeed(userId, date)) : []
   ).map((card) =>
@@ -992,11 +990,12 @@ export async function getDailyQuiz(
       ? card
       : {
           ...card,
-          kanji: getKanjiChar(card.kanji.char, locale) ?? card.kanji,
-          choices: card.choices.map((c) => ({
-            ...c,
-            label: getKanjiChar(c.id, locale)?.meanings[0] ?? c.label,
-          })),
+          word: getWord(card.word.id, locale) ?? card.word,
+          // Only meanings are in a language; readings and words are Japanese.
+          choices:
+            card.kind === "word-meaning"
+              ? card.choices.map((c) => ({ ...c, label: getWord(c.id, locale)?.meanings[0] ?? c.label }))
+              : card.choices,
         },
   );
 
@@ -1013,8 +1012,8 @@ export type DailyAnswerResult =
  * Grades one daily quiz answer and stores it.
  *
  * The browser sends only which option was picked. The question is rebuilt
- * here and graded against the rebuild, so the stored verdict — and the
- * character, and the options — are the server's, not the client's.
+ * here and graded against the rebuild, so the stored verdict — and the word,
+ * and the options — are the server's, not the client's.
  */
 export async function recordDailyAnswer(
   userId: string,
@@ -1041,21 +1040,22 @@ export async function recordDailyAnswer(
     await asUser(userId, (db) =>
       db.query(
         `insert into public.daily_quiz_answers
-           (user_id, level, quiz_date, position, kind, char, answer, chosen, options, correct, stability, time_zone)
-         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+           (user_id, level, quiz_date, position, kind, char, word_id, answer, chosen, options, correct, stability, time_zone)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
           userId,
-          // A quiz can mix levels; each answer records its own character's.
-          card.kanji.level,
+          // A quiz can mix levels; each answer records its own word's.
+          card.word.level,
           date,
           position,
           card.kind,
-          card.kanji.char,
+          card.word.word,
+          card.word.id,
           answer.label,
           chosen.label,
           card.choices.map((c) => c.label),
           correct,
-          quiz.stability.get(card.kanji.char) ?? 0,
+          quiz.stability.get(card.word.id) ?? 0,
           timeZone,
         ],
       ),

@@ -10,7 +10,7 @@
       "教育|きょういく": ["Pendidikan"],
       "教え方|おしえかた": ["Cara Mengajar", "Metode Mengajar"],
 
-      "習う|ならう": ["Belajar (dari guru)", "Mengikuti Kursus"],
+      "習う|ならう": ["Mengikuti Kursus", "Belajar (dari guru)"],
       "練習|れんしゅう": ["Latihan"],
       "学習|がくしゅう": ["Pembelajaran", "Studi"],
       "自習|じしゅう": ["Belajar Mandiri", "Belajar Sendiri"],
@@ -33,7 +33,7 @@
       "授業|じゅぎょう": ["Kelas", "Jam Pelajaran"],
       "卒業|そつぎょう": ["Kelulusan"],
       "工業|こうぎょう": ["Industri", "Manufaktur"],
-      "作業|さぎょう": ["Pekerjaan", "Tugas"],
+      "作業|さぎょう": ["Tugas", "Pekerjaan"],
       "事業|じぎょう": ["Bisnis", "Usaha"],
       "休業|きゅうぎょう": ["Tutup (tidak beroperasi)"]
     }
@@ -128,7 +128,7 @@
       "注文|ちゅうもん": ["Pesanan (makanan atau barang)"],
 
       "字|じ": ["Aksara", "Tulisan Tangan"],
-      "文字|もじ": ["Huruf", "Karakter Tulisan"],
+      "文字|もじ": ["Aksara", "Huruf"],
       "ローマ字|ローマじ": ["Romaji", "Alfabet Latin"],
       "数字|すうじ": ["Angka", "Digit"],
       "赤字|あかじ": ["Defisit", "Merugi"],
@@ -207,7 +207,7 @@
       "真っ赤|まっか": ["Merah Menyala"],
       "真っ黒|まっくろ": ["Hitam Pekat"],
       "真っ青|まっさお": ["Biru Pekat", "Pucat Pasi"],
-      "真夜中|まよなか": ["Tengah Malam"],
+      "真夜中|まよなか": ["Tengah Malam Buta"],
 
       "紙|かみ": ["Kertas"],
       "手紙|てがみ": ["Surat"],
@@ -288,7 +288,7 @@
       "明かり|あかり": ["Cahaya", "Lampu"],
       "明らか|あきらか": ["Jelas", "Nyata"],
       "説明|せつめい": ["Penjelasan"],
-      "発明|はつめい": ["Penemuan"],
+      "発明|はつめい": ["Penciptaan", "Invensi"],
       "明後日|あさって": ["Lusa"],
 
       "悪い|わるい": ["Buruk", "Salah"],
@@ -323,7 +323,7 @@
       "送別会|そうべつかい": ["Pesta Perpisahan"],
       "区別|くべつ": ["Pembedaan", "Membedakan"],
 
-      "特に|とくに": ["Terutama", "Khususnya"],
+      "特に|とくに": ["Khususnya", "Terutama"],
       "特別|とくべつ": ["Istimewa"],
       "特急|とっきゅう": ["Ekspres Terbatas (kereta)"],
       "特売|とくばい": ["Obral Khusus", "Jual Murah"],

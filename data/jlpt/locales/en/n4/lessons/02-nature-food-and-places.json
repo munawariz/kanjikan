@@ -41,7 +41,7 @@
       "飲む|のむ": ["To Drink", "To Take (medicine)"],
       "飲み水|のみみず": ["Drinking Water"],
       "飲食|いんしょく": ["Eating and Drinking"],
-      "飲料|いんりょう": ["Beverage"],
+      "飲料|いんりょう": ["Drink", "Beverage"],
       "飲み込む|のみこむ": ["To Swallow", "To Grasp (an idea)"],
 
       "ご飯|ごはん": ["Cooked Rice", "Meal"],
@@ -53,7 +53,7 @@
 
       "無料|むりょう": ["Free of Charge"],
       "給料|きゅうりょう": ["Salary", "Pay"],
-      "食料|しょくりょう": ["Food", "Provisions"],
+      "食料|しょくりょう": ["Foodstuffs", "Provisions"],
       "手料理|てりょうり": ["Home Cooking"],
       "日本料理|にほんりょうり": ["Japanese Cuisine"],
 
@@ -120,7 +120,7 @@
       "下町|したまち": ["Old Downtown"],
       "町外れ|まちはずれ": ["Edge of Town", "Outskirts"],
       "町長|ちょうちょう": ["Town Mayor"],
-      "町内|ちょうない": ["Neighbourhood", "Within the Town"],
+      "町内|ちょうない": ["Within the Town", "Neighbourhood"],
 
       "京都|きょうと": ["Kyoto"],
       "上京|じょうきょう": ["Moving to Tokyo", "Going to the Capital"],
@@ -191,7 +191,7 @@
       "空室|くうしつ": ["Vacant Room", "Vacancy"],
       "茶室|ちゃしつ": ["Tea Room"],
 
-      "住む|すむ": ["To Live", "To Reside"],
+      "住む|すむ": ["To Live (somewhere)", "To Reside"],
       "住所|じゅうしょ": ["Address"],
       "住まい|すまい": ["Home", "Residence"],
       "住人|じゅうにん": ["Resident", "Inhabitant"],
@@ -250,12 +250,12 @@
     "summary": "会 is meet and 社 a shrine or firm: 会社 is a company, and the same two turned round, 社会, is society. 員 on the end makes a member of something: 会社員, 店員, 駅員.",
     "words": {
       "仕事|しごと": ["Work", "Job"],
-      "仕上げる|しあげる": ["To Finish (something) Off", "To Complete"],
+      "仕上げる|しあげる": ["To Complete", "To Finish (something) Off"],
       "仕上がる|しあがる": ["To Be Finished", "To Turn Out"],
       "仕える|つかえる": ["To Serve"],
       "仕組み|しくみ": ["Mechanism", "How Something Works"],
 
-      "事|こと": ["Thing", "Matter"],
+      "事|こと": ["Matter", "Thing"],
       "大事|だいじ": ["Important", "Precious"],
       "返事|へんじ": ["Reply", "Answer"],
       "工事|こうじ": ["Construction Work"],

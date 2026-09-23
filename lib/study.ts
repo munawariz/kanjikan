@@ -30,8 +30,13 @@ export type CardKind = StudyCard["kind"];
 
 export type KanjiQuizCard = Extract<StudyCard, { kind: "kanji-meaning" }>;
 
-/** Cards that grade a word rather than a character. */
+/**
+ * Cards that grade a word rather than a character: pick its meaning, pick its
+ * reading, or pick the word from its meaning.
+ */
 export const WORD_QUIZ_KINDS = ["word-meaning", "word-reading", "word-recall"] as const;
+export type WordQuizKind = (typeof WORD_QUIZ_KINDS)[number];
+export type WordQuizCard = Extract<StudyCard, { kind: WordQuizKind }>;
 
 /** mulberry32 — small, fast, and good enough for shuffling a study deck. */
 export function rng(seed: number) {
@@ -119,13 +124,30 @@ function confusability(word: Word, kanji: Set<string>, gloss: Set<string>) {
   };
 }
 
+const sameGloss = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/**
+ * Whether another word in the pool means the same thing.
+ *
+ * 父, お父さん and 父親 are all "father": knowing that is knowing the
+ * character, which its own card already asks. What tells them apart is how
+ * each is written and read, so that is what they are tested on.
+ */
+function hasSynonym(word: Word, pool: Word[]): boolean {
+  const gloss = word.meanings[0];
+  if (!gloss) return false;
+  return pool.some((w) => w.id !== word.id && !!w.meanings[0] && sameGloss(w.meanings[0], gloss));
+}
+
 /**
  * Three wrong answers for one card, most confusable first.
  *
  * De-duplicates by rendered label, so two identical options can never both
- * appear, and drops any word that shares a meaning with the answer — 万 and
- * 一万 are both "ten thousand", and offered together on a recall card they
- * would be two correct answers.
+ * appear. When the options are meanings, or the prompt is one, it also drops
+ * any word that shares a meaning with the answer — 万 and 一万 are both "ten
+ * thousand", and offered together on a recall card they would be two correct
+ * answers. A reading card keeps them: ちち beside おとうさん is exactly the
+ * question worth asking about 父.
  */
 function wordDistractors(
   word: Word,
@@ -139,7 +161,9 @@ function wordDistractors(
   const score = confusability(word, new Set(word.kanji), glossTokens(word));
 
   const candidates = pool.filter(
-    (w) => w.id !== word.id && !w.meanings.some((m) => synonym.has(m.trim().toLowerCase())),
+    (w) =>
+      w.id !== word.id &&
+      (kind === "word-reading" || !w.meanings.some((m) => synonym.has(m.trim().toLowerCase()))),
   );
 
   // Shuffle first, then sort: Array.sort is stable, so equally confusable
@@ -157,12 +181,8 @@ function wordDistractors(
   return out;
 }
 
-function wordQuiz(
-  word: Word,
-  pool: Word[],
-  kind: (typeof WORD_QUIZ_KINDS)[number],
-  rand: () => number,
-): StudyCard {
+function wordQuiz(word: Word, pool: Word[], rand: () => number): WordQuizCard {
+  const kind = wordKind(word, pool, rand);
   const options = [
     { id: word.id, label: wordLabel[kind](word) },
     ...wordDistractors(word, pool, kind, rand),
@@ -189,23 +209,18 @@ function kanjiQuiz(kanji: Kanji, pool: KanjiGloss[], rand: () => number): KanjiQ
 }
 
 /**
- * Chooses how to test a word.
+ * Chooses how to test a word, at random: its meaning, its reading, or the word
+ * itself from its meaning. Any of the three can come up at any point, so no
+ * question becomes one the learner can expect.
  *
- * Meaning first, because a word you cannot translate is not learned. Readings
- * come next, since fixing the reading of the character is the whole point of
- * the exercise. Production — English to Japanese — is saved for a memory that
- * lasts a few days, where it is a fair ask.
- *
- * The thresholds are the stabilities the old stages 2 and 4 became (see
- * supabase/migrations/0009_fsrs.sql), so each kind starts where it used to.
+ * A word that means the same as another in the pool is always asked for its
+ * reading, since its meaning cannot tell it apart (see {@link hasSynonym}). A
+ * word written only in kana has no reading to ask.
  */
-function wordKind(word: Word, stability: number, rand: () => number): (typeof WORD_QUIZ_KINDS)[number] {
-  const canAskReading = word.word !== word.reading;
-  if (stability < 0.33) return "word-meaning";
-  if (stability < 3) return canAskReading && rand() < 0.6 ? "word-reading" : "word-meaning";
-  const roll = rand();
-  if (canAskReading && roll < 0.4) return "word-reading";
-  return roll < 0.75 ? "word-recall" : "word-meaning";
+function wordKind(word: Word, pool: Word[], rand: () => number): WordQuizKind {
+  if (word.word === word.reading) return rand() < 0.5 ? "word-meaning" : "word-recall";
+  if (hasSynonym(word, pool)) return "word-reading";
+  return WORD_QUIZ_KINDS[Math.floor(rand() * WORD_QUIZ_KINDS.length)];
 }
 
 /** The character a card is about: its own, or the one its word teaches. */
@@ -260,7 +275,7 @@ export function buildLessonQueue(
       queue.push(kanjiQuiz(k, kanji, rand));
 
       for (const w of shuffle(its, rand)) {
-        queue.push(wordQuiz(w, words, wordKind(w, wordStability[w.id] ?? 0, rand), rand));
+        queue.push(wordQuiz(w, words, rand));
       }
     }
 
@@ -279,39 +294,32 @@ export function buildLessonQueue(
  */
 export function buildReviewQueue(
   words: Word[],
-  wordStability: Record<string, number>,
   pool: Word[],
   seed: number,
   writing: Kanji[] = [],
 ): StudyCard[] {
   const rand = rng(seed);
+  const from = pool.length >= 8 ? pool : words;
   return [
     ...writing.map((k): StudyCard => ({ kind: "kanji-write", kanji: k })),
-    ...words.map((w) =>
-      wordQuiz(w, pool.length >= 8 ? pool : words, wordKind(w, wordStability[w.id] ?? 0, rand), rand),
-    ),
+    ...words.map((w) => wordQuiz(w, from, rand)),
   ];
 }
 
 /**
- * A day's quiz: the meaning of a few characters already learned.
+ * A day's quiz: a few words already learned, each asked one of the three ways.
  *
- * Drawn uniformly, not weakest-first. Reviews already chase the weak
- * characters; this is a sample of what has stuck, and the answers are recorded
- * to measure exactly that — a sample biased towards failures would make the
- * record worthless as a measure. Distractors come from the whole level, so
- * knowing only the learned characters is no help in eliminating options.
+ * Drawn uniformly, not weakest-first. Reviews already chase the weak words;
+ * this is a sample of what has stuck, and the answers are recorded to measure
+ * exactly that — a sample biased towards failures would make the record
+ * worthless as a measure. Distractors come from the whole level, so knowing
+ * only the learned words is no help in eliminating options.
  */
-export function buildDailyQuiz(
-  learned: Kanji[],
-  pool: Kanji[],
-  size: number,
-  seed: number,
-): KanjiQuizCard[] {
+export function buildDailyQuiz(learned: Word[], pool: Word[], size: number, seed: number): WordQuizCard[] {
   const rand = rng(seed);
   return shuffle(learned, rand)
     .slice(0, size)
-    .map((k) => kanjiQuiz(k, pool, rand));
+    .map((w) => wordQuiz(w, pool, rand));
 }
 
 /**
@@ -345,7 +353,6 @@ export function buildPracticeQueue(
   words: Word[],
   kanjiPool: KanjiGloss[],
   wordPool: Word[],
-  wordStability: Record<string, number>,
   seed: number,
 ): StudyCard[] {
   const rand = rng(seed);
@@ -358,7 +365,7 @@ export function buildPracticeQueue(
     for (const k of kanji) {
       reading.push(kanjiQuiz(k, kanjiPool, rand));
       for (const w of words.filter((w) => w.teaches === k.char)) {
-        reading.push(wordQuiz(w, wordPool, wordKind(w, wordStability[w.id] ?? 0, rand), rand));
+        reading.push(wordQuiz(w, wordPool, rand));
       }
     }
   }

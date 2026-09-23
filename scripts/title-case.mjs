@@ -2,7 +2,7 @@
  * Title Case for meanings: "Fire", "Ten Thousand", "Coming to Japan".
  *
  * Every word is capitalised except short joining words in the middle of a
- * phrase. Qualifiers in parentheses stay as written ("Father (polite)"), and a
+ * phrase. Qualifiers in parentheses stay as written ("Cold (weather)"), and a
  * word that already has capitals past its first letter is left alone (OK, AM).
  *
  * Indonesian follows the same rule with its own joining words: "Hari dan

@@ -64,7 +64,7 @@
       "代理|だいり": ["Pengganti", "Wakil"],
 
       "味|あじ": ["Rasa", "Cita Rasa"],
-      "味わう|あじわう": ["Menikmati", "Mencicipi"],
+      "味わう|あじわう": ["Mencicipi", "Menikmati"],
       "意味|いみ": ["Arti"],
       "趣味|しゅみ": ["Hobi", "Selera"],
       "味見|あじみ": ["Pencicipan", "Mencoba Rasa"]
@@ -120,7 +120,7 @@
       "下町|したまち": ["Kawasan Kota Lama"],
       "町外れ|まちはずれ": ["Pinggir Kota", "Pinggiran"],
       "町長|ちょうちょう": ["Kepala Kota Kecil"],
-      "町内|ちょうない": ["Lingkungan Sekitar", "Dalam Kota"],
+      "町内|ちょうない": ["Dalam Kota", "Lingkungan Sekitar"],
 
       "京都|きょうと": ["Kyoto"],
       "上京|じょうきょう": ["Pindah ke Tokyo", "Pergi ke Ibu Kota"],
@@ -193,7 +193,7 @@
 
       "住む|すむ": ["Tinggal", "Bermukim"],
       "住所|じゅうしょ": ["Alamat"],
-      "住まい|すまい": ["Rumah", "Tempat Tinggal"],
+      "住まい|すまい": ["Tempat Tinggal", "Rumah"],
       "住人|じゅうにん": ["Penghuni", "Penduduk"],
 
       "台|だい": ["Dudukan", "Landasan"],
@@ -250,7 +250,7 @@
     "summary": "会 berarti bertemu dan 社 berarti kuil atau firma: 会社 adalah perusahaan, dan dua kanji yang sama bila dibalik, 社会, berarti masyarakat. 員 di akhir kata menunjukkan anggota dari sesuatu: 会社員, 店員, 駅員.",
     "words": {
       "仕事|しごと": ["Pekerjaan", "Kerja"],
-      "仕上げる|しあげる": ["Menyelesaikan (sesuatu)", "Merampungkan"],
+      "仕上げる|しあげる": ["Merampungkan", "Menyelesaikan (sesuatu)"],
       "仕上がる|しあがる": ["Selesai", "Jadi (hasilnya)"],
       "仕える|つかえる": ["Mengabdi"],
       "仕組み|しくみ": ["Mekanisme", "Cara Kerja"],

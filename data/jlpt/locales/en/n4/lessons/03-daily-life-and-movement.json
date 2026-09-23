@@ -8,7 +8,7 @@
       "売り場|うりば": ["Sales Floor", "Counter"],
       "売店|ばいてん": ["Kiosk", "Stall"],
       "売り手|うりて": ["Seller"],
-      "商売|しょうばい": ["Business", "Trade"],
+      "商売|しょうばい": ["Trade", "Business"],
 
       "買う|かう": ["To Buy"],
       "買い手|かいて": ["Buyer"],
@@ -85,7 +85,7 @@
       "大使館|たいしかん": ["Embassy"],
       "天使|てんし": ["Angel"],
 
-      "用|よう": ["Business", "Something to Do"],
+      "用|よう": ["Errand", "Something to Do"],
       "用事|ようじ": ["Errand", "Things to Do"],
       "用意|ようい": ["Preparation", "Getting Ready"],
       "使用|しよう": ["Use", "Usage"],

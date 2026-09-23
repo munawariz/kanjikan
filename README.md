@@ -248,39 +248,47 @@ Start Anyway button. Nothing is ever locked.
 Correct promotes one stage; wrong demotes two, never below 1. A word counts as *known* once it has
 survived a week-long gap, which is the bar Home measures against.
 
-Question type is chosen by stage: meaning first, readings once a word has kanji and a stage above
-1, and English-to-Japanese production only at higher stages.
+Each word question is one of three, picked at random every time the word comes up, in lessons,
+reviews, practice and the daily quiz alike:
+
+- **Choose translation** — the word is shown; pick its meaning.
+- **Choose reading** — the word is shown; pick its reading in kana.
+- **Choose kanji** — the meaning is shown; pick the word.
+
+A word that has the same first meaning as another (父, お父さん and 父親 are all *Father*) is always
+asked for its reading, since its meaning cannot tell it apart. A word written only in kana has no
+reading to ask.
 
 ---
 
 ## Daily quiz
 
-`/daily-quiz`, reached from a card on the dashboard. Five questions a day — the meaning of a
-character — one attempt each.
+`/daily-quiz`, reached from a card on the dashboard. Five words a day, each asked one of the three
+ways a word question can be (see above), one attempt each.
 
-- **Which kanji.** Only characters first studied *before* today — the day the first of a
-  character's words was answered or marked known — so the pool holds still all day and nothing is
-  asked minutes after it was taught. It unlocks at five, i.e. the day after the first lesson.
-  Characters of every level count.
-- **Which five.** A uniform sample, seeded by user and date: the same five on every reload, and not
-  biased towards weak characters, since the results are meant to measure retention. The wrong
-  options come from the levels the learner has learned something in, so an N5 learner is never
-  offered N4 meanings they could rule out for being unfamiliar.
+- **Which words.** Only words first studied *before* today — answered or marked known — so the
+  pool holds still all day and nothing is asked minutes after it was taught. It unlocks at five,
+  i.e. the day after the first lesson. Words of every level count.
+- **Which five.** A uniform sample, seeded by user and date: the same five, asked the same way, on
+  every reload, and not biased towards weak words, since the results are meant to measure
+  retention. The wrong options come from the levels the learner has learned something in, so an N5
+  learner is never offered N4 words they could rule out for being unfamiliar.
 - **Which day.** The learner's own. `TimeZoneScript` writes the browser's zone to a cookie, and the
   server reckons dates in it; without the cookie it falls back to UTC.
 - **Grading.** The browser sends only the option picked. The server rebuilds the question and grades
-  it, and stores the character, all four options, the answer, the choice, the verdict and the
-  character's SRS stage at that moment in `daily_quiz_answers`. RLS allows select and insert but no
-  update, so an answer cannot be changed.
+  it, and stores the question's kind, the word (`char` as written, and `word_id`), all four options,
+  the answer, the choice, the verdict and the word's stability at that moment in
+  `daily_quiz_answers`. RLS allows select and insert but no update, so an answer cannot be changed.
 - **Not scheduling.** The quiz does not touch any progress table or `study_sessions`. It records how
-  much has stuck without moving the review schedule it is measuring. The `srs_stage` it stores is the
-  character's reading stage worked out from its words; answers from before migration
-  `0006_word_mastery.sql` hold the old, separately stored recognition stage.
+  much has stuck without moving the review schedule it is measuring.
+- **Older answers.** Before migration `0011_daily_quiz_words.sql` the quiz asked the meaning of a
+  single character. Those rows have kind `kanji-meaning`, the character in `char`, no `word_id`, and
+  the character's reading stability, or before `0009_fsrs.sql` its stage in `srs_stage`.
 
 Every answer is kept for analysis. To pull them:
 
 ```sql
-select quiz_date, position, char, answer, chosen, correct, srs_stage, answered_at
+select quiz_date, position, kind, char, word_id, answer, chosen, correct, stability, answered_at
 from daily_quiz_answers
 where user_id = '<uuid>'
 order by quiz_date, position;
@@ -430,7 +438,7 @@ are almost never a word on their own, but *Noon*, *Electricity* and *School* are
 This takes judgement, so it is not checked automatically.
 
 **Every meaning is in Title Case**: *Fire*, *Ten Thousand*, *Coming to Japan*. Short joining words stay
-lowercase inside a phrase, and qualifiers in parentheses stay as written: *Father (polite)*.
+lowercase inside a phrase, and qualifiers in parentheses stay as written: *Cold (weather)*.
 `scripts/title-case.mjs` is the rule, and `npm run validate:content` fails on any meaning — kanji,
 word, part or role — that does not follow it.
 

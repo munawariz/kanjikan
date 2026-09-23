@@ -197,11 +197,10 @@ export function StudySession({
         words,
         kanjiPool ?? kanji,
         pool ?? words,
-        wordStability,
         seed + round,
       );
     }
-    return buildReviewQueue(words, wordStability, pool ?? words, seed, kanji);
+    return buildReviewQueue(words, pool ?? words, seed, kanji);
   }, [
     mode,
     practiceTypes,

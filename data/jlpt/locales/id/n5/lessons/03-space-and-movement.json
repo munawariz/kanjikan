@@ -13,7 +13,7 @@
       "小学校|しょうがっこう": ["Sekolah Dasar"],
       "小学生|しょうがくせい": ["Murid Sekolah Dasar"],
       "小鳥|ことり": ["Burung Kecil"],
-      "小さな|ちいさな": ["Kecil (sebelum kata benda)", "Mungil"],
+      "小さな|ちいさな": ["Kecil", "Mungil"],
 
       "中|なか": ["Bagian Dalam", "Tengah"],
       "中国|ちゅうごく": ["Tiongkok"],
@@ -72,7 +72,7 @@
     "words": {
       "行く|いく": ["Pergi"],
       "銀行|ぎんこう": ["Bank"],
-      "旅行|りょこう": ["Perjalanan", "Wisata"],
+      "旅行|りょこう": ["Wisata", "Perjalanan"],
       "行う|おこなう": ["Melakukan", "Mengadakan (acara)"],
       "急行|きゅうこう": ["Kereta Ekspres"],
 
@@ -84,7 +84,7 @@
       "出る|でる": ["Keluar", "Meninggalkan"],
       "出す|だす": ["Mengeluarkan", "Mengirim"],
       "出口|でぐち": ["Pintu Keluar"],
-      "出かける|でかける": ["Pergi Keluar", "Berangkat"],
+      "出かける|でかける": ["Bepergian", "Berangkat"],
       "思い出|おもいで": ["Kenangan"],
 
       "入る|はいる": ["Masuk", "Memasuki"],

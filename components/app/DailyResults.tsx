@@ -4,6 +4,7 @@ import { Badge } from "@/components/atlas/core/Badge.jsx";
 import { Card } from "@/components/atlas/layout/Card.jsx";
 import { Sparkle } from "@/components/atlas/core/Sparkle.jsx";
 import type { DailyAnswerRow } from "@/lib/progress";
+import type { WordQuizCard } from "@/lib/study";
 import type { Locale } from "@/lib/i18n/config";
 import { intlTag } from "@/lib/i18n/format";
 import { useLocale, useT } from "@/lib/i18n/client";
@@ -29,8 +30,21 @@ export function formatQuizDate(date: string, locale: Locale) {
  * The finished quiz. Rendered by the page once every answer is on record, and
  * by the quiz itself the moment the last one is given, so the two must look
  * the same — the page's version replaces the quiz's as soon as it refreshes.
+ *
+ * Each row shows the whole word — reading and meaning — whichever of them was
+ * asked: after a wrong answer that is what is worth seeing, and on a card that
+ * asked for the word itself the answer alone would only repeat it.
  */
-export function DailyResults({ date, rows }: { date: string; rows: DailyAnswerRow[] }) {
+export function DailyResults({
+  date,
+  rows,
+  questions,
+}: {
+  date: string;
+  rows: DailyAnswerRow[];
+  /** The day's quiz, to look each answered word up by position. */
+  questions: WordQuizCard[];
+}) {
   const t = useT().daily;
   const locale = useLocale();
   const correct = rows.filter((r) => r.correct).length;
@@ -70,35 +84,46 @@ export function DailyResults({ date, rows }: { date: string; rows: DailyAnswerRo
       </Card>
 
       <Card tone="white" pad="none" radius="lg" bordered>
-        {rows.map((r, i) => (
-          <div
-            key={r.position}
-            className="row"
-            style={{
-              gap: 18,
-              padding: "16px 22px",
-              borderTop: i === 0 ? "none" : "1px solid var(--border-subtle)",
-              justifyContent: "space-between",
-            }}
-          >
-            <div className="row" style={{ gap: 18, minWidth: 0 }}>
-              <span className="jp" style={{ fontSize: 34, lineHeight: 1, color: "var(--text-heading)" }}>
-                {r.char}
-              </span>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ color: "var(--text-heading)", fontWeight: "var(--weight-semibold)" }}>
-                  {r.answer}
-                </div>
-                {!r.correct && (
-                  <div className="body-sm" style={{ color: "var(--negative-600)" }}>
-                    {t.youChose(r.chosen)}
+        {rows.map((r, i) => {
+          // An answer recorded before the quiz asked about words has no word
+          // to look up, and shows as it was stored.
+          const card = questions[r.position - 1];
+          const word = card && card.kind === r.kind && card.word.word === r.char ? card.word : null;
+          return (
+            <div
+              key={r.position}
+              className="row"
+              style={{
+                gap: 18,
+                padding: "16px 22px",
+                borderTop: i === 0 ? "none" : "1px solid var(--border-subtle)",
+                justifyContent: "space-between",
+              }}
+            >
+              <div className="row" style={{ gap: 18, minWidth: 0 }}>
+                <span className="jp" style={{ fontSize: 34, lineHeight: 1, color: "var(--text-heading)" }}>
+                  {r.char}
+                </span>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ color: "var(--text-heading)", fontWeight: "var(--weight-semibold)" }}>
+                    {word ? word.meanings[0] : r.answer}
                   </div>
-                )}
+                  {word && word.reading !== word.word && (
+                    <div className="jp body-sm" style={{ color: "var(--text-body)" }}>
+                      {word.reading}
+                    </div>
+                  )}
+                  {!r.correct && (
+                    <div className="body-sm" style={{ color: "var(--negative-600)" }}>
+                      {t.youChose(r.chosen)}
+                    </div>
+                  )}
+                </div>
               </div>
+              <Badge tone={r.correct ? "accent" : "sage"}>{r.correct ? t.correct : t.missed}</Badge>
             </div>
-            <Badge tone={r.correct ? "accent" : "sage"}>{r.correct ? t.correct : t.missed}</Badge>
-          </div>
-        ))}
+          );
+        })}
       </Card>
     </div>
   );

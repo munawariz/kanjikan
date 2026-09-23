@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { KanjiQuizCard } from "@/lib/study";
+import type { WordQuizCard } from "@/lib/study";
 import type { DailyAnswerRow } from "@/lib/progress";
 import { post, QuizCard, SaveWarning } from "./StudySession";
 import { DailyResults, formatQuizDate } from "./DailyResults";
@@ -23,7 +23,7 @@ export function DailyQuiz({
 }: {
   date: string;
   /** The whole day's quiz, in order. */
-  questions: KanjiQuizCard[];
+  questions: WordQuizCard[];
   /** Answers already on record for this date. */
   answered: DailyAnswerRow[];
 }) {
@@ -59,7 +59,8 @@ export function DailyQuiz({
         ...r,
         {
           position,
-          char: card.kanji.char,
+          kind: card.kind,
+          char: card.word.word,
           answer: label(card.answerId),
           chosen: label(choiceId),
           correct: choiceId === card.answerId,
@@ -113,7 +114,7 @@ export function DailyQuiz({
     return (
       <div className="stack" style={{ gap: 20 }}>
         {saveError && <SaveWarning detail={saveError} />}
-        <DailyResults date={date} rows={[...rows].sort((a, b) => a.position - b.position)} />
+        <DailyResults date={date} rows={[...rows].sort((a, b) => a.position - b.position)} questions={questions} />
       </div>
     );
   }

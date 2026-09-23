@@ -37,7 +37,7 @@
     "summary": "本 berawal sebagai buku, tetapi arti lamanya adalah asal-usul — itu sebabnya 日本 berarti asal matahari, dan itu pula sebabnya 本 dipakai untuk menghitung benda yang panjang dan ramping.",
     "words": {
       "学校|がっこう": ["Sekolah"],
-      "学ぶ|まなぶ": ["Belajar", "Mempelajari"],
+      "学ぶ|まなぶ": ["Mempelajari", "Belajar"],
       "学年|がくねん": ["Tahun Ajaran", "Tingkat Kelas"],
       "科学|かがく": ["Sains"],
       "留学生|りゅうがくせい": ["Pelajar Asing"],
@@ -97,7 +97,7 @@
       "何|なに": ["Apa"],
       "何曜日|なんようび": ["Hari Apa"],
       "何回|なんかい": ["Berapa Kali"],
-      "何度|なんど": ["Berapa Derajat", "Berapa Kali"],
+      "何度|なんど": ["Berapa Kali", "Berapa Derajat"],
       "何か|なにか": ["Sesuatu", "Apa Saja"]
     }
   },
@@ -121,7 +121,7 @@
       "面白い|おもしろい": ["Menarik", "Lucu"],
       "白黒|しろくろ": ["Hitam Putih"],
 
-      "午前|ごぜん": ["Pagi", "AM"],
+      "午前|ごぜん": ["AM", "Pagi"],
       "午後|ごご": ["Siang (setelah tengah hari)", "PM"],
       "正午|しょうご": ["Tengah Hari", "Pukul 12 Siang"],
       "午前中|ごぜんちゅう": ["Sepanjang Pagi"],

@@ -47,7 +47,7 @@
 
       "思う|おもう": ["Berpikir", "Merasa", "Yakin"],
       "思い出す|おもいだす": ["Teringat", "Mengingat Kembali"],
-      "思い|おもい": ["Perasaan", "Pikiran", "Harapan"],
+      "思い|おもい": ["Pikiran", "Perasaan", "Harapan"],
       "思いつく|おもいつく": ["Mendapat (ide)", "Terpikir"],
       "思わず|おもわず": ["Tanpa Berpikir", "Tanpa Sengaja"],
 
@@ -92,8 +92,8 @@
       "何者|なにもの": ["Orang Macam Apa", "Siapa"],
 
       "主に|おもに": ["Terutama", "Sebagian Besar"],
-      "主人|しゅじん": ["Suami Saya", "Kepala Rumah Tangga", "Pemilik"],
-      "ご主人|ごしゅじん": ["Suami (sopan)", "Suami (orang lain)"],
+      "主人|しゅじん": ["Suami", "Kepala Rumah Tangga", "Pemilik"],
+      "ご主人|ごしゅじん": ["Suami"],
       "主婦|しゅふ": ["Ibu Rumah Tangga"],
       "主語|しゅご": ["Subjek (tata bahasa)"],
       "主食|しゅしょく": ["Makanan Pokok"],
@@ -111,34 +111,34 @@
     "words": {
       "家|いえ": ["Rumah", "Tempat Tinggal"],
       "家|うち": ["Rumah Sendiri", "Rumah", "Keluarga Sendiri"],
-      "家内|かない": ["Istri Saya"],
+      "家内|かない": ["Istri"],
       "大家|おおや": ["Pemilik Rumah Sewa", "Induk Semang"],
       "家出|いえで": ["Kabur dari Rumah"],
 
       "家族|かぞく": ["Keluarga"],
-      "ご家族|ごかぞく": ["Keluarga (sopan)", "Keluarga (orang lain)"],
+      "ご家族|ごかぞく": ["Keluarga"],
       "大家族|だいかぞく": ["Keluarga Besar", "Keluarga Beranggota Banyak"],
       "親族|しんぞく": ["Kerabat", "Sanak Saudara"],
       "民族|みんぞく": ["Suku Bangsa", "Bangsa"],
 
-      "兄|あに": ["Kakak Laki-Laki Saya"],
-      "お兄さん|おにいさん": ["Kakak Laki-Laki (sopan)", "Pemuda"],
-      "兄さん|にいさん": ["Kakak Laki-Laki (akrab)", "Abang"],
+      "兄|あに": ["Kakak Laki-Laki"],
+      "お兄さん|おにいさん": ["Kakak Laki-Laki", "Pemuda"],
+      "兄さん|にいさん": ["Kakak Laki-Laki"],
       "兄貴|あにき": ["Abang (kasual)", "Senior yang Dihormati"],
       "父兄|ふけい": ["Orang Tua dan Wali Murid"],
 
-      "弟|おとうと": ["Adik Laki-Laki Saya"],
-      "弟さん|おとうとさん": ["Adik Laki-Laki (sopan)"],
+      "弟|おとうと": ["Adik Laki-Laki"],
+      "弟さん|おとうとさん": ["Adik Laki-Laki"],
       "兄弟|きょうだい": ["Saudara Kandung", "Saudara Laki-Laki"],
       "弟子|でし": ["Murid", "Pengikut"],
 
-      "姉|あね": ["Kakak Perempuan Saya"],
-      "お姉さん|おねえさん": ["Kakak Perempuan (sopan)", "Wanita Muda"],
-      "姉さん|ねえさん": ["Kakak Perempuan (akrab)", "Kakak (perempuan)"],
+      "姉|あね": ["Kakak Perempuan"],
+      "お姉さん|おねえさん": ["Kakak Perempuan", "Wanita Muda"],
+      "姉さん|ねえさん": ["Kakak Perempuan"],
       "姉貴|あねき": ["Kakak Perempuan (kasual)", "Wanita Senior yang Dihormati"],
 
-      "妹|いもうと": ["Adik Perempuan Saya"],
-      "妹さん|いもうとさん": ["Adik Perempuan (sopan)"],
+      "妹|いもうと": ["Adik Perempuan"],
+      "妹さん|いもうとさん": ["Adik Perempuan"],
       "姉妹|しまい": ["Saudara Perempuan"],
       "兄弟姉妹|きょうだいしまい": ["Saudara Laki-Laki dan Perempuan", "Saudara Kandung"]
     }
@@ -153,7 +153,7 @@
       "朝夕|あさゆう": ["Pagi dan Sore", "Senantiasa"],
       "朝刊|ちょうかん": ["Koran Pagi", "Edisi Pagi"],
 
-      "昼|ひる": ["Siang", "Siang Hari", "Makan Siang"],
+      "昼|ひる": ["Siang Hari", "Siang", "Makan Siang"],
       "お昼|おひる": ["Makan Siang", "Tengah Hari"],
       "昼食|ちゅうしょく": ["Santap Siang", "Makan Siang"],
       "昼寝|ひるね": ["Tidur Siang", "Tidur Sebentar"],

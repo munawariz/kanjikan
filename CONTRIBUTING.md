@@ -247,8 +247,14 @@ Memory stories never affect progress.
 - **A word uses only kanji taught by that point**, apart from a few standard words that are always
   written with a later one (部屋, 田舎).
 - **Every kanji keeps at least four words**, so its readings are fixed from more than one angle.
-- **Within a lesson, words start with different meanings.** A quiz shows a word's first meaning
-  beside other words' first meanings, and two identical ones make a question impossible to answer.
+- **Words that mean the same thing get the same first meaning.** 父, お父さん and 父親 are all
+  *Father*, and 女の子 and 女子 are both *Girl*. Don't invent a difference to tell them apart, like
+  *My Father* or *Father (polite)*. A quiz never asks what such a word means, because the meaning
+  can't tell it from the others; it asks how the word is read instead. The match has to be exact,
+  in every language: *Girl* and *Young Girl* look like two different words to the quiz.
+- **Words that mean different things get different first meanings,** even where English uses one
+  word for both. 手紙 is *Letter*, so 文字 is *Character*; 生きる is *To Live*, so 住む is *To Live
+  (somewhere)*. Two words with the same first meaning are treated as synonyms.
 
 **Progress.** A word's written form, its reading and its lesson are its identity.
 - **Fixing a meaning** is safe.
