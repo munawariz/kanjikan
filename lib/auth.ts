@@ -29,29 +29,37 @@ export type SessionUser = { id: string; username: string };
 const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
 
 /**
- * The signed-in account, or null. Never throws for an anonymous visitor.
+ * The signed-in account, or null for no session — and a rejection when the
+ * database could not be asked. For a caller that must not mistake a database
+ * hiccup for a signed-out visitor: the progress queue treats "signed out" as
+ * a reason to hold everything until the next sign-in.
  *
  * Memoised per request: a layout and its page both ask.
  */
-export const getUser = cache(async (): Promise<SessionUser | null> => {
+export const readUser = cache(async (): Promise<SessionUser | null> => {
   const token = cookies().get(SESSION_COOKIE)?.value;
   if (!token || !isDatabaseConfigured) return null;
+  return asSystem(async (db) => {
+    const { rows } = await db.query<SessionUser>(
+      `select a.id, a.username
+         from public.sessions s
+         join public.accounts a on a.id = s.account_id
+        where s.token_hash = $1 and s.expires_at > now()`,
+      [hashToken(token)],
+    );
+    return rows[0] ?? null;
+  });
+});
+
+/** The signed-in account, or null. Never throws: a database failure reads as no one. */
+export async function getUser(): Promise<SessionUser | null> {
   try {
-    return await asSystem(async (db) => {
-      const { rows } = await db.query<SessionUser>(
-        `select a.id, a.username
-           from public.sessions s
-           join public.accounts a on a.id = s.account_id
-          where s.token_hash = $1 and s.expires_at > now()`,
-        [hashToken(token)],
-      );
-      return rows[0] ?? null;
-    });
+    return await readUser();
   } catch (e) {
     console.error(`[kanjikan] getUser failed: ${(e as Error).message}`);
     return null;
   }
-});
+}
 
 /** Starts a session and sets its cookie. Server actions only: it writes a cookie. */
 export async function startSession(accountId: string) {

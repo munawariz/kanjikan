@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUser } from "@/lib/auth";
+import { readUser } from "@/lib/auth";
 import { getT } from "@/lib/i18n/server";
 import { applyEvent, pruneReceipts } from "@/lib/sync";
 import { parseSyncEvent, SYNC_BATCH_SIZE, type SyncResult } from "@/lib/sync-events";
@@ -14,7 +14,17 @@ import { parseSyncEvent, SYNC_BATCH_SIZE, type SyncResult } from "@/lib/sync-eve
  * rather than skipping past it, keeps a word's answers in order.
  */
 export async function POST(request: Request) {
-  const [user, t] = await Promise.all([getUser(), getT()]);
+  const t = await getT();
+  // A 401 makes the browser hold its queue until the next sign-in, so a
+  // session that could not be looked up is a 503 — retried shortly — rather
+  // than read as signed out.
+  let user;
+  try {
+    user = await readUser();
+  } catch (e) {
+    console.error(`[kanjikan] sync: session lookup failed: ${(e as Error).message}`);
+    return NextResponse.json({ error: t.study.save.database }, { status: 503 });
+  }
   if (!user) return NextResponse.json({ error: t.api.notSignedIn }, { status: 401 });
 
   const body = await request.json().catch(() => null);

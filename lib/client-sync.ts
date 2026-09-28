@@ -4,10 +4,12 @@
  * A study session never waits on the server. Each answer, mark and checkpoint
  * is written to a queue in IndexedDB the moment it happens and the card moves
  * on; the queue is sent to /api/progress/batch in the background, in order, and
- * an event leaves it only once the server says it is applied. A failed send is
- * retried with exponential backoff, and a send is tried again the moment the
- * browser comes back online — so a lesson taken on a train is saved when the
- * train leaves the tunnel, and a tab closed mid-send loses nothing.
+ * an event leaves it only once the server says it is applied. Events are
+ * gathered for a few seconds before a send, so a run of quick answers is one
+ * request; the end of a session, or the tab being hidden, sends at once. A
+ * failed or stalled send is retried with exponential backoff, and at once when
+ * the browser comes back online — so a lesson taken on a train is saved when
+ * the train leaves the tunnel, and a tab closed mid-send loses nothing.
  *
  * A guest's progress goes to a store of its own, kanjikan_guest_progress, and
  * is handed to the queue under the account the first time someone signs in
@@ -40,8 +42,16 @@ type Queued = { owner: string | null; event: SyncEvent };
 
 /** A guest store past this drops its oldest events: it is for lessons, not for years. */
 const GUEST_LIMIT = 5000;
+/** How long a new event waits for others to be sent with it. */
+const SEND_DELAY_MS = 5000;
+/** How long a send may go unanswered before it is given up and retried. */
+const SEND_TIMEOUT_MS = 15_000;
 const RETRY_BASE_MS = 1000;
-const RETRY_MAX_MS = 60_000;
+/**
+ * The longest wait between retries. Short, because a connection that comes
+ * back without the browser noticing is only found by trying.
+ */
+const RETRY_MAX_MS = 20_000;
 
 /* ----------------------------------------------------------------------------
  * Storage
@@ -175,9 +185,12 @@ export type SyncState = {
   /**
    *   idle        nothing to send, or sent
    *   syncing     a batch is on its way
-   *   offline     the browser says there is no network; sends when there is
+   *   offline     the last send failed with the browser saying there is no
+   *               network; tries again on the backoff, and at once when the
+   *               browser says it is back
    *   retrying    the last send failed; tries again after a backoff
-   *   signedOut   the server no longer knows this account; sends once signed in
+   *   signedOut   the server no longer knows this account; keeps asking on the
+   *               retry backoff, and sends once signed in
    */
   status: "idle" | "syncing" | "offline" | "retrying" | "signedOut";
 };
@@ -318,28 +331,37 @@ export async function migrateGuestProgress(userId: string): Promise<number> {
 let flushing: Promise<void> | null = null;
 let again = false;
 let attempt = 0;
+/** A send waiting out its backoff after a failure. */
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
+/** A send waiting for more answers to go with it. */
+let sendTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearTimers() {
+  if (retryTimer) clearTimeout(retryTimer);
+  if (sendTimer) clearTimeout(sendTimer);
+  retryTimer = sendTimer = null;
+}
 
 /**
  * Sends everything this account has queued, a batch at a time, until the
  * queue is empty or a send fails. Only one runs at a time in a tab, and, where
  * the browser has Web Locks, across tabs; asked again while one is running,
  * it runs once more after, to pick up what was queued meanwhile.
+ *
+ * Sends now, whatever is waiting: for the end of a session, the tab being
+ * hidden or closed, and the network coming back.
  */
 export function flushSync(): Promise<void> {
   if (flushing) {
     again = true;
     return flushing;
   }
-  if (retryTimer) {
-    clearTimeout(retryTimer);
-    retryTimer = null;
-  }
+  clearTimers();
   flushing = (async () => {
     do {
       again = false;
       await withLock(drain);
-    } while (again && state.status !== "retrying");
+    } while (again && !retryTimer);
   })().finally(() => {
     flushing = null;
   });
@@ -347,12 +369,19 @@ export function flushSync(): Promise<void> {
 }
 
 /**
- * Sends soon, unless a retry is already waiting out its backoff or the server
- * has said this account is signed out: a new answer is no reason to try again
- * sooner, and would otherwise make every card a request.
+ * Sends within SEND_DELAY_MS of a new event, together with whatever else is
+ * queued by then — so a run of quick answers is one request, not one each.
+ * Nothing is lost by waiting: the events are already on this device.
+ *
+ * A retry waiting out its backoff is left to it: a new answer is no reason to
+ * try a failing server sooner.
  */
 function kick() {
-  if (!retryTimer && state.status !== "signedOut") void flushSync();
+  if (retryTimer || sendTimer) return;
+  sendTimer = setTimeout(() => {
+    sendTimer = null;
+    void flushSync();
+  }, SEND_DELAY_MS);
 }
 
 function withLock(fn: () => Promise<void>): Promise<void> {
@@ -372,14 +401,19 @@ async function drain(): Promise<void> {
       setState({ status: "idle" });
       return;
     }
-    if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      setState({ status: "offline" });
-      return;
-    }
-
+    // Tried even when the browser says it is offline. A send that fails for
+    // it costs nothing, and navigator.onLine is not to be trusted either way:
+    // waiting for an "online" event that never comes is what used to leave
+    // progress unsent until a reload.
     setState({ status: "syncing" });
     const body: SyncBatch = { owner: user, sentAt: new Date().toISOString(), events: batch.map((q) => q.event) };
     let result: SyncResult;
+    // On a bad connection a request can stall with no reply and no error for
+    // minutes, holding the queue (and the lock every other tab waits on) the
+    // whole time. Giving up and resending is safe: the server skips an event
+    // it has already applied.
+    const abort = new AbortController();
+    const timeout = setTimeout(() => abort.abort(), SEND_TIMEOUT_MS);
     try {
       const res = await fetch("/api/progress/batch", {
         method: "POST",
@@ -388,17 +422,22 @@ async function drain(): Promise<void> {
         // Lets a send started as the tab closes finish. A batch is a few
         // kilobytes, well inside keepalive's 64 KB.
         keepalive: true,
+        signal: abort.signal,
       });
       if (res.status === 401 || res.status === 409) {
         // Kept, not dropped: they go once this account is signed in again.
-        setState({ status: "signedOut" });
-        return;
+        // Still asked again on the usual backoff, so a sign-in in another tab,
+        // or a 401 that was wrong, clears this without a reload.
+        return retryLater("signedOut");
       }
       if (!res.ok) throw new Error(`${res.status} ${await res.text().catch(() => "")}`);
       result = (await res.json()) as SyncResult;
     } catch (e) {
-      console.error("[kanjikan] progress sync failed; will retry", e);
-      return retryLater();
+      const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+      if (!offline) console.error("[kanjikan] progress sync failed; will retry", e);
+      return retryLater(offline ? "offline" : "retrying");
+    } finally {
+      clearTimeout(timeout);
     }
 
     const sent = new Set(batch.slice(0, result.done).map((q) => q.event.id));
@@ -415,11 +454,11 @@ async function drain(): Promise<void> {
   }
 }
 
-/** 1 s, 2 s, 4 s … up to a minute, with jitter so tabs do not retry in step. */
-function retryLater() {
+/** 1 s, 2 s, 4 s … up to RETRY_MAX_MS, with jitter so tabs do not retry in step. */
+function retryLater(status: "retrying" | "offline" | "signedOut" = "retrying") {
   const delay = Math.min(RETRY_MAX_MS, RETRY_BASE_MS * 2 ** attempt) * (0.5 + Math.random() / 2);
   attempt++;
-  setState({ status: "retrying" });
+  setState({ status });
   retryTimer = setTimeout(() => {
     retryTimer = null;
     void flushSync();
